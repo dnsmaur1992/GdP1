@@ -773,7 +773,26 @@ function startFocus(k) {
 
 home();
 
+// ---------- Webapp: Offline-Betrieb und automatische Updates ----------
+var BUILD = "__BUILD__";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|anthropic/.test(location.hostname)) {
-  navigator.serviceWorker.register("sw.js").catch(function(){});
+  var reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", function(){ if (!reloading && !sess) { reloading = true; location.reload(); } });
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function(reg){
+    function checkUpdate() {
+      reg.update().catch(function(){});
+      fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then(function(r){ return r.json(); }).then(function(v){
+        if (v.build && v.build !== BUILD && !document.getElementById("updBar")) {
+          var bar = document.createElement("div"); bar.id = "updBar"; bar.className = "updbar";
+          bar.innerHTML = '<span>Neue Version verfügbar.</span><button class="btn small" id="updGo">Jetzt laden</button>';
+          document.body.appendChild(bar);
+          document.getElementById("updGo").onclick = function(){ location.reload(); };
+          if (!sess) location.reload();
+        }
+      }).catch(function(){});
+    }
+    checkUpdate();
+    document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") checkUpdate(); });
+  }).catch(function(){});
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
 }

@@ -8,6 +8,7 @@ src/gen.js (Aufgabengeneratoren), src/units.js (Lehrplan), src/app.js (Logik).
 Danach build.py ausführen und index.html committen.
 """
 from pathlib import Path
+import json, time
 
 root = Path(__file__).parent
 src = root / "src"
@@ -17,6 +18,9 @@ t = t.replace("/*CONTENT*/", content).replace("/*EXAM*/", (src / "exam.js").read
 for name in ("gen", "units", "app"):
     t = t.replace("/*" + name.upper() + "*/", (src / (name + ".js")).read_text(encoding="utf-8"))
 t = t.replace("<!--PWA-->", "")
+BUILD_ID = time.strftime("%Y%m%d-%H%M%S")
+t = t.replace("__BUILD__", BUILD_ID)
+(root / "version.json").write_text(json.dumps({"build": BUILD_ID}), encoding="utf-8")
 
 split = t.index('<div class="app"')
 head, body = t[:split], t[split:]
@@ -47,4 +51,4 @@ img {{ max-width: 100%; }}
 </html>
 """
 (root / "index.html").write_text(page, encoding="utf-8")
-print("index.html gebaut:", len(page), "Zeichen")
+print("index.html gebaut:", len(page), "Zeichen, Build", BUILD_ID)
