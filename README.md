@@ -4,6 +4,10 @@ Lern-Webapp für **Grundlagen der Programmierung 1** (Java). Statt auf den groß
 
 ## Funktionen
 
+Drei Reiter: **Lernpfad**, **Programmieren**, **Klausur**.
+
+**Klausurplan** – Countdown bis zur Klausur (voreingestellt 28.01.2027, Ziel 1,0), Zieldatum für jede Einheit, Hinweis wenn du hinter dem Plan liegst, die letzten zwei Wochen für Klausurtraining und Probeklausur. Dazu eine Klausurreife-Schätzung mit den offenen Punkten. Datum änderbar unter „Zeitplan und Klausurdatum“.
+
 **Lernpfad entlang des Lehrplans** – EIP → PUP → PJA → EJP → VAR → STA → OBJ → KLA → VER → ITR → VRB → EXC → ARR → ZKT. Einheit antippen, Zeit einstellen (10–45 Min.), loslegen. Jede Einheit hat Stufen:
 
 1. **Lernen** – kurze Häppchen mit Erklärung, Codebeispiel und Quiz.
@@ -67,7 +71,7 @@ Nach einer Änderung:
 python3 build.py          # baut index.html neu
 ```
 
-Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v4";` hochzählen (z. B. `nibble-v5`), damit installierte Apps die neue Version laden. Danach committen und pushen.
+Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v5";` hochzählen (z. B. `nibble-v6`), damit installierte Apps die neue Version laden. Danach committen und pushen.
 
 ## Farben und Logo
 

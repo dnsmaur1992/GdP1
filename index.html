@@ -142,6 +142,11 @@ pre .st { color: #F5C26B; }
 .big { font-family: var(--f-display); font-size: 40px; font-weight: 700; line-height: 1.05; }
 .foot { font-size: 12px; color: var(--muted); text-align: center; }
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface-2); border-radius: 12px; padding: 4px; }
+.plancard p { margin: 0; }
+.ready { display: flex; gap: 10px; align-items: center; }
+.ready .bar { flex: 1; height: 8px; margin: 0; }
+.plancard input[type=date] { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); min-height: 40px; }
+.seg.three { grid-template-columns: 1fr 1fr 1fr; }
 .seg button { border: 0; border-radius: 9px; min-height: 44px; background: transparent; color: var(--muted); font-family: var(--f-display); font-weight: 600; font-size: 15px; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
 .stmt { font-size: 17px; }
@@ -2792,9 +2797,10 @@ function stageBar(u) {
 function home() {
   clearInterval(timer); sess = null;
   if (!S.unit || !UNIT[S.unit]) S.unit = nextUnit();
-  var ex = S.mode === "exam";
-  var h = header() + '<div class="seg" role="group" aria-label="Modus"><button id="mPath" aria-pressed="' + !ex + '">Lernpfad</button><button id="mExam" aria-pressed="' + ex + '">Klausurtraining</button></div>';
-  if (ex) h += examHome(); else h += pathHome();
+  var ex = S.mode === "exam", cd = S.mode === "code";
+  var h = header() + '<div class="seg three" role="group" aria-label="Modus"><button id="mPath" aria-pressed="' + (!ex && !cd) + '">Lernpfad</button><button id="mCode" aria-pressed="' + cd + '">Programmieren</button><button id="mExam" aria-pressed="' + ex + '">Klausur</button></div>';
+  if (!ex && !cd) h += planCard();
+  if (ex) h += examHome(); else if (cd) h += codeHome(); else h += pathHome();
   h += weakPanel(3);
   h += '<div class="foot">Fortschritt wird auf diesem Gerät gespeichert.<br><button class="linkbtn" id="exp">Fortschritt sichern</button>' +
     '<label class="linkbtn" for="imp" style="display:inline-block;cursor:pointer">Fortschritt laden</label><input type="file" id="imp" accept=".json,application/json" hidden>' +
@@ -2802,12 +2808,13 @@ function home() {
   render(h);
   document.getElementById("mPath").onclick = function(){ S.mode = "path"; save(); home(); };
   document.getElementById("mExam").onclick = function(){ S.mode = "exam"; save(); home(); };
-  if (ex) bindExamHome(); else bindPathHome();
+  document.getElementById("mCode").onclick = function(){ S.mode = "code"; save(); home(); };
+  if (ex) bindExamHome(); else if (cd) bindCodeHome(); else { bindPathHome(); bindPlanCard(); }
   bindWeak(); var wa = document.getElementById("weakAll"); if (wa) wa.onclick = weakView;
   bindIO();
   var rs = document.getElementById("reset");
   rs.onclick = function(){
-    if (rs.dataset.armed) { var keep = { minutes: S.minutes, medium: S.medium }; S = Object.assign({ done: {}, wrong: {}, days: [], answered: 0, correct: 0, mode: "path", exam: {}, efocus: null, box: {}, stats: {}, log: [], unit: null, prog: {}, checks: {}, seen: {} }, keep); save(); home(); }
+    if (rs.dataset.armed) { var keep = { minutes: S.minutes, medium: S.medium, examDate: S.examDate }; S = Object.assign({ done: {}, wrong: {}, days: [], answered: 0, correct: 0, mode: "path", exam: {}, efocus: null, box: {}, stats: {}, log: [], unit: null, prog: {}, checks: {}, seen: {} }, keep); save(); home(); }
     else { rs.dataset.armed = 1; rs.textContent = "Wirklich alles zurücksetzen? Nochmal tippen"; }
   };
 }
@@ -2815,10 +2822,11 @@ function home() {
 function pathHome() {
   var u = S.unit, U = UNIT[u], st = unitStage(u), p = planUnit(u, S.minutes), sug = nextUnit();
   var doneN = UNITS.filter(function(x){ return unitDone(x.id); }).length;
-  var h = '<section class="panel hero" aria-labelledby="h-now"><span class="label" id="h-now">' + (u === sug ? "Als Nächstes im Lehrplan" : "Gewählte Lerneinheit") + '</span>' +
+  var h = (examPlan().finalPhase ? '<button class="btn" id="toExam">Endspurt: Klausurtraining starten</button>' : '') + '<section class="panel hero" aria-labelledby="h-now"><span class="label" id="h-now">' + (u === sug ? "Als Nächstes im Lehrplan" : "Gewählte Lerneinheit") + '</span>' +
     '<button class="unitlink" id="openUnit"><span class="code big">' + u + '</span><span><b>' + esc(U.chap.title) + '</b><br><span class="hint">' + st.text + '</span></span><span aria-hidden="true">›</span></button>' +
     timePicker() + '<div class="plan" id="plan">' + planUnitHtml(p) + '</div>' +
     '<button class="btn" id="go">Session starten</button>' +
+    (U.gens.length ? '<button class="btn ghost" id="goCode">Nur Programmieren: Aufgabe aus ' + u + '</button>' : '') +
     (u !== sug ? '<button class="linkbtn" id="toSug" style="align-self:flex-start">Zurück zum Lehrplan: ' + sug + '</button>' : '') + '</section>';
   h += '<section class="panel stats" aria-label="Fortschritt"><div class="stat"><b>' + doneN + '/' + UNITS.length + '</b><small>Einheiten fertig</small></div>' +
     '<div class="stat"><b>' + dueCount() + '</b><small>heute fällig</small></div><div class="stat"><b>' + streak() + '</b><small>Tage in Folge</small></div></section>';
@@ -2845,8 +2853,60 @@ function bindPathHome() {
   bindTime(function(){ document.getElementById("plan").innerHTML = planUnitHtml(planUnit(S.unit, S.minutes)); });
   document.getElementById("go").onclick = function(){ startUnit(S.unit); };
   document.getElementById("openUnit").onclick = function(){ unitView(S.unit); };
+  var te = document.getElementById("toExam"); if (te) te.onclick = function(){ S.mode = "exam"; save(); home(); };
+  var gc = document.getElementById("goCode"); if (gc) gc.onclick = function(){ startTasks([shuffle(UNIT[S.unit].gens)[0]], S.unit); };
   var ts = document.getElementById("toSug"); if (ts) ts.onclick = function(){ S.unit = nextUnit(); save(); home(); };
   app.querySelectorAll("[data-u]").forEach(function(b){ b.onclick = function(){ S.unit = b.dataset.u; save(); unitView(b.dataset.u); }; });
+}
+
+// ---------- Klausurplan: Zieldaten bis zur Klausur ----------
+var WEIGHT = { EIP: 1, PUP: 1, PJA: 1, EJP: 1, VAR: 2, STA: 2, OBJ: 1.5, KLA: 3, VER: 2, ITR: 3, VRB: 3, EXC: 2, ARR: 3, ZKT: 2 };
+var FINAL_DAYS = 14; // die letzten zwei Wochen: Klausurtraining und Wiederholung
+function dateOf(dn) { return new Date(dn * 86400000); }
+function dnOf(iso) { var p = iso.split("-"); return Math.floor(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000); }
+function fmtDate(dn) { var d = dateOf(dn); return ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][d.getUTCDay()] + " " + String(d.getUTCDate()).padStart(2, "0") + "." + String(d.getUTCMonth() + 1).padStart(2, "0") + "."; }
+function examPlan() {
+  if (!S.examDate) S.examDate = "2027-01-28";
+  if (!S.planStart) { S.planStart = dayNum(); save(); }
+  var exam = dnOf(S.examDate), start = S.planStart, learnEnd = exam - FINAL_DAYS;
+  var total = 0; ORDER.forEach(function(u){ total += WEIGHT[u]; });
+  var acc = 0, due = {};
+  ORDER.forEach(function(u){ acc += WEIGHT[u]; due[u] = Math.round(start + (learnEnd - start) * acc / total); });
+  var today = dayNum();
+  var behind = ORDER.filter(function(u){ return due[u] < today && !unitDone(u); });
+  var thisWeek = ORDER.filter(function(u){ return !unitDone(u) && due[u] >= today && due[u] < today + 7; });
+  return { exam: exam, left: exam - today, learnEnd: learnEnd, due: due, behind: behind, thisWeek: thisWeek, finalPhase: today >= learnEnd };
+}
+// Klausurreife: grobe Schätzung aus abgeschlossenen Einheiten, sicheren Klausuraufgaben, Programmierpraxis und offenen Baustellen
+function readiness() {
+  var units = UNITS.filter(function(u){ return unitDone(u.id); }).length / UNITS.length;
+  var exam = EXAM.filter(function(e){ var b = S.box["ex:" + e.id]; return b && b.b >= 2; }).length / EXAM.length;
+  var solved = 0; Object.keys(S.prog).forEach(function(k){ solved += S.prog[k]; });
+  var prog = Math.min(1, solved / 60);
+  var weak = weakSpots().length, weakPen = Math.min(0.15, weak * 0.02);
+  var score = Math.max(0, 0.35 * units + 0.3 * exam + 0.35 * prog - weakPen);
+  var todo = [];
+  if (units < 1) todo.push((UNITS.length - Math.round(units * UNITS.length)) + " Einheiten abschließen");
+  if (prog < 1) todo.push("noch " + Math.max(0, 60 - solved) + " Programmieraufgaben (viele davon auf Papier)");
+  if (exam < 1) todo.push(Math.round((1 - exam) * EXAM.length) + " Klausuraufgaben mehrfach sicher lösen");
+  if (weak) todo.push(weak + " Baustelle" + (weak > 1 ? "n" : "") + " schließen");
+  return { pct: Math.round(score * 100), todo: todo };
+}
+function planCard() {
+  var P = examPlan(), R = readiness();
+  var h = '<section class="panel plancard" aria-labelledby="h-plan"><div class="weak-h"><span class="label" id="h-plan" style="flex:1">Klausur ' + fmtDate(P.exam) + ' · Ziel 1,0</span><span class="pill' + (P.behind.length ? " hot" : " ok") + '">' + (P.left >= 0 ? "noch " + P.left + " Tage" : "vorbei") + '</span></div>';
+  if (P.finalPhase) h += '<p><b>Endspurt:</b> Jetzt täglich Klausurtraining und Baustellen. Schreib die Probeklausur ca. 4 Tage vorher einmal unter echten Bedingungen (nur Papier, Zeit stoppen).</p>';
+  else if (P.behind.length) h += '<p><b>' + P.behind.length + ' Einheit' + (P.behind.length > 1 ? "en" : "") + ' hinter dem Plan:</b> ' + P.behind.join(", ") + '. Plane diese Woche zusätzliche Sessions ein.</p>';
+  else h += '<p><b>Im Plan.</b> ' + (P.thisWeek.length ? "Diese Woche dran: " + P.thisWeek.map(function(u){ return u + " (bis " + fmtDate(P.due[u]) + ")"; }).join(", ") + "." : "Nächste Einheit: " + nextUnit() + " bis " + fmtDate(P.due[nextUnit()]) + ".") + '</p>';
+  h += '<div class="ready"><div class="bar"><i style="width:' + Math.max(2, R.pct) + '%"></i></div><span class="mono">' + R.pct + ' %</span></div><p class="hint">Klausurreife – Schätzung aus deinem Fortschritt' + (R.todo.length ? '. Noch offen: ' + R.todo.slice(0, 3).join(" · ") : '') + '</p>' +
+    '<details><summary class="hint">Zeitplan und Klausurdatum</summary><ol class="tlist num">' + ORDER.map(function(u){ return '<li>' + u + ' bis ' + fmtDate(P.due[u]) + (unitDone(u) ? ' ✓' : '') + '</li>'; }).join("") + '<li>Ab ' + fmtDate(P.learnEnd) + ': Klausurtraining, Probeklausur, Wiederholung</li></ol>' +
+    '<label class="hint" for="exDate">Klausurdatum</label> <input type="date" id="exDate" value="' + S.examDate + '"> <button class="linkbtn" id="replan">Plan ab heute neu verteilen</button></details></section>';
+  return h;
+}
+function bindPlanCard() {
+  var d = document.getElementById("exDate"); if (!d) return;
+  d.onchange = function(){ if (d.value) { S.examDate = d.value; save(); home(); } };
+  document.getElementById("replan").onclick = function(){ S.planStart = dayNum(); save(); home(); };
 }
 
 // ---------- Einheiten-Ansicht ----------
@@ -3175,6 +3235,39 @@ function summary() {
   sess = null; save(); render(h); bindWeak();
   document.getElementById("home").onclick = home;
   var mo = document.getElementById("more"); if (mo) mo.onclick = function(){ startTasks([wasPractice.g], wasPractice.u); };
+}
+
+// ---------- Programmieren: Startseite ----------
+function reachedGens() { // Übungstypen aller Einheiten bis zur aktuellen
+  var idx = ORDER.indexOf(nextUnit()), g = [];
+  UNITS.forEach(function(u, i){ if (i <= Math.max(idx, ORDER.indexOf(S.unit))) u.gens.forEach(function(x){ g.push({ g: x, u: u.id }); }); });
+  if (!g.length) ["EJP", "VAR"].forEach(function(id){ UNIT[id].gens.forEach(function(x){ g.push({ g: x, u: id }); }); });
+  return g;
+}
+function codeHome() {
+  var pap = S.medium !== "rechner", reached = reachedGens(), solved = 0;
+  Object.keys(S.prog).forEach(function(k){ solved += S.prog[k]; });
+  var h = '<section class="panel"><span class="label">Programmieren üben</span>' +
+    '<p class="hint">Jede Aufgabe wird neu erzeugt – andere Zahlen, Namen, Varianten. So trainierst du Können statt Auswendiglernen.</p>' +
+    '<div class="seg small" role="group" aria-label="Bearbeitung"><button id="cPap" aria-pressed="' + pap + '">Auf Papier</button><button id="cPc" aria-pressed="' + !pap + '">Am Rechner</button></div>' +
+    '<p class="hint">' + (pap ? "Wie in der Klausur: von Hand schreiben, dann mit Musterlösung und Checkliste vergleichen." : "Vorlage und Test.java kopieren, in der IDE programmieren, Tests laufen lassen.") + '</p>' +
+    '<button class="btn" id="cMix"' + (reached.length ? '' : ' disabled') + '>Gemischte Aufgabe' + (reached.length ? ' (bis ' + reached[reached.length - 1].u + ')' : '') + '</button>' +
+    (reached.length ? '' : '<p class="hint">Programmieraufgaben beginnen ab EJP – wähle unten eine Einheit.</p>') +
+    '<div class="stats" style="margin-top:4px"><div class="stat"><b>' + solved + '</b><small>Aufgaben gelöst</small></div><div class="stat"><b>' + Object.keys(GENS).length + '</b><small>Aufgabentypen</small></div><div class="stat"><b>∞</b><small>Varianten</small></div></div></section>';
+  UNITS.filter(function(u){ return u.gens.length; }).forEach(function(u){
+    h += '<section class="panel"><div class="weak-h"><span class="code big" style="font-size:13px">' + u.id + '</span><b style="flex:1;min-width:0">' + esc(u.chap.title) + '</b>' + pill(u.id) + '</div>' +
+      '<div class="chips">' + u.gens.map(function(g){ return '<button class="chip" data-cg="' + g + '" data-cu="' + u.id + '">' + esc(genTitle(g)) + '</button>'; }).join("") + '</div>' +
+      (u.esa.length ? '<button class="linkbtn" data-esa="' + u.id + '" style="align-self:flex-start">Einsendeaufgaben ' + u.esa.map(function(e){ return e.id; }).join(", ") + ' vorbereiten</button>' : '') + '</section>';
+  });
+  return h;
+}
+function bindCodeHome() {
+  document.getElementById("cPap").onclick = function(){ S.medium = "papier"; save(); home(); };
+  document.getElementById("cPc").onclick = function(){ S.medium = "rechner"; save(); home(); };
+  var mx = document.getElementById("cMix");
+  if (mx) mx.onclick = function(){ var r = reachedGens(); if (!r.length) return; var pick = shuffle(r)[0]; startTasks([pick.g], pick.u); };
+  app.querySelectorAll("[data-cg]").forEach(function(b){ b.onclick = function(){ startTasks([b.dataset.cg], b.dataset.cu); }; });
+  app.querySelectorAll("[data-esa]").forEach(function(b){ b.onclick = function(){ unitView(b.dataset.esa); }; });
 }
 
 // ---------- Klausurtraining: Startseite ----------
