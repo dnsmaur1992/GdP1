@@ -1,0 +1,2102 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1726">
+<meta name="description" content="Lern-App für Grundlagen der Programmierung 1: kurze Sessions, Quiz, Klausurtraining und Fehleranalyse.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="nibble">
+<style>
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; font: 14px system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>nibble GP1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: eine Spalte, max. 560px, Bildschirm-für-Bildschirm wie eine Handy-App.
+   ================================================================
+   HIER FARBEN ÄNDERN  (z. B. Hochschulfarben aus dem CI-Handbuch)
+   --accent = Hauptfarbe, --accent-ink = Text auf Hauptfarbe
+   ================================================================ */
+:root {
+  --bg: #F3F6FA; --surface: #FFFFFF; --surface-2: #E8EEF5; --line: #D3DCE8;
+  --fg: #0E1726; --muted: #4E5D73;
+  --accent: #0B8457; --accent-ink: #FFFFFF; --accent-soft: #D5F2E5;
+  --ok: #0B8457; --ok-soft: #D5F2E5; --bad: #C8323B; --bad-soft: #FBE1E2; --warn: #9A6200;
+  --code-bg: #0E1726; --code-fg: #D8E2F0; --code-kw: #3DDC97;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1726; --surface: #16233A; --surface-2: #1D2C46; --line: #2A3A55;
+  --fg: #E6EDF7; --muted: #9FB0C8;
+  --accent: #3DDC97; --accent-ink: #062016; --accent-soft: #143A31;
+  --ok: #3DDC97; --ok-soft: #143A31; --bad: #FF7A80; --bad-soft: #3E1E27; --warn: #F5A524;
+  --code-bg: #0A111D; --code-fg: #D8E2F0; --code-kw: #3DDC97; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1726; --surface: #16233A; --surface-2: #1D2C46; --line: #2A3A55;
+  --fg: #E6EDF7; --muted: #9FB0C8;
+  --accent: #3DDC97; --accent-ink: #062016; --accent-soft: #143A31;
+  --ok: #3DDC97; --ok-soft: #143A31; --bad: #FF7A80; --bad-soft: #3E1E27; --warn: #F5A524;
+  --code-bg: #0A111D; --code-fg: #D8E2F0; --code-kw: #3DDC97; color-scheme: dark }
+
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.app { max-width: 560px; margin: 0 auto; padding-block: 20px 40px; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; line-height: 1.2; }
+p { margin: 0; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--f-mono); font-size: .88em; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+.mono { font-family: var(--f-mono); }
+.muted { color: var(--muted); }
+.label { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* Kopf */
+.top { display: flex; align-items: center; gap: 12px; }
+.top svg { width: 44px; height: 44px; flex: none; }
+.brand { display: flex; flex-direction: column; min-width: 0; }
+.brand b { font-family: var(--f-mono); font-size: 22px; font-weight: 600; line-height: 1.1; }
+.brand b span { color: var(--accent); }
+.brand small { color: var(--muted); font-size: 13px; }
+/* Platz für ein zusätzliches Logo (siehe PARTNER_LOGO im Script) */
+#partnerLogo { margin-left: auto; max-height: 40px; max-width: 120px; object-fit: contain; }
+
+/* Startbildschirm */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.timepick { display: flex; align-items: baseline; gap: 8px; }
+.timepick output { font-family: var(--f-display); font-size: 56px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.timepick span { font-size: 18px; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
+.ticks { display: flex; justify-content: space-between; font-family: var(--f-mono); font-size: 12px; color: var(--muted); margin-top: -8px; }
+.plan { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.plan div { display: flex; gap: 8px; align-items: baseline; }
+.plan .tag { font-family: var(--f-mono); font-size: 11px; padding: 2px 6px; border-radius: 6px; background: var(--surface-2); color: var(--muted); flex: none; }
+.plan .tag.rev { background: var(--bad-soft); color: var(--bad); }
+.btn { border: 0; border-radius: 12px; padding: 14px 18px; min-height: 48px; font-weight: 600; background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-size: 17px; }
+.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+.btn:disabled { opacity: .45; cursor: default; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row .btn { flex: 1 1 140px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat b { font-family: var(--f-display); font-size: 24px; font-variant-numeric: tabular-nums; }
+.stat small { color: var(--muted); font-size: 12px; }
+
+.chapters { display: flex; flex-direction: column; }
+.chap { display: grid; grid-template-columns: 52px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 12px 4px; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; text-align: left; width: 100%; }
+.chap:first-child { border-top: 0; }
+.chap .code { font-family: var(--f-mono); font-weight: 600; font-size: 13px; padding: 4px 0; text-align: center; border-radius: 8px; background: var(--surface-2); }
+.chap.focus .code { background: var(--accent); color: var(--accent-ink); }
+.chap .name { font-size: 15px; line-height: 1.3; }
+.bar { height: 4px; border-radius: 4px; background: var(--surface-2); margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.chap .pct { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Session */
+.sbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.clock { font-family: var(--f-mono); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.clock.over { color: var(--warn); }
+.prog { flex: 1; display: flex; gap: 4px; }
+.prog i { flex: 1; height: 6px; border-radius: 3px; background: var(--surface-2); }
+.prog i.done { background: var(--accent); }
+.prog i.now { background: var(--muted); }
+.iconbtn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 10px; min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.card h2 { font-size: 22px; }
+.learn { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+pre { margin: 0; background: var(--code-bg); color: var(--code-fg); border-radius: 10px; padding: 14px; overflow-x: auto; font-family: var(--f-mono); font-size: 13px; line-height: 1.5; }
+pre .kw { color: var(--code-kw); }
+pre .cm { color: #7F90A8; }
+pre .st { color: #F5C26B; }
+.q { font-weight: 600; font-size: 17px; }
+.answers { display: flex; flex-direction: column; gap: 8px; }
+.ans { text-align: left; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 12px; padding: 12px 14px; min-height: 48px; display: flex; gap: 10px; align-items: center; }
+.ans .k { font-family: var(--f-mono); font-size: 13px; color: var(--muted); flex: none; width: 18px; }
+.ans.right { border-color: var(--ok); background: var(--ok-soft); }
+.ans.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.ans:disabled { cursor: default; color: var(--fg); }
+.why { border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+.why.ok { background: var(--ok-soft); }
+.why.no { background: var(--bad-soft); }
+.why b { display: block; font-family: var(--f-display); }
+.task { border: 1px dashed var(--accent); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.timeup { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; font-size: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.timeup .btn { padding: 8px 14px; min-height: 40px; font-size: 15px; }
+.big { font-family: var(--f-display); font-size: 40px; font-weight: 700; line-height: 1.05; }
+.foot { font-size: 12px; color: var(--muted); text-align: center; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface-2); border-radius: 12px; padding: 4px; }
+.seg button { border: 0; border-radius: 9px; min-height: 44px; background: transparent; color: var(--muted); font-family: var(--f-display); font-weight: 600; font-size: 15px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.stmt { font-size: 17px; }
+.stmt code { font-size: .95em; }
+.tfrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tfrow .ans { justify-content: center; font-weight: 600; }
+textarea { width: 100%; box-sizing: border-box; min-height: 120px; resize: vertical; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); padding: 12px; font-family: var(--f-mono); font-size: 13px; line-height: 1.5; }
+.hint { font-size: 14px; color: var(--muted); }
+.reveal { display: flex; flex-direction: column; gap: 12px; }
+.check { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.check label { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; cursor: pointer; padding: 4px 0; }
+.check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex: none; }
+.ws { color: var(--muted); }
+.soltext { white-space: pre-line; }
+.verdict { font-family: var(--f-display); font-weight: 600; }
+.verdict.ok { color: var(--ok); }
+.verdict.no { color: var(--bad); }
+.weak { display: flex; flex-direction: column; gap: 8px; padding-block: 12px; border-top: 1px solid var(--line); }
+.weak:first-of-type { border-top: 0; }
+.weak-h { display: flex; gap: 10px; align-items: center; }
+.weak-h .name { flex: 1; min-width: 0; font-weight: 500; }
+.pill { font-family: var(--f-mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.pill.hot { background: var(--bad-soft); color: var(--bad); }
+.btn.small { padding: 8px 14px; min-height: 44px; font-size: 15px; flex: 0 0 auto; }
+.log { display: flex; flex-direction: column; }
+.logitem { border-top: 1px solid var(--line); padding-block: 10px; }
+.logitem:first-child { border-top: 0; }
+.logitem summary { cursor: pointer; min-height: 32px; display: flex; gap: 8px; align-items: center; }
+.logitem[open] { display: flex; flex-direction: column; gap: 8px; }
+.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; padding: 8px; min-height: 44px; }
+@media (prefers-reduced-motion: no-preference) { .card { animation: in .25s ease-out; } @keyframes in { from { transform: translateY(6px); opacity: .6 } } }
+</style>
+
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* ================================================================
+   PARTNER_LOGO: Hier kann ein zusätzliches Logo eingetragen werden,
+   z. B. eine Bild-URL oder eine data:-URI. Leer = kein Logo.
+   ================================================================ */
+var PARTNER_LOGO = "";
+
+// nibble – Lerninhalte GP1, Teil 1 (Grundlagen)
+// Eigene Zusammenfassungen und Fragen auf Basis der Lerneinheiten.
+var CONTENT = CONTENT || [];
+CONTENT.push(
+{
+  id: "EIP", title: "Einführung in die Programmierung", color: "#5AA9FF",
+  nibbles: [
+    {
+      t: "Was ein Computer kann – und was nicht",
+      learn: [
+        "Computer sind dem Menschen bei **Geschwindigkeit, Zuverlässigkeit und Speichervolumen** überlegen.",
+        "Grenzen gibt es bei sehr komplexen Problemen und bei Fragen, die **ethisch-moralische Urteile** verlangen.",
+        "Daten und Programme bilden ein **Modell** realer Sachverhalte ab – nie die Wirklichkeit selbst.",
+        "Jeder Computer besteht aus **Hardware** (Elektronik) und **Software** (Programme, Daten, Dokumentation)."
+      ],
+      quiz: [
+        { q: "Was gehört laut Definition zur Software?", a: ["Nur ausführbare Programme", "Programme, Daten und Dokumentation", "Prozessor und Arbeitsspeicher", "Alle Peripheriegeräte"], c: 1, why: "Software umfasst Programme, die zugehörigen Daten und deren Dokumentation." },
+        { q: "Wobei ist ein Computer dem Menschen NICHT überlegen?", a: ["Rechengeschwindigkeit", "Fehlerfreies Wiederholen", "Ethische Abwägungen", "Speichern großer Datenmengen"], c: 2, why: "Moralische Urteile lassen sich nicht sinnvoll an eine Maschine delegieren." }
+      ]
+    },
+    {
+      t: "Von-Neumann-Architektur & EVA-Prinzip",
+      learn: [
+        "**Prozessor + Arbeitsspeicher** bilden die Zentraleinheit, alles andere sind **Peripheriegeräte**.",
+        "Programm **und** Daten müssen zur Ausführung im Arbeitsspeicher liegen – er ist schnell, aber **flüchtig**.",
+        "Dauerhaft gespeichert wird auf Speichermedien wie Festplatte oder USB-Stick.",
+        "Daraus folgt das **EVA-Prinzip**: Eingabe → Verarbeitung → Ausgabe."
+      ],
+      quiz: [
+        { q: "Was passiert mit dem Inhalt des Arbeitsspeichers beim Ausschalten?", a: ["Er bleibt erhalten", "Er wird auf die Festplatte kopiert", "Er geht verloren", "Er wird komprimiert"], c: 2, why: "Der Arbeitsspeicher (RAM) ist flüchtig." },
+        { q: "Welches Gerät ist ein reines Eingabegerät?", a: ["Drucker", "Maus", "Festplatte", "Monitor"], c: 1, why: "Die Maus dient nur der Eingabe, der Drucker nur der Ausgabe." }
+      ]
+    },
+    {
+      t: "System- vs. Anwendersoftware",
+      learn: [
+        "**Systemsoftware** ist eng mit der Hardware verbunden, z. B. das Betriebssystem. Sie erfordert hardwarenahe Programmierung.",
+        "**Anwendersoftware** ist alles, was für konkrete Anwendungsfälle entwickelt wurde.",
+        "**Anwender** benutzen Programme, **Programmentwickler** entwerfen und implementieren sie nach Anwendervorgaben.",
+        "Beim Testen nimmt der Entwickler bewusst die **Anwendersicht** ein."
+      ],
+      quiz: [
+        { q: "Ein Betriebssystem gehört zur …", a: ["Anwendersoftware", "Systemsoftware", "Hardware", "Firmware des Monitors"], c: 1, why: "Das Betriebssystem ist der klassische Vertreter der Systemsoftware." },
+        { q: "Ein SIEM-Tool im SOC ist aus Sicht der Einteilung …", a: ["Systemsoftware", "Anwendersoftware", "Hardware", "Ein Algorithmus"], c: 1, why: "Es wurde für einen konkreten Anwendungsfall (Log-Analyse) entwickelt." }
+      ]
+    },
+    {
+      t: "Algorithmen & schrittweise Verfeinerung",
+      learn: [
+        "Ein **Algorithmus** ist eine **endliche, eindeutige** Vorschrift zur Lösung eines Problems in Einzelschritten.",
+        "Er muss **terminieren** und für gleiche Eingaben das gleiche Ergebnis liefern.",
+        "Bei der **schrittweisen Verfeinerung** zerlegt man ein grobes Problem („Kaffee kochen“) immer weiter in präzise Teilschritte.",
+        "Aus dem fertigen Algorithmus wird durch Formulierung in einer Programmiersprache ein **Programm**."
+      ],
+      code: "Kaffee kochen\n  1. Wasser einfüllen\n     1.1 Kanne nehmen\n     1.2 Kanne bis Markierung füllen\n  2. Filter einsetzen\n  3. Pulver einfüllen\n  4. Maschine einschalten",
+      quiz: [
+        { q: "Welche Eigenschaft muss ein Algorithmus NICHT haben?", a: ["Endlichkeit", "Eindeutigkeit", "Grafische Oberfläche", "Ausführbarkeit der Einzelschritte"], c: 2, why: "Eine GUI hat mit dem Algorithmus-Begriff nichts zu tun." },
+        { q: "„Schrittweise Verfeinerung“ bedeutet …", a: ["Code nachträglich optimieren", "Ein Problem von grob nach fein in Teilschritte zerlegen", "Einen Algorithmus mehrmals ausführen", "Fehler nach und nach entfernen"], c: 1, why: "Man arbeitet vom groben Ablauf hin zu präzisen Einzelschritten." }
+      ]
+    }
+  ]
+},
+{
+  id: "PUP", title: "Programmiersprachen und Programmierung", color: "#5AA9FF",
+  nibbles: [
+    {
+      t: "Bits, Bytes und Zeichenkodierung",
+      learn: [
+        "Maschinencode basiert auf dem **Binärsystem**: ein Symbol (0/1) ist ein **Bit**, 8 Bit sind ein **Byte**.",
+        "Zeichen werden über **Kodierungstabellen** auf Zahlen abgebildet, z. B. ASCII (7 Bit).",
+        "**Unicode** erfasst die Zeichen nahezu aller Schriftsysteme. Java verwendet Unicode intern.",
+        "Ein **Nibble** sind übrigens 4 Bit – ein halbes Byte, genau eine Hex-Ziffer."
+      ],
+      quiz: [
+        { q: "Wie viele verschiedene Werte kann ein Byte darstellen?", a: ["8", "128", "256", "1024"], c: 2, why: "2⁸ = 256." },
+        { q: "Welche Kodierung verwendet Java für Zeichen?", a: ["ASCII", "EBCDIC", "Unicode", "Morse"], c: 2, why: "char und String basieren in Java auf Unicode." }
+      ]
+    },
+    {
+      t: "Syntax und Semantik",
+      learn: [
+        "Eine Programmiersprache ist eine **künstliche Sprache** mit exakter Syntax und Semantik.",
+        "**Syntax**: Symbole und Regeln für den Aufbau von Wörtern und Sätzen.",
+        "Ein **Syntaxfehler** verhindert die Übersetzung in Maschinencode.",
+        "**Semantik**: die Bedeutung syntaktisch korrekter Konstrukte, also was das Programm tatsächlich tut."
+      ],
+      code: "int x = 10 / 0;   // syntaktisch korrekt, semantisch problematisch\nint y = 10 /;     // Syntaxfehler: kompiliert nicht",
+      quiz: [
+        { q: "Ein fehlendes Semikolon ist ein …", a: ["Semantikfehler", "Syntaxfehler", "Laufzeitfehler", "Logikfehler"], c: 1, why: "Es verletzt die formalen Aufbauregeln der Sprache." },
+        { q: "Was bestimmt die Semantik?", a: ["Welche Zeichen erlaubt sind", "Die Bedeutung bzw. Wirkung des Programms", "Die Dateiendung", "Die Einrückung"], c: 1, why: "Semantik = Bedeutung korrekter Konstrukte." }
+      ]
+    },
+    {
+      t: "Imperativ, objektorientiert, deklarativ",
+      learn: [
+        "**Imperativ**: Anweisungen manipulieren Daten Schritt für Schritt (z. B. C, Pascal).",
+        "**Objektorientiert**: Objekte vereinen Zustand und Verhalten und kommunizieren miteinander (z. B. Java, C++).",
+        "**Deklarativ**: man beschreibt *was* gilt, nicht *wie* – logisch (PROLOG) oder funktional (LISP).",
+        "Höhere Sprachen sind **prozessorunabhängig** und problemorientiert."
+      ],
+      quiz: [
+        { q: "Zu welchem Konzept gehört Java?", a: ["Rein imperativ", "Objektorientiert", "Logisch", "Funktional"], c: 1, why: "Java ist eine objektorientierte Sprache." },
+        { q: "PROLOG ist eine …", a: ["logische Sprache", "imperative Sprache", "Assemblersprache", "Auszeichnungssprache"], c: 0, why: "PROLOG basiert auf Prädikatenlogik." }
+      ]
+    },
+    {
+      t: "Compiler vs. Interpreter",
+      learn: [
+        "Quellcode muss in **Maschinencode** übersetzt werden.",
+        "Ein **Compiler** übersetzt das ganze Programm vorab in eine ausführbare Datei.",
+        "Ein **Interpreter** übersetzt und führt Anweisung für Anweisung direkt aus.",
+        "**Bibliotheken** lagern Programmteile aus, die zur Laufzeit eingebunden werden.",
+        "Java kombiniert beides: **javac** erzeugt Bytecode, die **JVM** interpretiert ihn."
+      ],
+      quiz: [
+        { q: "Was erzeugt ein klassischer Compiler?", a: ["Nichts, er führt direkt aus", "Eine ausführbare Datei", "Nur Fehlermeldungen", "HTML-Doku"], c: 1, why: "Das gesamte Programm wird vorab übersetzt." },
+        { q: "Wie arbeitet Java?", a: ["Nur kompiliert", "Nur interpretiert", "Kompiliert zu Bytecode, der von der JVM ausgeführt wird", "Gar nicht übersetzt"], c: 2, why: "Das hybride Modell ist die Basis der Plattformunabhängigkeit." }
+      ]
+    },
+    {
+      t: "Phasen der Softwareentwicklung",
+      learn: [
+        "**Analyse**: Anforderungen werden exakt und vollständig festgehalten, oft im **Pflichtenheft**.",
+        "**Entwurf**: vom Grob- zum Feinentwurf.",
+        "**Implementierung**: der Entwurf wird in einer Programmiersprache umgesetzt.",
+        "**Test**: das Programm wird gegen die Anforderungen geprüft – auch aus Anwendersicht."
+      ],
+      quiz: [
+        { q: "In welcher Phase entsteht typischerweise das Pflichtenheft?", a: ["Analyse", "Entwurf", "Implementierung", "Test"], c: 0, why: "Die Anforderungen werden in der Analyse festgelegt." }
+      ]
+    }
+  ]
+},
+{
+  id: "PJA", title: "Die Programmiersprache Java", color: "#5AA9FF",
+  nibbles: [
+    {
+      t: "Eigenschaften von Java",
+      learn: [
+        "Java ist **einfach, objektorientiert, plattformunabhängig, robust und sicher**.",
+        "**Plattformunabhängig**: Bytecode läuft überall, wo eine JVM existiert („write once, run anywhere“).",
+        "**Robust**: strenge Typprüfung und automatische Speicherverwaltung (Garbage Collection), keine Zeigerarithmetik.",
+        "Java unterstützt **Nebenläufigkeit** (Threads) und bringt eine riesige **Standardbibliothek** mit."
+      ],
+      quiz: [
+        { q: "Was macht Java plattformunabhängig?", a: ["Der Compiler erzeugt für jedes OS eigenen Maschinencode", "Bytecode wird von einer JVM ausgeführt", "Java läuft nur im Browser", "Java nutzt keine Bibliotheken"], c: 1, why: "Die JVM übernimmt die Übersetzung in den plattformspezifischen Maschinencode." },
+        { q: "Was trägt zur Robustheit von Java bei?", a: ["Manuelle Speicherfreigabe", "Zeigerarithmetik", "Garbage Collection", "Fehlende Typprüfung"], c: 2, why: "Der Garbage Collector verhindert typische Speicherfehler." }
+      ]
+    },
+    {
+      t: "Klassen und Objekte – die Idee",
+      learn: [
+        "Eine **Klasse** ist ein **Bauplan** mit Name, Attributen, Methoden und Beziehungen.",
+        "Ein **Objekt** hat **Identität**, **Zustand** (Attribute) und **Verhalten** (Methoden).",
+        "Objekte werden mit **new** und einem **Konstruktor** erzeugt.",
+        "Man kommuniziert mit Objekten über **Methodenaufrufe**."
+      ],
+      code: "Konto k = new Konto();   // Objekt nach Bauplan Konto\nk.einzahlen(100);        // Verhalten aufrufen",
+      quiz: [
+        { q: "Womit wird ein Objekt in Java erzeugt?", a: ["class", "new", "import", "static"], c: 1, why: "Der new-Operator ruft den Konstruktor auf." },
+        { q: "Der Zustand eines Objekts steckt in seinen …", a: ["Methoden", "Attributen", "Paketen", "Kommentaren"], c: 1, why: "Attribute speichern die Daten des Objekts." }
+      ]
+    },
+    {
+      t: "Kapselung, Vererbung, Polymorphie",
+      learn: [
+        "**Datenkapselung**: Attribute nur über Methoden verändern – zentral auch für sichere Software.",
+        "**Vererbung**: Unterklassen erben Attribute und Methoden ihrer Oberklassen und sparen Code.",
+        "**Polymorphie**: gleichnamige Methoden führen je nach Objekt unterschiedliche Anweisungen aus (durch Überschreiben)."
+      ],
+      quiz: [
+        { q: "Welches Prinzip schützt Attribute vor direktem Zugriff?", a: ["Vererbung", "Polymorphie", "Datenkapselung", "Nebenläufigkeit"], c: 2, why: "Kapselung erzwingt Zugriff über definierte Methoden." },
+        { q: "Polymorphie entsteht in Java vor allem durch …", a: ["Überschreiben von Methoden", "Importieren von Paketen", "Konstanten", "Kommentare"], c: 0, why: "Überschriebene Methoden verhalten sich je nach Objekttyp unterschiedlich." }
+      ]
+    },
+    {
+      t: "JDK, JVM und IDE",
+      learn: [
+        "Das **JDK** (Java Development Kit) enthält Compiler **javac**, Starter **java**, **javadoc** und mehr.",
+        "Die **JVM** ist ein Bytecode-Interpreter, der Bytecode in plattformspezifischen Maschinencode umsetzt.",
+        "Eine **IDE** bündelt Editor, Compiler, Debugger und weitere Werkzeuge unter einer Oberfläche.",
+        "Modellierungswerkzeuge (z. B. UML) helfen beim Entwurf."
+      ],
+      quiz: [
+        { q: "Welches Werkzeug übersetzt .java in .class?", a: ["java", "javac", "javadoc", "jar"], c: 1, why: "javac ist der Java-Compiler." },
+        { q: "Die JVM ist im Kern ein …", a: ["Texteditor", "Bytecode-Interpreter", "Betriebssystem", "Webserver"], c: 1, why: "Sie führt Bytecode auf der jeweiligen Plattform aus." }
+      ]
+    }
+  ]
+},
+{
+  id: "EJP", title: "Das erste Java-Programm", color: "#3DDC97",
+  nibbles: [
+    {
+      t: "Aufbau eines Java-Programms",
+      learn: [
+        "**import**-Anweisungen stehen ganz oben.",
+        "Danach folgt der **Dokumentationskopf** (Datei, Autor, Beschreibung, Datum, Version).",
+        "Die Klasse beginnt mit **class** und ihrem Bezeichner.",
+        "Jede Applikation startet in der **main-Methode**.",
+        "Java ist **case-sensitiv**: `Hallo` ≠ `hallo`."
+      ],
+      code: "/**\n * HalloWelt.java\n * @author Dein Name\n * @version 1.0\n */\npublic class HalloWelt {\n    public static void main(String[] args) {\n        System.out.println(\"Hallo SOC!\");\n    }\n}",
+      quiz: [
+        { q: "Wie lautet der korrekte Kopf der main-Methode?", a: ["public void main()", "public static void main(String[] args)", "static int main(String args)", "public main(String[] args)"], c: 1, why: "Genau diese Signatur sucht die JVM als Einstiegspunkt." },
+        { q: "Sind `MeinProgramm` und `meinProgramm` derselbe Bezeichner?", a: ["Ja", "Nein, Java ist case-sensitiv", "Nur unter Windows", "Nur bei Klassen"], c: 1, why: "Groß- und Kleinschreibung wird immer unterschieden." }
+      ]
+    },
+    {
+      t: "Kompilieren und Ausführen",
+      learn: [
+        "Quellcode wird als **.java**-Datei gespeichert.",
+        "**Dateiname und Klassenname müssen identisch sein**: `HalloWelt` → `HalloWelt.java`.",
+        "Kompilieren: `javac HalloWelt.java` erzeugt `HalloWelt.class` (Bytecode).",
+        "Ausführen: `java HalloWelt` – **ohne** `.class`!"
+      ],
+      code: "$ javac HalloWelt.java\n$ java HalloWelt\nHallo SOC!",
+      quiz: [
+        { q: "Welcher Aufruf startet das Programm korrekt?", a: ["java HalloWelt.class", "java HalloWelt", "javac HalloWelt", "run HalloWelt.java"], c: 1, why: "Beim java-Aufruf wird die Endung .class weggelassen." },
+        { q: "Die Klasse heißt `LogParser`. Wie muss die Datei heißen?", a: ["logparser.java", "LogParser.java", "LogParser.class", "Main.java"], c: 1, why: "Dateiname = Klassenname (inkl. Groß-/Kleinschreibung) + .java." }
+      ],
+      task: "Schreib ein Programm `Begruessung`, das zwei Zeilen ausgibt: deinen Namen und deinen Studiengang. Kompiliere es mit javac und führe es mit java aus."
+    },
+    {
+      t: "JAR-Dateien",
+      learn: [
+        "Eine **JAR-Datei** (Java Archive) bündelt mehrere .class-Dateien und Ressourcen in einem ZIP-Archiv.",
+        "Mit einem **Manifest** lässt sich die Hauptklasse festlegen.",
+        "Start eines ausführbaren JARs: `java -jar programm.jar`."
+      ],
+      quiz: [
+        { q: "Wie startet man ein ausführbares JAR?", a: ["java programm.jar", "java -jar programm.jar", "javac -jar programm.jar", "jar programm"], c: 1, why: "Der Schalter -jar weist java an, das Manifest auszuwerten." }
+      ]
+    },
+    {
+      t: "Dokumentieren mit javadoc",
+      learn: [
+        "Dokukommentare beginnen mit `/**` und enden mit `*/`.",
+        "Gebräuchliche Tags: **@author**, **@version**, **@param**, **@return**, **@throws**.",
+        "`javadoc` erzeugt daraus eine **HTML-Dokumentation**.",
+        "Guter Code ist ausreichend kommentiert – besonders, wenn andere ihn weiterverwenden."
+      ],
+      code: "/**\n * Prüft, ob ein Port im erlaubten Bereich liegt.\n * @param port die Portnummer\n * @return true, wenn 0 bis 65535\n */\npublic static boolean istGueltig(int port) { ... }",
+      quiz: [
+        { q: "Mit welcher Zeichenfolge beginnt ein javadoc-Kommentar?", a: ["//", "/*", "/**", "#"], c: 2, why: "Nur /** … */ wird von javadoc ausgewertet." },
+        { q: "Welches Tag beschreibt den Rückgabewert?", a: ["@param", "@return", "@author", "@see"], c: 1, why: "@return dokumentiert, was die Methode zurückgibt." }
+      ]
+    }
+  ]
+}
+);
+// nibble – Lerninhalte GP1, Teil 2 (Variablen bis Klassen)
+var CONTENT = CONTENT || [];
+CONTENT.push(
+{
+  id: "VAR", title: "Variablen und primitive Datentypen", color: "#3DDC97",
+  nibbles: [
+    {
+      t: "Deklaration, Zuweisung, Initialisierung",
+      learn: [
+        "Lokale Variablen sind wie **Behälter**: vor der Verwendung mit **Typ und Bezeichner** deklarieren.",
+        "Eine **Zuweisung** schreibt einen Wert hinein: `x = 5;`",
+        "Zuweisung direkt bei der Deklaration heißt **Initialisierung**: `int x = 5;`",
+        "Bezeichner beginnen mit Buchstabe, `_` oder `$`, dürfen keine Schlüsselwörter sein; Variablen schreibt man in **camelCase**."
+      ],
+      code: "int anzahlLogins;        // Deklaration\nanzahlLogins = 3;        // Zuweisung\nint fehlversuche = 0;    // Initialisierung",
+      quiz: [
+        { q: "Welcher Bezeichner ist ungültig?", a: ["port2", "_temp", "2port", "maxVersuche"], c: 2, why: "Bezeichner dürfen nicht mit einer Ziffer beginnen." },
+        { q: "`int x = 7;` ist eine …", a: ["reine Deklaration", "Initialisierung", "Typumwandlung", "Konstante"], c: 1, why: "Deklaration plus erste Wertzuweisung = Initialisierung." }
+      ]
+    },
+    {
+      t: "Die primitiven Datentypen",
+      learn: [
+        "Ganzzahlen: **byte** (8 Bit), **short** (16), **int** (32), **long** (64, Literal mit `L`).",
+        "Fließkomma: **float** (32 Bit, Literal mit `F`) und **double** (64 Bit, Standard).",
+        "**char**: ein Unicode-Zeichen in einfachen Hochkommas: `'A'`.",
+        "**boolean**: nur `true` oder `false`.",
+        "Dezimaltrenner ist der **Punkt**: `1.7`, nicht `1,7`."
+      ],
+      code: "byte  b = 100;\nlong  l = 3000000000L;\nfloat f = 3.5F;\ndouble d = 1.7;\nchar  c = 'S';\nboolean ok = true;",
+      quiz: [
+        { q: "Welche Deklaration ist korrekt?", a: ["double d = 1,7;", "byte b = 780;", "char c = '22';", "float f = 32;"], c: 3, why: "int 32 wird implizit zu float. 780 sprengt byte (max. 127), '22' sind zwei Zeichen." },
+        { q: "Welcher Typ ist der Standard für Fließkomma-Literale?", a: ["float", "double", "long", "int"], c: 1, why: "1.5 ist automatisch double; für float braucht man F." }
+      ]
+    },
+    {
+      t: "Arithmetik und die Ganzzahl-Falle",
+      learn: [
+        "Operatoren: `+  -  *  /  %` sowie `++` und `--`.",
+        "**Ganzzahldivision schneidet ab**: `7 / 2` ergibt `3`.",
+        "`%` liefert den **Rest**: `7 % 2` ergibt `1`.",
+        "Kombinierte Operatoren: `x += 5` entspricht `x = x + 5`.",
+        "Präfix `++x` erhöht **vor**, Postfix `x++` **nach** der Verwendung."
+      ],
+      code: "int a = 7, b = 2;\nSystem.out.println(a / b);    // 3\nSystem.out.println(a % b);    // 1\nSystem.out.println(a / 2.0);  // 3.5\nint i = 5;\nint j = i++;   // j = 5, i = 6",
+      quiz: [
+        { q: "Was ergibt `20 % 5 / 10 % 2`?", a: ["0", "1", "2", "Compilerfehler"], c: 0, why: "20 % 5 = 0, 0 / 10 = 0, 0 % 2 = 0 (Auswertung von links)." },
+        { q: "`int i = 3; int k = ++i * 2;` – welchen Wert hat k?", a: ["6", "7", "8", "9"], c: 2, why: "Präfix: i wird zuerst 4, dann 4 * 2 = 8." }
+      ],
+      task: "Schreib ein Programm, das eine Anzahl Sekunden (z. B. 3725) in Stunden, Minuten und Sekunden zerlegt. Tipp: / und %."
+    },
+    {
+      t: "Type Casting",
+      learn: [
+        "**Implizit** (erweiternd) geht automatisch: `byte → short → int → long → float → double`.",
+        "**Explizit** (einschränkend) braucht den **Cast-Operator**: `(int) 3.9`.",
+        "Beim Cast nach int werden Nachkommastellen **abgeschnitten**, nicht gerundet.",
+        "Rechnen mit byte/short ergibt immer **int** – das Ergebnis muss ggf. zurückgecastet werden."
+      ],
+      code: "double d = 3.9;\nint i = (int) d;       // 3\nbyte a = 10, b = 20;\nbyte c = (byte)(a + b); // a + b ist int!",
+      quiz: [
+        { q: "Was ergibt `(int) 9.99`?", a: ["10", "9", "9.99", "Compilerfehler"], c: 1, why: "Der Cast schneidet ab." },
+        { q: "Warum kompiliert `byte c = a + b;` (a, b sind byte) nicht?", a: ["byte kann nicht addiert werden", "a + b ist vom Typ int", "Es fehlt ein Semikolon", "byte ist kein primitiver Typ"], c: 1, why: "Arithmetik mit kleinen Ganzzahltypen liefert int." }
+      ]
+    },
+    {
+      t: "boolean und logische Operatoren",
+      learn: [
+        "Vergleiche liefern boolean: `<  <=  ==  !=  >=  >`.",
+        "Logische Operatoren: `&&` (und), `||` (oder), `!` (nicht), `^` (exklusiv oder).",
+        "`&&` und `||` werten **kurzschließend** aus: steht das Ergebnis fest, wird rechts nicht mehr geprüft.",
+        "Achtung: `=` ist Zuweisung, `==` ist Vergleich."
+      ],
+      code: "int versuche = 4;\nboolean gesperrt = versuche >= 3 && !istAdmin;\nboolean verdaechtig = vomAusland ^ vpnAktiv;",
+      quiz: [
+        { q: "Was ergibt `true ^ true`?", a: ["true", "false", "Compilerfehler", "1"], c: 1, why: "Exklusiv-oder ist nur true, wenn genau eine Seite true ist." },
+        { q: "Bei `x != 0 && 10 / x > 1` mit x = 0 …", a: ["kommt eine ArithmeticException", "wird rechts nicht ausgewertet, Ergebnis false", "ist das Ergebnis true", "kompiliert es nicht"], c: 1, why: "Kurzschluss: links ist false, also wird rechts gar nicht berechnet." }
+      ]
+    },
+    {
+      t: "Konstanten, Ein- und Ausgabe",
+      learn: [
+        "Lokale **Konstanten** mit `final`: nur einmal zuweisbar, Name in GROSSBUCHSTABEN.",
+        "Ausgabe: `System.out.println(...)` mit, `System.out.print(...)` ohne Zeilenumbruch.",
+        "Strings in doppelten Anführungszeichen, Verknüpfung mit `+`.",
+        "Eingabe z. B. mit einem **Scanner**-Objekt: `new Scanner(System.in)`."
+      ],
+      code: "import java.util.Scanner;\n...\nfinal int MAX_VERSUCHE = 3;\nScanner sc = new Scanner(System.in);\nSystem.out.print(\"Port: \");\nint port = sc.nextInt();\nSystem.out.println(\"Prüfe Port \" + port);",
+      quiz: [
+        { q: "Was passiert bei `final int MAX = 3; MAX = 4;`?", a: ["MAX wird 4", "Compilerfehler", "Laufzeitfehler", "MAX bleibt still 3"], c: 1, why: "Einer final-Variablen kann man nicht erneut zuweisen." }
+      ]
+    }
+  ]
+},
+{
+  id: "STA", title: "Statische Methoden und Konstanten", color: "#3DDC97",
+  nibbles: [
+    {
+      t: "Statische Methoden aufrufen",
+      learn: [
+        "Statische Methoden (**Klassenmethoden**) ruft man über den **Klassennamen** auf.",
+        "Syntax: `ergebnis = Klassenname.methode(arg1, arg2);`",
+        "Methoden ohne Rückgabewert (**void**) ruft man ohne Zuweisung auf.",
+        "Beispiele aus `Math`: `Math.sqrt`, `Math.pow`, `Math.abs`, `Math.max`."
+      ],
+      code: "double c = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));\nint groesser = Math.max(3, 8);   // 8",
+      quiz: [
+        { q: "Was liefert `Math.pow(2, 10)`?", a: ["20", "1024.0", "100", "12"], c: 1, why: "2¹⁰ = 1024, Rückgabetyp ist double." },
+        { q: "Wie ruft man eine void-Methode korrekt auf?", a: ["x = Klasse.m();", "Klasse.m();", "void Klasse.m();", "return Klasse.m();"], c: 1, why: "Ohne Rückgabewert gibt es nichts zuzuweisen." }
+      ]
+    },
+    {
+      t: "Eigene Methoden deklarieren",
+      learn: [
+        "**Methodenkopf**: `public static rueckgabetyp name(typ param, ...)`.",
+        "**Methodenrumpf**: ein Block `{ ... }` mit Anweisungen und lokalen Variablen.",
+        "`return` beendet die Methode und liefert einen Wert passenden Typs zurück.",
+        "Bei `void` darf `return` fehlen."
+      ],
+      code: "public static double hypotenuse(double a, double b) {\n    return Math.sqrt(a * a + b * b);\n}\n\npublic static void banner(String text) {\n    System.out.println(\"=== \" + text + \" ===\");\n}",
+      quiz: [
+        { q: "Was muss hinter `return` stehen, wenn der Rückgabetyp `int` ist?", a: ["Nichts", "Ein Ausdruck vom Typ int", "Ein String", "void"], c: 1, why: "Der Rückgabewert muss zum deklarierten Typ passen." },
+        { q: "Welcher Teil gehört zum Methodenkopf?", a: ["Die Parameterliste", "Die lokalen Variablen", "Die return-Anweisung", "Die Schleifen"], c: 0, why: "Modifizierer, Rückgabetyp, Name und Parameter bilden den Kopf." }
+      ],
+      task: "Schreib eine Methode `public static boolean istPrivateIP(int a)`, die true liefert, wenn das erste Oktett 10 ist. Teste sie aus main heraus."
+    },
+    {
+      t: "Überladen von Methoden",
+      learn: [
+        "Mehrere Methoden dürfen **gleich heißen**, wenn ihre **Parameterlisten** sich unterscheiden.",
+        "Die **Signatur** = Methodenname + Parametertypen.",
+        "Der Rückgabetyp allein reicht **nicht** zur Unterscheidung.",
+        "Der Compiler wählt anhand der Argumenttypen die passende Variante."
+      ],
+      code: "static int max(int a, int b) { ... }\nstatic double max(double a, double b) { ... }\nstatic int max(int a, int b, int c) { ... }",
+      quiz: [
+        { q: "Welches Paar ist KEINE gültige Überladung?", a: ["f(int) / f(double)", "f(int) / f(int, int)", "int f(int) / double f(int)", "f(String) / f(char)"], c: 2, why: "Nur der Rückgabetyp unterscheidet sich – das ist nicht erlaubt." }
+      ]
+    },
+    {
+      t: "Sichtbarkeit lokaler Variablen & Konstanten",
+      learn: [
+        "Lokale Variablen und Parameter gelten **nur in ihrem Block/ihrer Methode**.",
+        "Am Methodenende wird ihr Speicher freigegeben, der Wert ist weg.",
+        "**Statische Konstanten**: `public static final double MWST = 0.19;`",
+        "Zugriff von außen über den Klassennamen: `Steuer.MWST`, z. B. `Math.PI`."
+      ],
+      code: "public class Netz {\n    public static final int MAX_PORT = 65535;\n}\n// anderswo:\nif (port > Netz.MAX_PORT) { ... }",
+      quiz: [
+        { q: "Wie greift man auf die Konstante PI der Klasse Math zu?", a: ["PI", "Math.PI", "Math.PI()", "new Math().PI"], c: 1, why: "Statische Konstanten werden über den Klassennamen angesprochen." },
+        { q: "Was passiert mit einer lokalen Variablen nach dem Methodenende?", a: ["Sie bleibt global erhalten", "Ihr Speicher wird freigegeben", "Sie wird zur Konstanten", "Sie wird an main übergeben"], c: 1, why: "Lokale Variablen leben nur während der Methodenausführung." }
+      ]
+    },
+    {
+      t: "Methoden testen",
+      learn: [
+        "Bevor man Methoden weitergibt, sollte man sie **systematisch testen**.",
+        "Teste **typische Werte**, **Grenzwerte** (0, Maximum, Minimum) und **ungültige Eingaben**.",
+        "Eine einfache Testklasse ruft die Methode mit bekannten Werten auf und vergleicht mit dem erwarteten Ergebnis.",
+        "Grenzwerttests sind auch in der IT-Security Gold wert: viele Lücken stecken an den Rändern."
+      ],
+      code: "System.out.println(istGueltig(0));      // erwartet true\nSystem.out.println(istGueltig(65535));  // erwartet true\nSystem.out.println(istGueltig(65536));  // erwartet false\nSystem.out.println(istGueltig(-1));     // erwartet false",
+      quiz: [
+        { q: "Welche Testwerte sind für einen Bereich 1–100 am wichtigsten?", a: ["50", "1, 100, 0 und 101", "Nur 100", "Zufallswerte"], c: 1, why: "Grenzwerte und knapp daneben decken typische Off-by-one-Fehler auf." }
+      ]
+    }
+  ]
+},
+{
+  id: "OBJ", title: "Objekte", color: "#3DDC97",
+  nibbles: [
+    {
+      t: "Klassen der Standardbibliothek nutzen",
+      learn: [
+        "Eine **Klasse ist ein Datentyp**, ihre Werte heißen **Objekte** oder **Instanzen**.",
+        "Klassen liegen in **Paketen**; mit `import` macht man sie bekannt: `import java.util.Scanner;`",
+        "`java.lang` (String, Math, System) ist automatisch importiert.",
+        "Objekte erzeugt man mit `new` und einem **Konstruktor**."
+      ],
+      code: "import java.time.LocalDate;\nimport java.util.Random;\n\nRandom r = new Random();\nint wuerfel = r.nextInt(6) + 1;\nLocalDate heute = LocalDate.now();",
+      quiz: [
+        { q: "Welche Klasse muss NICHT importiert werden?", a: ["Scanner", "Random", "String", "LocalDate"], c: 2, why: "String liegt in java.lang, das immer verfügbar ist." },
+        { q: "`new Random()` ist ein …", a: ["Methodenaufruf einer Konstante", "Konstruktoraufruf", "Import", "Cast"], c: 1, why: "new ruft den Konstruktor auf und erzeugt ein Objekt." }
+      ]
+    },
+    {
+      t: "Instanz- vs. statische Methoden",
+      learn: [
+        "**Instanzmethoden** arbeiten mit einem konkreten Objekt: `objekt.methode(...)`.",
+        "**Statische Methoden** gehören zur Klasse: `Klasse.methode(...)`.",
+        "Viele Methoden liefern selbst **fertige Objekte** zurück, z. B. `LocalDate.now()`.",
+        "In der API-Doku steht `this` für das aktuelle Objekt."
+      ],
+      code: "String s = \"Firewall\";\nint n = s.length();           // Instanzmethode\nString t = String.valueOf(42); // statische Methode",
+      quiz: [
+        { q: "`\"abc\".toUpperCase()` ist ein Aufruf einer …", a: ["statischen Methode", "Instanzmethode", "Konstante", "Konstruktors"], c: 1, why: "Sie wird auf einem konkreten String-Objekt aufgerufen." }
+      ]
+    },
+    {
+      t: "Referenzen verstehen",
+      learn: [
+        "Variablen von Klassentypen speichern **Referenzen** (Verweise), nicht das Objekt selbst.",
+        "`b = a;` kopiert nur die Referenz – beide zeigen auf **dasselbe Objekt**.",
+        "Hat eine Variable kein Objekt, ist ihr Wert **null**.",
+        "Ein Methodenaufruf auf null führt zur **NullPointerException**."
+      ],
+      code: "StringBuilder a = new StringBuilder(\"log\");\nStringBuilder b = a;\nb.append(\"-1\");\nSystem.out.println(a);  // log-1  (!)\n\nString x = null;\nx.length();  // NullPointerException",
+      quiz: [
+        { q: "Nach `b = a;` (beides Objekte) und einer Änderung über b …", a: ["ist nur b geändert", "sieht man die Änderung auch über a", "wird a gelöscht", "kompiliert es nicht"], c: 1, why: "a und b verweisen auf dasselbe Objekt." },
+        { q: "Was löst `s.length()` aus, wenn s null ist?", a: ["0", "NullPointerException", "Compilerfehler", "-1"], c: 1, why: "Auf null gibt es kein Objekt, dessen Methode man aufrufen könnte." }
+      ]
+    },
+    {
+      t: "== versus equals()",
+      learn: [
+        "`==` prüft bei Objekten auf **Identität**: dasselbe Objekt im Speicher?",
+        "`equals()` prüft auf **inhaltliche Gleichheit**.",
+        "Für Strings also **immer** `equals` verwenden.",
+        "Bei primitiven Typen vergleicht `==` die Werte direkt."
+      ],
+      code: "String a = new String(\"admin\");\nString b = new String(\"admin\");\nSystem.out.println(a == b);       // false\nSystem.out.println(a.equals(b));  // true",
+      quiz: [
+        { q: "Wie prüft man sicher, ob ein eingegebener Username \"root\" ist?", a: ["user == \"root\"", "user.equals(\"root\")", "user = \"root\"", "user.compare(\"root\")"], c: 1, why: "equals vergleicht den Inhalt; == nur die Referenz." }
+      ]
+    }
+  ]
+},
+{
+  id: "KLA", title: "Eigene Klassen programmieren", color: "#3DDC97",
+  nibbles: [
+    {
+      t: "Klasse, Paket, Attribute",
+      learn: [
+        "Klassen sind **Baupläne** und modellieren eine Sache der Wirklichkeit.",
+        "Mit `package` ordnet man die Klasse einem Paket zu (erste Zeile der Datei).",
+        "Attribute: `private Datentyp name;` – sie halten den Zustand jedes Objekts.",
+        "Dateiname = Name der öffentlichen Klasse."
+      ],
+      code: "package de.nibble.soc;\n\npublic class Alarm {\n    private String quelle;\n    private int prioritaet;\n    private boolean bearbeitet;\n}",
+      quiz: [
+        { q: "Wo steht die package-Anweisung?", a: ["Am Ende der Datei", "Als erste Anweisung der Datei", "In der main-Methode", "Im Konstruktor"], c: 1, why: "package muss vor imports und Klassendeklaration stehen." }
+      ]
+    },
+    {
+      t: "Sichtbarkeit & Kapselung",
+      learn: [
+        "`public`: überall sichtbar. `private`: nur innerhalb der Klasse.",
+        "`protected`: Klasse, Paket und Unterklassen. Ohne Angabe: **package-private**.",
+        "Attribute sind üblicherweise **private** – das ist der Kern der Datenkapselung.",
+        "Zugriff von außen nur über kontrollierte Methoden."
+      ],
+      quiz: [
+        { q: "Welche Sichtbarkeit sollten Attribute normalerweise haben?", a: ["public", "private", "protected", "keine Angabe"], c: 1, why: "private schützt den Zustand vor unkontrolliertem Zugriff." },
+        { q: "Ein Member ohne Sichtbarkeitsmodifizierer ist sichtbar …", a: ["überall", "nur in der Klasse", "im selben Paket", "nur in Unterklassen"], c: 2, why: "Das ist die package-private Standardsichtbarkeit." }
+      ]
+    },
+    {
+      t: "Getter, Setter, toString",
+      learn: [
+        "**Getter** lesen ein Attribut: `getQuelle()`, bei boolean auch `isBearbeitet()`.",
+        "**Setter** schreiben ein Attribut und können Werte **validieren**.",
+        "Innerhalb der Klasse greift man mit `this.attribut` zu.",
+        "`toString()` liefert eine lesbare Textdarstellung des Objekts."
+      ],
+      code: "public int getPrioritaet() {\n    return this.prioritaet;\n}\npublic void setPrioritaet(int p) {\n    if (p >= 1 && p <= 5) {\n        this.prioritaet = p;\n    }\n}\n@Override\npublic String toString() {\n    return \"Alarm[\" + quelle + \", P\" + prioritaet + \"]\";\n}",
+      quiz: [
+        { q: "Welchen Vorteil hat ein Setter gegenüber einem public-Attribut?", a: ["Er ist schneller", "Er kann ungültige Werte abweisen", "Er spart Speicher", "Keinen"], c: 1, why: "Validierung im Setter hält das Objekt in einem gültigen Zustand." }
+      ]
+    },
+    {
+      t: "Konstruktoren",
+      learn: [
+        "Ein Konstruktor **heißt wie die Klasse** und hat **keinen Rückgabetyp**.",
+        "Seine Aufgabe: **alle Attribute initialisieren**.",
+        "Ohne eigenen Konstruktor gibt es den **impliziten Defaultkonstruktor** (0, 0.0, false, null).",
+        "Konstruktoren lassen sich **überladen**; mit `this(...)` ruft man einen anderen Konstruktor derselben Klasse auf.",
+        "**final**-Attribute bekommen genau einmal einen Wert, meist im Konstruktor."
+      ],
+      code: "public Alarm(String quelle, int prioritaet) {\n    this.quelle = quelle;\n    this.prioritaet = prioritaet;\n}\npublic Alarm(String quelle) {\n    this(quelle, 3);   // Standardpriorität\n}",
+      quiz: [
+        { q: "Welchen Rückgabetyp hat ein Konstruktor?", a: ["void", "Den Klassentyp", "Keinen", "int"], c: 2, why: "Konstruktoren haben gar keinen Rückgabetyp, auch nicht void." },
+        { q: "Was gilt, sobald man einen eigenen Konstruktor schreibt?", a: ["Der Defaultkonstruktor bleibt zusätzlich", "Der implizite Defaultkonstruktor entfällt", "Man braucht keine Attribute", "Die Klasse wird abstrakt"], c: 1, why: "Der implizite Defaultkonstruktor existiert nur, wenn kein eigener definiert ist." }
+      ],
+      task: "Schreib eine Klasse `Benutzer` mit den Attributen name (final) und fehlversuche. Konstruktor, Getter, eine Methode `fehlversuch()` und `istGesperrt()` (ab 3 Versuchen)."
+    },
+    {
+      t: "Statische Attribute & Methoden in eigenen Klassen",
+      learn: [
+        "Statische Attribute gehören zur **Klasse**, nicht zu einzelnen Objekten – alle teilen sich einen Wert.",
+        "Typisch: ein **Zähler** für erzeugte Objekte.",
+        "Statische Methoden haben **kein this** und können keine Instanzattribute direkt nutzen."
+      ],
+      code: "private static int anzahl = 0;\n\npublic Alarm(String quelle) {\n    this.quelle = quelle;\n    anzahl++;\n}\npublic static int getAnzahl() { return anzahl; }",
+      quiz: [
+        { q: "Warum darf eine statische Methode nicht auf `this.quelle` zugreifen?", a: ["quelle ist private", "Es gibt in ihr kein aktuelles Objekt", "Strings sind verboten", "Sie darf es doch"], c: 1, why: "Statische Methoden laufen ohne Bezug zu einer Instanz." }
+      ]
+    },
+    {
+      t: "Enums",
+      learn: [
+        "Eine **Enum** ist eine Klasse mit einer festen Liste von **Konstanten**.",
+        "Die Konstantenliste steht **immer zuerst**, danach Attribute, Konstruktoren, Methoden.",
+        "Konstruktoren einer Enum sind immer **private**.",
+        "Jede Enum hat `name()`, `ordinal()` sowie statisch `valueOf()` und `values()`."
+      ],
+      code: "public enum Schweregrad {\n    NIEDRIG(1), MITTEL(5), HOCH(8), KRITISCH(10);\n\n    private final int score;\n    Schweregrad(int score) { this.score = score; }\n    public int getScore() { return score; }\n}\n// Schweregrad.HOCH.ordinal() -> 2",
+      quiz: [
+        { q: "Was liefert `Schweregrad.KRITISCH.ordinal()`?", a: ["10", "3", "4", "\"KRITISCH\""], c: 1, why: "ordinal() ist die Position in der Liste, beginnend bei 0." },
+        { q: "Welche Methode liefert alle Konstanten einer Enum?", a: ["all()", "values()", "list()", "ordinal()"], c: 1, why: "values() gibt ein Array aller Konstanten zurück." }
+      ]
+    }
+  ]
+}
+);
+// nibble – Lerninhalte GP1, Teil 3 (Kontrollstrukturen bis Zeichenketten)
+var CONTENT = CONTENT || [];
+CONTENT.push(
+{
+  id: "VER", title: "Einfach- und Mehrfachverzweigungen", color: "#F5A524",
+  nibbles: [
+    {
+      t: "Sequenz und if-Anweisung",
+      learn: [
+        "Kontrollstrukturen: **Sequenz**, **Selektion** (Verzweigung), **Iteration** (Schleife).",
+        "Unvollständige Alternative: nur `if`. Vollständige Alternative: `if` + `else`.",
+        "Die Bedingung muss vom Typ **boolean** sein.",
+        "Bei nur einer abhängigen Anweisung dürfen die `{}` fehlen – besser trotzdem setzen."
+      ],
+      code: "if (fehlversuche >= 3) {\n    sperren(user);\n} else {\n    System.out.println(\"Login erneut versuchen\");\n}",
+      quiz: [
+        { q: "Welche Verzweigung ist syntaktisch korrekt?", a: ["if x > 0 { }", "if (x > 0) { }", "if (x = 0) { }", "if (x > 0) then { }"], c: 1, why: "Bedingung in runden Klammern, boolean-Ausdruck. x = 0 wäre eine int-Zuweisung." },
+        { q: "x = 0, y = 1. Wann wird z = 1?", a: ["if (x > y) z = 1;", "if (x == y) z = 1;", "if (x < y) z = 1;", "if (x != 0) z = 1;"], c: 2, why: "0 < 1 ist true." }
+      ]
+    },
+    {
+      t: "Mehrere Bedingungen & Schachtelung",
+      learn: [
+        "Bedingungen verknüpft man mit `&&`, `||` und `!`.",
+        "if-Anweisungen lassen sich **schachteln**.",
+        "Ein `else` gehört immer zum **unmittelbar davor liegenden if** (dangling else) – Klammern klären das.",
+        "Ketten mit `if – else if – else` prüfen Fälle nacheinander."
+      ],
+      code: "if (score >= 9) {\n    stufe = \"kritisch\";\n} else if (score >= 7) {\n    stufe = \"hoch\";\n} else if (score >= 4) {\n    stufe = \"mittel\";\n} else {\n    stufe = \"niedrig\";\n}",
+      quiz: [
+        { q: "Wie prüft man, dass x NICHT negativ ist?", a: ["if (x > 0)", "if (x >= 0)", "if (!x)", "if (x != -1)"], c: 1, why: "Nicht negativ schließt die 0 ein." },
+        { q: "Bei `if (a) if (b) x(); else y();` gehört else zu …", a: ["if (a)", "if (b)", "keinem", "beiden"], c: 1, why: "else bindet an das nächstgelegene vorangehende if." }
+      ],
+      task: "Programmiere eine CVSS-Einstufung: Eingabe einer Zahl 0.0–10.0, Ausgabe Keine/Niedrig/Mittel/Hoch/Kritisch (0 / 0.1–3.9 / 4.0–6.9 / 7.0–8.9 / 9.0–10.0)."
+    },
+    {
+      t: "switch-case",
+      learn: [
+        "Für Mehrfachverzweigungen über **einen Ausdruck** gibt es `switch`.",
+        "Erlaubte Typen u. a.: `char`, `byte`, `short`, `int`, `String`, Enums.",
+        "Moderne Pfeil-Syntax `case X ->` hat **kein Durchfallen**; mehrere Werte mit Komma: `case 1, 2 ->`.",
+        "Alte Doppelpunkt-Syntax `case X:` fällt ohne `break` in die nächsten Fälle durch.",
+        "`default` ist optional und greift, wenn kein case passt."
+      ],
+      code: "switch (port) {\n    case 22 -> System.out.println(\"SSH\");\n    case 80, 443 -> System.out.println(\"Web\");\n    case 3389 -> System.out.println(\"RDP\");\n    default -> System.out.println(\"unbekannt\");\n}",
+      quiz: [
+        { q: "Eingabe 1 bei `case 1: print(\"a\"); case 2: print(\"b\"); case 3: print(\"c\");` – Ausgabe?", a: ["a", "abc", "c", "nichts"], c: 1, why: "Ohne break fällt die alte Syntax durch alle folgenden Fälle." },
+        { q: "Dasselbe mit `case 1 -> ...` – Ausgabe?", a: ["a", "abc", "ab", "Compilerfehler"], c: 0, why: "Die Pfeil-Syntax führt nur den passenden Fall aus." }
+      ]
+    }
+  ]
+},
+{
+  id: "ITR", title: "Iteration", color: "#F5A524",
+  nibbles: [
+    {
+      t: "while – die kopfgesteuerte Schleife",
+      learn: [
+        "Prüft die Bedingung **vor** jedem Durchlauf – der Rumpf läuft evtl. **nie** (abweisend).",
+        "In jedem Durchlauf muss sich eine Variable der Bedingung ändern, sonst droht eine **Endlosschleife**.",
+        "Kombinierte Operatoren (`+=`, `++`) bauen Ergebnisse schrittweise auf."
+      ],
+      code: "int i = 7;\nwhile (i > 0)\n    System.out.println(i);\n    i = i - 1;   // gehört NICHT zur Schleife!",
+      quiz: [
+        { q: "Was passiert im Codebeispiel oben?", a: ["Ausgabe 7 bis 1", "Endlosschleife, es wird immer 7 ausgegeben", "Compilerfehler", "Nichts"], c: 1, why: "Ohne Klammern gehört nur println zur Schleife, i ändert sich nie." },
+        { q: "`while (false) {...}` – wie oft läuft der Rumpf?", a: ["0-mal", "1-mal", "unendlich", "Compilerfehler"], c: 3, why: "Fiese Sonderregel: Java meldet unerreichbaren Code als Fehler. Mit einer Variablen statt false wäre es 0-mal." }
+      ]
+    },
+    {
+      t: "do-while – die fußgesteuerte Schleife",
+      learn: [
+        "Prüft die Bedingung **nach** dem Durchlauf: der Rumpf läuft **mindestens einmal**.",
+        "Ideal für **Eingabewiederholung**: erst fragen, dann prüfen.",
+        "Semikolon nach `while (...)` nicht vergessen!"
+      ],
+      code: "int port;\ndo {\n    System.out.print(\"Port (1-65535): \");\n    port = sc.nextInt();\n} while (port < 1 || port > 65535);",
+      quiz: [
+        { q: "Was ist der Unterschied zwischen while und do-while?", a: ["Keiner", "do-while läuft mindestens einmal", "while läuft mindestens einmal", "do-while kann nicht enden"], c: 1, why: "Bei do-while wird erst nach dem Rumpf geprüft." }
+      ]
+    },
+    {
+      t: "for – die Zählschleife",
+      learn: [
+        "Aufbau: `for (Initialisierung; Bedingung; Aktualisierung)`.",
+        "Ideal, wenn die **Anzahl der Durchläufe** bekannt ist.",
+        "Jede for-Schleife lässt sich als while-Schleife schreiben (und umgekehrt).",
+        "Alle drei Teile sind optional, `for(;;)` ist eine Endlosschleife.",
+        "Schleifen lassen sich **verschachteln**, z. B. für Tabellen."
+      ],
+      code: "for (int i = 1; i <= 5; i++) {\n    System.out.println(\"Scan \" + i);\n}\n// gleichwertig:\nint i = 1;\nwhile (i <= 5) { System.out.println(\"Scan \" + i); i++; }",
+      quiz: [
+        { q: "Wie oft läuft `for (int i = 0; i < 10; i += 3)`?", a: ["3", "4", "10", "unendlich"], c: 1, why: "i = 0, 3, 6, 9 – dann ist 12 nicht mehr < 10." },
+        { q: "Ist `for (int i = 10; i > 0; i--)` gültig?", a: ["Ja, zählt rückwärts", "Nein, i-- ist verboten", "Nein, Start muss 0 sein", "Nur mit break"], c: 0, why: "Die Aktualisierung darf beliebig sein, auch dekrementierend." }
+      ],
+      task: "Gib alle Ports von 20 bis 25 aus und markiere 22 mit \"<- SSH\"."
+    },
+    {
+      t: "break und continue",
+      learn: [
+        "`break` **verlässt** die Schleife sofort.",
+        "`continue` **überspringt** den Rest des aktuellen Durchlaufs.",
+        "Sparsam einsetzen – oft lässt sich die Bedingung klarer formulieren."
+      ],
+      code: "for (String zeile : log) {\n    if (zeile.isBlank()) continue;     // leere Zeilen überspringen\n    if (zeile.contains(\"FATAL\")) break; // Analyse abbrechen\n    analysiere(zeile);\n}",
+      quiz: [
+        { q: "Was macht `continue`?", a: ["Beendet das Programm", "Beendet die Schleife", "Springt zum nächsten Durchlauf", "Wiederholt den Durchlauf"], c: 2, why: "Der Rest des Rumpfs wird übersprungen, die Schleife läuft weiter." }
+      ]
+    }
+  ]
+},
+{
+  id: "VRB", title: "Vererbung und Polymorphie", color: "#F5A524",
+  nibbles: [
+    {
+      t: "Grundidee: extends",
+      learn: [
+        "Mit `extends` erbt eine **Subklasse** die nicht-statischen Attribute und Methoden einer **Superklasse**.",
+        "So entsteht eine **Klassenhierarchie** (ist-ein-Beziehung).",
+        "Java erlaubt nur **Einfachvererbung**: eine direkte Superklasse.",
+        "Wurzel aller Klassen ist **Object**."
+      ],
+      code: "public class Geraet {\n    protected String ip;\n    public void ping() { ... }\n}\npublic class Firewall extends Geraet {\n    private int regelAnzahl;\n    public void regelHinzufuegen(String r) { ... }\n}",
+      quiz: [
+        { q: "Wie viele direkte Superklassen kann eine Java-Klasse haben?", a: ["Keine", "Genau eine", "Beliebig viele", "Zwei"], c: 1, why: "Java kennt nur Einfachvererbung (Object ist Standard)." },
+        { q: "Welche Klasse hat keine Superklasse?", a: ["String", "Object", "Math", "Exception"], c: 1, why: "Object ist die Wurzel der Hierarchie." }
+      ]
+    },
+    {
+      t: "Konstruktoren, super und protected",
+      learn: [
+        "**Konstruktoren werden nicht vererbt.**",
+        "Mit `super(...)` ruft man den Konstruktor der Superklasse auf – als **erste Anweisung**.",
+        "`this(...)` ruft einen Konstruktor derselben Klasse auf.",
+        "`protected`: sichtbar in Subklassen (und im Paket)."
+      ],
+      code: "public Firewall(String ip, int regeln) {\n    super(ip);              // Geraet(String ip)\n    this.regelAnzahl = regeln;\n}",
+      quiz: [
+        { q: "Wo muss `super(...)` im Konstruktor stehen?", a: ["Am Ende", "Als erste Anweisung", "Beliebig", "In einer eigenen Methode"], c: 1, why: "Erst wird der Superklassen-Teil aufgebaut." }
+      ]
+    },
+    {
+      t: "Überschreiben & Polymorphie",
+      learn: [
+        "Eine Subklasse kann geerbte Methoden **überschreiben** – gleiche Signatur, mit `@Override` kennzeichnen.",
+        "**Polymorphie**: Welche Methode läuft, entscheidet das **Objekt**, nicht der Variablentyp.",
+        "Ein Subklassen-Objekt ist **zuweisungskompatibel** zur Superklasse."
+      ],
+      code: "Geraet g = new Firewall(\"10.0.0.1\", 50);\ng.ping();   // ruft ggf. Firewall.ping() auf\n\nGeraet[] netz = { new Firewall(...), new Router(...) };\nfor (Geraet x : netz) x.ping();  // jeweils passende Variante",
+      quiz: [
+        { q: "`Geraet g = new Firewall(...); g.ping();` – welche ping-Version läuft, wenn Firewall sie überschreibt?", a: ["Geraet.ping()", "Firewall.ping()", "Keine", "Compilerfehler"], c: 1, why: "Zur Laufzeit zählt der tatsächliche Objekttyp." },
+        { q: "Wozu dient `@Override`?", a: ["Pflicht für jede Methode", "Der Compiler prüft, ob wirklich überschrieben wird", "Macht Methoden schneller", "Verhindert Vererbung"], c: 1, why: "Tippfehler in der Signatur fallen so sofort auf." }
+      ]
+    },
+    {
+      t: "Casts und instanceof",
+      learn: [
+        "Über eine Superklassen-Variable sind nur die **dort bekannten Methoden** aufrufbar.",
+        "Mit einem **expliziten Cast** erreicht man Subklassen-Methoden: `((Firewall) g).regelHinzufuegen(...)`.",
+        "Vorher mit **instanceof** prüfen, sonst droht eine `ClassCastException`."
+      ],
+      code: "if (g instanceof Firewall) {\n    Firewall fw = (Firewall) g;\n    fw.regelHinzufuegen(\"deny 23\");\n}",
+      quiz: [
+        { q: "Was passiert bei einem falschen Cast zur Laufzeit?", a: ["Nichts", "ClassCastException", "NullPointerException", "Der Cast wird ignoriert"], c: 1, why: "Das Objekt ist nicht vom erwarteten Typ." }
+      ]
+    },
+    {
+      t: "abstract und final",
+      learn: [
+        "Von einer **abstract**-Klasse lassen sich **keine Objekte** erzeugen – sie ist zum Erben da.",
+        "**abstract**-Methoden haben keinen Rumpf und **müssen** in konkreten Subklassen überschrieben werden.",
+        "Eine **final**-Klasse kann nicht beerbt werden (z. B. String).",
+        "Eine **final**-Methode kann nicht überschrieben werden."
+      ],
+      code: "public abstract class Sensor {\n    public abstract boolean pruefe(String ereignis);\n}\npublic class PortScanSensor extends Sensor {\n    @Override\n    public boolean pruefe(String e) { return e.contains(\"SYN\"); }\n}",
+      quiz: [
+        { q: "`new Sensor()` bei abstrakter Klasse Sensor …", a: ["funktioniert", "ist ein Compilerfehler", "erzeugt null", "ruft die Subklasse auf"], c: 1, why: "Abstrakte Klassen sind nicht instanziierbar." },
+        { q: "Kann man von String erben?", a: ["Ja", "Nein, String ist final", "Nur im selben Paket", "Nur mit super"], c: 1, why: "String ist eine finale Klasse." }
+      ]
+    }
+  ]
+},
+{
+  id: "EXC", title: "Ausnahmebehandlung", color: "#FF6B6B",
+  nibbles: [
+    {
+      t: "try-catch und der Aufruf-Stack",
+      learn: [
+        "Tritt eine Ausnahme auf, wird ein **Exception-Objekt** erzeugt und **geworfen**.",
+        "Die Methode bricht ab; gesucht wird ein **passender catch-Block** – erst lokal, dann den **Aufruf-Stack** hinauf.",
+        "Fängt niemand die Ausnahme, bricht das Programm mit **Stacktrace** ab.",
+        "Schlüsselwörter: `try`, `catch`, `throw`, `throws` (und selten `finally`)."
+      ],
+      code: "try {\n    int port = Integer.parseInt(eingabe);\n    verbinde(port);\n} catch (NumberFormatException e) {\n    System.out.println(\"Keine gültige Zahl: \" + eingabe);\n}",
+      quiz: [
+        { q: "Was passiert, wenn eine Exception nirgends gefangen wird?", a: ["Sie wird ignoriert", "Programmabbruch mit Stacktrace", "Die Methode wird wiederholt", "Der Compiler meldet sie"], c: 1, why: "Die JVM beendet das Programm und gibt den Aufruf-Stack aus." }
+      ]
+    },
+    {
+      t: "throws und throw",
+      learn: [
+        "Kann eine Methode eine Ausnahme nicht sinnvoll behandeln, gibt sie sie mit **throws** im Kopf weiter.",
+        "Dokumentieren mit `@throws` im javadoc.",
+        "Mit **throw** löst man selbst eine Ausnahme aus.",
+        "Typisch: ungültige Argumente mit `IllegalArgumentException` abweisen."
+      ],
+      code: "/** @throws IllegalArgumentException bei ungültigem Port */\npublic static void setPort(int p) {\n    if (p < 0 || p > 65535) {\n        throw new IllegalArgumentException(\"Port: \" + p);\n    }\n    ...\n}",
+      quiz: [
+        { q: "Welches Schlüsselwort steht im Methodenkopf?", a: ["throw", "throws", "catch", "try"], c: 1, why: "throws deklariert, throw wirft." }
+      ]
+    },
+    {
+      t: "checked vs. unchecked",
+      learn: [
+        "Alle Ausnahmen erben von **Throwable**; behandelbare von **Exception**.",
+        "**Checked Exceptions** (von Exception, z. B. IOException) **müssen** behandelt oder mit throws weitergegeben werden.",
+        "**Unchecked Exceptions** (von RuntimeException, z. B. NullPointerException) stellt der Compiler frei.",
+        "Mehrere catch-Blöcke: **spezifische Typen zuerst**, allgemeine danach."
+      ],
+      code: "try {\n    leseLog(datei);\n} catch (FileNotFoundException e) {\n    System.out.println(\"Datei fehlt\");\n} catch (IOException e) {\n    System.out.println(\"Lesefehler\");\n}",
+      quiz: [
+        { q: "Welche Exception ist unchecked?", a: ["IOException", "FileNotFoundException", "ArrayIndexOutOfBoundsException", "Exception"], c: 2, why: "Sie erbt von RuntimeException." },
+        { q: "Warum muss catch (IOException) NACH catch (FileNotFoundException) stehen?", a: ["Alphabetisch", "FileNotFoundException ist eine Unterklasse und wäre sonst unerreichbar", "Egal", "Wegen finally"], c: 1, why: "Der allgemeinere Block würde den spezielleren immer abfangen." }
+      ]
+    },
+    {
+      t: "Eigene Exceptions & Vermeidung",
+      learn: [
+        "Eigene Exceptions erben von **Exception** oder **RuntimeException**.",
+        "Wichtig ist ein **aussagekräftiger Name**, der auf **…Exception** endet.",
+        "Viele Ausnahmen lassen sich **von vornherein vermeiden**: Eingaben prüfen, null testen, Indexgrenzen beachten.",
+        "Eingabewiederholung: Schleife um try-catch, bis die Eingabe gültig ist."
+      ],
+      code: "public class UngueltigeIPException extends Exception {\n    public UngueltigeIPException(String msg) {\n        super(msg);\n    }\n}",
+      quiz: [
+        { q: "Was ist der wichtigste Bestandteil einer eigenen Exception-Klasse?", a: ["Viele Attribute", "Ein aussagekräftiger Name", "Eine main-Methode", "Ein statischer Zähler"], c: 1, why: "Der Name beschreibt die Fehlersituation." }
+      ],
+      task: "Lies so lange eine Zahl ein, bis sie gültig ist: fange NumberFormatException ab und wiederhole die Eingabe in einer do-while-Schleife."
+    }
+  ]
+},
+{
+  id: "ARR", title: "Arrays", color: "#B48CFF",
+  nibbles: [
+    {
+      t: "Arrays deklarieren und erzeugen",
+      learn: [
+        "Ein Array speichert **mehrere Werte gleichen Typs**; Arrays sind **Objekte**.",
+        "Deklaration: `int[] ports;` – Erzeugung: `ports = new int[5];`",
+        "Oder direkt initialisieren: `int[] ports = {22, 80, 443};`",
+        "Die Länge ist danach **fest**; `ports.length` (Attribut, ohne Klammern!) liefert sie.",
+        "Neue Arrays sind mit Standardwerten gefüllt (0, false, null)."
+      ],
+      code: "int[] ports = {22, 80, 443};\nString[] user = new String[3];   // {null, null, null}\nSystem.out.println(ports.length); // 3",
+      quiz: [
+        { q: "Welche Vereinbarung ist korrekt?", a: ["int a[] = new int();", "int[] a = new int[4];", "int[4] a;", "int[] a = {1;2;3};"], c: 1, why: "Größe beim new in eckigen Klammern; Initialisierungsliste mit Kommas." },
+        { q: "Wie ermittelt man die Länge eines Arrays a?", a: ["a.length()", "a.size()", "a.length", "length(a)"], c: 2, why: "Bei Arrays ist length ein Attribut, bei Strings eine Methode." }
+      ]
+    },
+    {
+      t: "Zugriff, Index und Schleifen",
+      learn: [
+        "Index beginnt bei **0**, höchster Index ist **length - 1**.",
+        "Ungültiger Index → **ArrayIndexOutOfBoundsException**.",
+        "`for`-Schleife, wenn Elemente **verändert** werden sollen.",
+        "**foreach** `for (int p : ports)`, wenn nur **gelesen** wird."
+      ],
+      code: "int[] feld = {3, 6, 9, 12, 15};\nSystem.out.println(feld[2]);  // 9\nfor (int i = 0; i < feld.length; i++) feld[i] *= 2;\nfor (int x : feld) System.out.print(x + \" \");",
+      quiz: [
+        { q: "`int[] feld = {3,6,9,12,15}; feld[2]` ergibt …", a: ["6", "9", "12", "3"], c: 1, why: "Index 0 → 3, 1 → 6, 2 → 9." },
+        { q: "Was passiert bei `feld[5]` im selben Array?", a: ["15", "0", "ArrayIndexOutOfBoundsException", "null"], c: 2, why: "Gültige Indizes sind 0 bis 4." }
+      ]
+    },
+    {
+      t: "Die Klasse Arrays",
+      learn: [
+        "`System.out.println(array)` gibt nur eine **Referenz** wie `[I@1b6d3586` aus.",
+        "`Arrays.toString(array)` liefert `[1, 2, 3]`.",
+        "Weitere Helfer: `Arrays.sort`, `Arrays.copyOf`, `Arrays.equals`, `Arrays.fill`.",
+        "Import: `java.util.Arrays`."
+      ],
+      code: "import java.util.Arrays;\nint[] a = {5, 1, 4};\nArrays.sort(a);\nSystem.out.println(Arrays.toString(a)); // [1, 4, 5]\nint[] groesser = Arrays.copyOf(a, 5);   // [1, 4, 5, 0, 0]",
+      quiz: [
+        { q: "Was gibt `System.out.println(new int[]{1,2,3})` aus?", a: ["[1, 2, 3]", "123", "Etwas wie [I@1b6d3586", "Compilerfehler"], c: 2, why: "Arrays überschreiben toString nicht – man sieht Typ und Hashcode." }
+      ],
+      task: "Speichere die Antwortzeiten (ms) von 6 Pings in einem Array und gib Minimum, Maximum und Durchschnitt aus."
+    },
+    {
+      t: "Arrays von Objekten & Kommandozeile",
+      learn: [
+        "Arrays können **Referenzen** speichern: `Alarm[] alarme = new Alarm[10];` – anfangs alles **null**.",
+        "Vor dem Methodenaufruf auf ein Element prüfen, ob es nicht null ist.",
+        "**Akkumulieren**: Summe/Zähler in einer Schleife aufbauen.",
+        "Kommandozeilenargumente kommen als `String[] args` in main an."
+      ],
+      code: "int offen = 0;\nfor (Alarm a : alarme) {\n    if (a != null && !a.isBearbeitet()) offen++;\n}\n// java Scanner 10.0.0.1  ->  args[0] = \"10.0.0.1\"",
+      quiz: [
+        { q: "Was steht nach `new Alarm[3]` in den Elementen?", a: ["Drei neue Alarm-Objekte", "null", "0", "Leere Strings"], c: 1, why: "Es werden nur die Plätze für Referenzen angelegt." }
+      ]
+    },
+    {
+      t: "Zweidimensionale Arrays",
+      learn: [
+        "Ein 2D-Array ist ein **Array von Arrays** – wie eine Tabelle.",
+        "`char[][] a = new char[3][2];` → **3 Zeilen, 2 Spalten**.",
+        "Zugriff mit zwei Indizes: `a[zeile][spalte]`.",
+        "Durchlaufen mit **verschachtelten Schleifen**; `a.length` = Zeilen, `a[0].length` = Spalten."
+      ],
+      code: "int[][] matrix = new int[3][4];\nfor (int z = 0; z < matrix.length; z++) {\n    for (int s = 0; s < matrix[z].length; s++) {\n        matrix[z][s] = z * s;\n    }\n}",
+      quiz: [
+        { q: "Wie erzeugt man ein char-Array mit 3 Zeilen und 2 Spalten?", a: ["new char[2][3]", "new char[3][2]", "new char[3,2]", "new char[6]"], c: 1, why: "Erst Zeilen, dann Spalten." }
+      ]
+    }
+  ]
+},
+{
+  id: "ZKT", title: "Zeichenketten", color: "#B48CFF",
+  nibbles: [
+    {
+      t: "String-Grundlagen",
+      learn: [
+        "Ein String ist eine Folge von **Unicode-Zeichen** und ein **Referenztyp**.",
+        "Meist per **Literal** erzeugt: `String s = \"alert\";`",
+        "Strings sind **unveränderlich** (immutable): Methoden liefern einen **neuen** String.",
+        "`length()` liefert die Länge, `charAt(i)` ein Zeichen (Index ab 0)."
+      ],
+      code: "String s = \"Firewall\";\ns.length();        // 8\ns.charAt(0);       // 'F'\ns.toUpperCase();   // \"FIREWALL\" – s selbst bleibt unverändert!",
+      quiz: [
+        { q: "Was steht nach `s.toUpperCase();` (ohne Zuweisung) in s?", a: ["Großbuchstaben", "Der Originalwert", "null", "Leerstring"], c: 1, why: "Strings sind unveränderlich, das Ergebnis wurde verworfen." }
+      ]
+    },
+    {
+      t: "Wichtige String-Methoden",
+      learn: [
+        "Suchen: `indexOf`, `contains`, `startsWith`, `endsWith`.",
+        "Herausschneiden: `substring(von, bis)` – **bis ist exklusiv**.",
+        "Aufräumen: `trim()`, `strip()`, `toLowerCase()`.",
+        "Zerlegen: `split(\"\\\\.\")` – Achtung, Regex!"
+      ],
+      code: "String ip = \"192.168.1.20\";\nip.indexOf('.');           // 3\nip.substring(0, 3);        // \"192\"\nString[] teile = ip.split(\"\\\\.\"); // {\"192\",\"168\",\"1\",\"20\"}\n\"  root \".trim();          // \"root\"",
+      quiz: [
+        { q: "`\"Logfile\".substring(0, 3)` ergibt …", a: ["\"Log\"", "\"Logf\"", "\"ogf\"", "\"Lo\""], c: 0, why: "Index 0 bis ausschließlich 3." },
+        { q: "Was liefert `\"abc\".indexOf('z')`?", a: ["0", "null", "-1", "Exception"], c: 2, why: "-1 bedeutet: nicht gefunden." }
+      ],
+      task: "Zerlege eine IP-Adresse mit split in ihre Oktette und prüfe, ob jedes zwischen 0 und 255 liegt (Integer.parseInt)."
+    },
+    {
+      t: "Vergleichen und Verknüpfen",
+      learn: [
+        "**Niemals** Strings mit `==` vergleichen – das prüft nur die Referenz.",
+        "Inhalt: `equals`, ohne Groß/Klein: `equalsIgnoreCase`, Reihenfolge: `compareTo`.",
+        "Verknüpfen (**Konkatenation**) mit `+`; andere Typen werden dabei automatisch zu String.",
+        "Vorsicht: `\"Port \" + 4 + 4` ergibt `Port 44`, `4 + 4 + \" Ports\"` ergibt `8 Ports`."
+      ],
+      code: "if (eingabe.equalsIgnoreCase(\"ja\")) { ... }\n\"a\".compareTo(\"b\");   // negativ\nSystem.out.println(\"P\" + 1 + 2);  // P12\nSystem.out.println(1 + 2 + \"P\");  // 3P",
+      quiz: [
+        { q: "Was gibt `System.out.println(1 + 2 + \"3\" + 4)` aus?", a: ["1234", "334", "10", "37"], c: 1, why: "1 + 2 = 3, dann String: \"3\" + \"3\" + \"4\" = \"334\"." }
+      ]
+    },
+    {
+      t: "StringBuilder",
+      learn: [
+        "**StringBuilder** ist **veränderbar** – Methoden ändern das Objekt selbst.",
+        "`append`, `insert`, `delete`, `reverse`, `setCharAt`.",
+        "Ideal zum Zusammenbauen von Texten in **Schleifen** (effizienter als `+`).",
+        "Mit `toString()` erhält man wieder einen String."
+      ],
+      code: "StringBuilder sb = new StringBuilder();\nfor (int p : offenePorts) {\n    sb.append(p).append(\", \");\n}\nsb.setLength(sb.length() - 2); // letztes \", \" weg\nString bericht = sb.toString();",
+      quiz: [
+        { q: "Was ist der Kernunterschied zwischen String und StringBuilder?", a: ["Keiner", "StringBuilder ist veränderbar", "String ist schneller beim Anhängen", "StringBuilder kann kein Unicode"], c: 1, why: "StringBuilder ändert sich selbst, String erzeugt neue Objekte." }
+      ]
+    },
+    {
+      t: "Formatierte Ausgabe",
+      learn: [
+        "`String.format` und `System.out.printf` mit Platzhaltern: `%d` (Ganzzahl), `%.2f` (2 Nachkommastellen), `%s` (String), `%n` (Zeilenumbruch).",
+        "`NumberFormat` (java.text) für **Währungen** und **Prozent** je nach Locale.",
+        "`DateTimeFormatter` (java.time.format) für **Datumsformate**."
+      ],
+      code: "System.out.printf(\"%-15s %5d%n\", \"10.0.0.1\", 443);\nString p = String.format(\"%.1f %%\", 87.456); // \"87,5 %\" (deutsche Locale)\n\nDateTimeFormatter f = DateTimeFormatter.ofPattern(\"dd.MM.yyyy HH:mm\");\nSystem.out.println(LocalDateTime.now().format(f));",
+      quiz: [
+        { q: "Welcher Platzhalter gibt eine Kommazahl mit 2 Nachkommastellen aus?", a: ["%d", "%2f", "%.2f", "%s2"], c: 2, why: "%.2f = Fließkomma, 2 Stellen nach dem Komma." }
+      ]
+    }
+  ]
+}
+);
+
+// nibble – Klausurtraining GP1, Aufbau wie die Probeklausur
+// Eigene Parallelaufgaben; alle Ausgaben und Lösungen mit javac/java geprüft.
+var R = String.raw;
+var SECTIONS = [
+  { id: "A1", title: "Variablen, Datentypen, Operatoren" },
+  { id: "A2", title: "Klassen und Objekte" },
+  { id: "A3", title: "Vererbung und Ausnahmen" },
+  { id: "A4", title: "Kontrollstrukturen und statische Methoden" },
+  { id: "A5", title: "Arrays und Zeichenketten" }
+];
+
+var EXAM = [
+// ---------- A1: korrekt oder nicht? ----------
+{ sec: "A1", type: "tf", s: "`double x = 1 + 2 - 3 / 4.0;`", ok: true, why: "3 / 4.0 ist eine double-Division (0.75), x wird 2.25." },
+{ sec: "A1", type: "tf", s: "`int y = 10 + 3.9;`", ok: false, why: "10 + 3.9 ist double. Eine Zuweisung an int braucht einen expliziten Cast: `(int)(10 + 3.9)`." },
+{ sec: "A1", type: "tf", s: "`long z = 5000000000;`", ok: false, why: "Das Literal ist ein int und zu groß dafür. Es fehlt das `L`: `5000000000L`." },
+{ sec: "A1", type: "tf", s: "`char c = \"A\";`", ok: false, why: "\"A\" ist ein String. Ein char-Literal steht in einfachen Hochkommas: `'A'`." },
+{ sec: "A1", type: "tf", s: "`String gruss = Guten Morgen;`", ok: false, why: "Die Anführungszeichen fehlen. So hält der Compiler Guten und Morgen für Bezeichner." },
+{ sec: "A1", type: "tf", s: "`int 2te = 5;`", ok: false, why: "Bezeichner dürfen nicht mit einer Ziffer beginnen." },
+{ sec: "A1", type: "tf", s: "`boolean b = (x > 1 || < 10);`", ok: false, why: "Der rechte Operand von `||` ist unvollständig. Richtig: `(x > 1 || x < 10)`." },
+{ sec: "A1", type: "tf", s: "`boolean b = !(3 == 3);`", ok: true, why: "3 == 3 ist true, die Negation ergibt false. Syntaktisch einwandfrei." },
+{ sec: "A1", type: "tf", s: "`int r = 17 % 5;` setzt r auf 2.", ok: true, why: "17 = 3 · 5 + 2, der Rest ist 2." },
+{ sec: "A1", type: "tf", s: "`float f = 2.5;`", ok: false, why: "2.5 ist ein double-Literal. Für float braucht man `2.5F` oder einen Cast." },
+{ sec: "A1", type: "tf", s: "`int i = 7 / 2;` setzt i auf 3.5.", ok: false, why: "Ganzzahldivision: das Ergebnis ist 3, der Rest wird abgeschnitten." },
+{ sec: "A1", type: "tf", s: "Eine Variable des Typs boolean kann drei Werte annehmen: true, false und null.", ok: false, why: "Der primitive Typ boolean kennt nur true und false. null gibt es nur bei Referenztypen." },
+{ sec: "A1", type: "tf", s: "`werte[0]` ist das erste Element des Arrays werte.", ok: true, why: "Die Indizierung beginnt bei 0." },
+{ sec: "A1", type: "tf", s: "Ein Array der Länge 5 hat den höchsten Index 5.", ok: false, why: "Der höchste Index ist length - 1, also 4." },
+{ sec: "A1", type: "tf", s: "`System.out.println(werte);` gibt die Elemente des int-Arrays werte aus.", ok: false, why: "Ausgegeben wird nur eine Referenz wie `[I@1b6d3586`. Für die Elemente: `Arrays.toString(werte)` oder eine Schleife." },
+{ sec: "A1", type: "tf", s: "Die Größe eines Arrays kann nach seiner Erzeugung nicht mehr geändert werden.", ok: true, why: "length ist final. Für eine andere Größe muss ein neues Array erzeugt werden." },
+{ sec: "A1", type: "tf", s: "Ein Array eignet sich gut, um Werte verschiedener Datentypen zu speichern.", ok: false, why: "Alle Elemente eines Arrays haben denselben Datentyp." },
+{ sec: "A1", type: "tf", s: "Nach `int[] a = new int[3];` enthält a drei Nullen.", ok: true, why: "Neue int-Arrays werden mit dem Standardwert 0 gefüllt." },
+{ sec: "A1", type: "tf", s: "`s1 == s2` vergleicht bei zwei Strings den Inhalt.", ok: false, why: "== vergleicht die Referenzen. Für den Inhalt: `s1.equals(s2)`." },
+{ sec: "A1", type: "tf", s: "Einer mit `final` deklarierten Variablen kann man später keinen neuen Wert zuweisen.", ok: true, why: "final erlaubt genau eine Zuweisung." },
+{ sec: "A1", type: "tf", s: "Ein Konstruktor hat den Rückgabetyp void.", ok: false, why: "Konstruktoren haben überhaupt keinen Rückgabetyp, auch nicht void." },
+
+// ---------- A2: Klassen und Objekte ----------
+{ sec: "A2", type: "write",
+  task: "Schreiben Sie eine vollständige Klasse `Server` mit einem Attribut für den Hostnamen, einem Konstruktor mit sinnvollem Parameter, passenden get- und set-Methoden. Überschreiben Sie `toString()`, sodass „Dieser Server heißt [hostname]“ zurückgegeben wird.",
+  sol: R`public class Server {
+    private String hostname;
+
+    public Server(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    @Override
+    public String toString() {
+        return "Dieser Server heißt " + hostname;
+    }
+}`,
+  check: ["Attribut ist `private`", "Konstruktor heißt `Server`, ohne Rückgabetyp, setzt `this.hostname`", "Getter mit Rückgabetyp String und `return`", "Setter mit Parameter und Rückgabetyp void", "`@Override` und `public String toString()` mit `return`"] },
+{ sec: "A2", type: "write",
+  task: "Ergänzen Sie die Anweisungen, sodass „Dieser Server heißt web01“ ausgegeben wird:\n`Server meinServer = new ______;`\n`System.out.println(______);`",
+  sol: R`Server meinServer = new Server("web01");
+System.out.println(meinServer);
+// gleichwertig: System.out.println(meinServer.toString());`,
+  check: ["Konstruktoraufruf mit String-Argument in Anführungszeichen", "println erhält das Objekt (toString wird automatisch aufgerufen)"] },
+{ sec: "A2", type: "explain", q: "Nennen Sie zwei Merkmale, an denen man einen Konstruktor eindeutig erkennt.",
+  sol: "Ein Konstruktor heißt genau wie die Klasse und hat keinen Rückgabetyp, auch nicht void.",
+  check: ["Name = Klassenname", "Kein Rückgabetyp (auch kein void)"] },
+{ sec: "A2", type: "explain", q: "Erläutern Sie die Methodenannotation `@Override`.",
+  sol: "@Override kennzeichnet eine Methode, die eine geerbte Methode (z. B. toString aus Object) überschreibt. Der Compiler prüft dann, ob es in der Oberklasse wirklich eine Methode mit dieser Signatur gibt. Tippfehler im Namen oder falsche Parameter fallen so als Compilerfehler auf, statt unbemerkt eine neue Methode anzulegen.",
+  check: ["Kennzeichnet das Überschreiben einer geerbten Methode", "Compiler prüft die Signatur", "Nutzen: Fehler (z. B. Tippfehler) werden früh erkannt"] },
+{ sec: "A2", type: "explain", q: "Folgender Code gibt `false` aus. Erläutern Sie warum, wie man zwei Objekte anhand ihrer Attributwerte vergleicht und wie man die Klasse Server dafür erweitert.\n`Server a = new Server(\"web01\");`\n`Server b = new Server(\"web01\");`\n`System.out.println(a == b);`",
+  sol: "a und b enthalten Referenzen auf zwei verschiedene Objekte. == vergleicht bei Objekten die Referenzen (Identität), nicht den Inhalt, daher false. Für einen inhaltlichen Vergleich nutzt man equals(). Dafür muss Server die von Object geerbte Methode `public boolean equals(Object o)` überschreiben und darin die Hostnamen mit equals vergleichen.",
+  code: R`@Override
+public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Server)) return false;
+    Server s = (Server) o;
+    return hostname.equals(s.hostname);
+}`,
+  check: ["Zwei verschiedene Objekte → verschiedene Referenzen", "== prüft Identität, nicht Inhalt", "Vergleich per equals()", "equals(Object) in Server überschreiben und Attribute vergleichen"] },
+{ sec: "A2", type: "explain", q: "Erläutern Sie den Unterschied zwischen Klasse und Objekt.",
+  sol: "Eine Klasse ist der Bauplan bzw. Datentyp: Sie legt fest, welche Attribute und Methoden es gibt. Ein Objekt (Instanz) ist ein konkretes Exemplar dieser Klasse mit eigenen Attributwerten, erzeugt mit new und einem Konstruktor. Von einer Klasse kann es viele Objekte geben.",
+  check: ["Klasse = Bauplan/Datentyp", "Objekt = konkrete Instanz mit eigenem Zustand", "Erzeugung mit new"] },
+{ sec: "A2", type: "explain", q: "Warum deklariert man Attribute meist als `private` und bietet Getter und Setter an?",
+  sol: "Das ist Datenkapselung: Von außen kann niemand den Zustand direkt verändern. Zugriff läuft nur über Methoden, die z. B. ungültige Werte abweisen können. Die interne Darstellung lässt sich später ändern, ohne dass anderer Code angepasst werden muss.",
+  check: ["Begriff Datenkapselung", "Kontrollierter Zugriff / Validierung im Setter", "Interne Änderungen bleiben nach außen unsichtbar"] },
+
+// ---------- A3: Vererbung und Ausnahmen ----------
+{ sec: "A3", type: "write",
+  task: "Die Klasse `Webserver` erbt von `Server` (A2). Sie hat zwei weitere Attribute für Port und maximale Verbindungszahl, einen Konstruktor für alle Attribute und überschreibt `toString()`, sodass Hostname, Port und Verbindungszahl ausgegeben werden. Bei negativer Verbindungszahl wirft der Konstruktor eine `IllegalArgumentException` mit der Nachricht „Negative Verbindungszahl ungültig!“.",
+  sol: R`public class Webserver extends Server {
+    private int port;
+    private int maxVerbindungen;
+
+    public Webserver(String hostname, int port, int maxVerbindungen) {
+        super(hostname);
+        if (maxVerbindungen < 0) {
+            throw new IllegalArgumentException("Negative Verbindungszahl ungültig!");
+        }
+        this.port = port;
+        this.maxVerbindungen = maxVerbindungen;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", Port " + port
+             + ", max. " + maxVerbindungen + " Verbindungen";
+    }
+}`,
+  check: ["`extends Server`", "`super(hostname)` als erste Anweisung", "`throw new IllegalArgumentException(\"...\")` bei Wert < 0", "Neue Attribute private und im Konstruktor gesetzt", "toString mit @Override; Hostname über super.toString() oder getHostname()"] },
+{ sec: "A3", type: "explain", q: "Gegeben ist:\n`int verbindungen = sc.nextInt();  // Scanner-Eingabe`\n`try {`\n`  Server s = new Webserver(\"web02\", 443, verbindungen);`\n`  System.out.println(s.toString());`\n`} catch (IllegalArgumentException e) {`\n`  System.out.println(e.getMessage());`\n`}`\nWas passiert, wenn der Benutzer 1. eine positive Zahl, 2. eine negative Zahl, 3. „Hallo“ eingibt?",
+  sol: "1. Das Objekt wird erzeugt, toString() liefert Hostname, Port und Verbindungszahl, das wird ausgegeben; der catch-Block wird übersprungen.\n2. Der Konstruktor wirft die IllegalArgumentException, der try-Block bricht vor der Ausgabe ab. Der catch-Block fängt sie und gibt „Negative Verbindungszahl ungültig!“ aus.\n3. Schon nextInt() wirft eine InputMismatchException – und zwar vor dem try-Block. Sie wird nicht gefangen (und wäre auch keine IllegalArgumentException), also bricht das Programm mit Stacktrace ab.",
+  check: ["Fall 1: normale Ausgabe, catch übersprungen", "Fall 2: Exception im Konstruktor, catch gibt die Nachricht aus", "Fall 3: Fehler beim Einlesen außerhalb von try / falscher Typ → Programmabbruch"] },
+{ sec: "A3", type: "explain", q: "Erläutern Sie am Beispiel `Server s = new Webserver(...); s.toString();` das Konzept der Polymorphie.",
+  sol: "Die Variable s hat den Typ Server, enthält aber ein Webserver-Objekt. Das ist erlaubt, weil Webserver zuweisungskompatibel zu seiner Oberklasse ist. Beim Aufruf s.toString() entscheidet das tatsächliche Objekt zur Laufzeit, welche Methode läuft: Ausgeführt wird die überschriebene toString() von Webserver, nicht die von Server.",
+  check: ["Variablentyp Server, Objekttyp Webserver", "Zuweisungskompatibilität Unterklasse → Oberklasse", "Zur Laufzeit läuft die überschriebene Methode des Objekts"] },
+{ sec: "A3", type: "trace",
+  code: R`class Tier {
+    String laut() { return "..."; }
+    String info() { return "Tier sagt " + laut(); }
+}
+class Hund extends Tier {
+    @Override String laut() { return "Wuff"; }
+}
+class Katze extends Tier {
+    @Override String laut() { return "Miau"; }
+}
+// in main:
+Tier[] zoo = { new Hund(), new Katze(), new Tier() };
+for (Tier z : zoo) System.out.println(z.info());`,
+  out: "Tier sagt Wuff\nTier sagt Miau\nTier sagt ...",
+  why: "info() ist nur in Tier definiert, ruft aber laut() polymorph auf: Es läuft jeweils die Version des tatsächlichen Objekts." },
+{ sec: "A3", type: "explain", q: "Was ist der Unterschied zwischen checked und unchecked Exceptions?",
+  sol: "Checked Exceptions erben von Exception (aber nicht von RuntimeException), z. B. IOException. Der Compiler verlangt, dass man sie mit try-catch behandelt oder mit throws weitergibt. Unchecked Exceptions erben von RuntimeException, z. B. IllegalArgumentException oder NullPointerException; ihre Behandlung ist freiwillig.",
+  check: ["checked: von Exception, Behandlung oder throws Pflicht", "unchecked: von RuntimeException, Behandlung freiwillig", "Je ein Beispiel"] },
+{ sec: "A3", type: "explain", q: "Was ist eine abstrakte Klasse und wozu dient sie?",
+  sol: "Eine mit abstract gekennzeichnete Klasse kann nicht instanziiert werden. Sie dient als gemeinsame Oberklasse und kann abstrakte Methoden ohne Rumpf enthalten, die jede konkrete Unterklasse überschreiben muss. So erzwingt man eine einheitliche Schnittstelle.",
+  check: ["Keine Objekte mit new möglich", "Abstrakte Methoden ohne Rumpf", "Unterklassen müssen sie implementieren"] },
+
+// ---------- A4: Kontrollstrukturen und statische Methoden ----------
+{ sec: "A4", type: "trace",
+  code: R`String sep = "**";
+for (int i = 1; i <= 12; i += 2) {
+    if (i % 3 == 0) {
+        System.out.print(i + " ");
+    } else {
+        System.out.print("- ");
+    }
+    switch (i) {
+        case 5 -> {
+            System.out.println();
+            System.out.println(sep);
+            sep = sep + "#";
+        }
+        case 9 -> {
+            System.out.println();
+            System.out.println(sep);
+        }
+    }
+}`,
+  out: "- 3 - \n**\n- 9 \n**#\n- ",
+  why: "i läuft 1, 3, 5, 7, 9, 11. Nur 3 und 9 sind durch 3 teilbar. Bei i = 5 und i = 9 folgt ein Zeilenumbruch und der Trenner; nach i = 5 wird sep zu \"**#\". Pfeil-Syntax: kein Durchfallen." },
+{ sec: "A4", type: "trace",
+  code: R`int s = 0;
+for (int i = 0; i < 10; i++) {
+    if (i % 2 == 0) continue;
+    if (i > 7) break;
+    s += i;
+    System.out.print(s + " ");
+}`,
+  out: "1 4 9 16 ",
+  why: "Gerade i werden übersprungen. Summiert werden 1, 3, 5, 7. Bei i = 9 greift break." },
+{ sec: "A4", type: "trace",
+  code: R`int x = 2;
+switch (x) {
+    case 1: System.out.print("A");
+    case 2: System.out.print("B");
+    case 3: System.out.print("C"); break;
+    default: System.out.print("D");
+}`,
+  out: "BC",
+  why: "Alte Syntax ohne break: ab case 2 fällt die Ausführung durch bis zum break nach C." },
+{ sec: "A4", type: "trace",
+  code: R`for (int z = 1; z <= 3; z++) {
+    for (int sp = 1; sp <= z; sp++) {
+        System.out.print(z * sp + " ");
+    }
+    System.out.println();
+}`,
+  out: "1 \n2 4 \n3 6 9 ",
+  why: "Die innere Schleife läuft z-mal. Nach jeder Zeile folgt ein Umbruch." },
+{ sec: "A4", type: "trace",
+  code: R`int k = 10;
+int n = 0;
+while (k > 1) {
+    k = k / 2;
+    n++;
+}
+System.out.println(k + " " + n);`,
+  out: "1 3",
+  why: "10 → 5 → 2 → 1 (Ganzzahldivision), also drei Durchläufe." },
+{ sec: "A4", type: "write",
+  task: "Schreiben Sie eine statische Methode `produkt`, die zwei int-Zahlen a und b erhält und das Produkt aller Zahlen von a bis b zurückgibt. Beispiel: `produkt(2, 4)` liefert 24 (2 · 3 · 4). Es gilt a < b.",
+  sol: R`public static int produkt(int a, int b) {
+    int p = 1;
+    for (int i = a; i <= b; i++) {
+        p *= i;
+    }
+    return p;
+}`,
+  check: ["Kopf: `public static int produkt(int a, int b)`", "Startwert 1 (nicht 0!)", "Schleife von a bis einschließlich b (`<=`)", "`return` am Ende"] },
+{ sec: "A4", type: "write",
+  task: "Schreiben Sie eine statische Methode `summeGerade`, die die Summe aller geraden Zahlen von a bis b zurückgibt. Beispiel: `summeGerade(3, 8)` liefert 18 (4 + 6 + 8).",
+  sol: R`public static int summeGerade(int a, int b) {
+    int s = 0;
+    for (int i = a; i <= b; i++) {
+        if (i % 2 == 0) {
+            s += i;
+        }
+    }
+    return s;
+}`,
+  check: ["Rückgabetyp int, zwei int-Parameter", "Prüfung `i % 2 == 0`", "Grenze b eingeschlossen", "Summe zurückgeben"] },
+{ sec: "A4", type: "explain", q: "Beschreiben Sie, wie sich der Aufruf einer statischen Methode syntaktisch vom Aufruf einer Instanzmethode unterscheidet.",
+  sol: "Eine statische Methode ruft man über den Klassennamen auf: `Math.sqrt(16)`. Eine Instanzmethode ruft man über eine Variable auf, die ein Objekt referenziert: `text.length()`. Innerhalb derselben Klasse darf der Klassenname bei statischen Methoden entfallen.",
+  check: ["statisch: `Klassenname.methode(...)`", "Instanz: `objekt.methode(...)`", "Je ein Beispiel"] },
+{ sec: "A4", type: "explain", q: "Wann verwendet man eine while-, wann eine do-while- und wann eine for-Schleife?",
+  sol: "for, wenn die Anzahl der Durchläufe vorab feststeht (Zählschleife). while, wenn eine Bedingung vor jedem Durchlauf geprüft werden soll und der Rumpf eventuell gar nicht laufen muss. do-while, wenn der Rumpf mindestens einmal laufen soll, z. B. bei einer Eingabewiederholung.",
+  check: ["for: bekannte Anzahl", "while: kopfgesteuert, evtl. 0 Durchläufe", "do-while: mindestens 1 Durchlauf"] },
+
+// ---------- A5: Arrays und Zeichenketten ----------
+{ sec: "A5", type: "explain", q: "Beschreiben und begründen Sie den Zusammenhang zwischen Länge und größtem Index eines Arrays.",
+  sol: "Der größte Index ist length - 1. Begründung: Die Indizierung beginnt bei 0, ein Array mit n Elementen hat also die Indizes 0 bis n - 1. Ein Zugriff auf Index length führt zur ArrayIndexOutOfBoundsException.",
+  check: ["größter Index = length - 1", "Begründung: Zählung ab 0", "Folge bei Überschreitung: ArrayIndexOutOfBoundsException"] },
+{ sec: "A5", type: "explain", q: "Erläutern Sie den grundsätzlichen Unterschied zwischen String- und StringBuilder-Objekten.",
+  sol: "String-Objekte sind unveränderlich: Methoden wie toUpperCase() liefern ein neues Objekt, das Original bleibt gleich. StringBuilder-Objekte sind veränderbar: append, insert oder reverse ändern das Objekt selbst. Darum eignet sich StringBuilder zum schrittweisen Aufbauen von Text, z. B. in Schleifen.",
+  check: ["String: unveränderlich, Methoden liefern neuen String", "StringBuilder: veränderbar, Methoden ändern das Objekt", "Einsatz: Text in Schleifen zusammenbauen"] },
+{ sec: "A5", type: "write",
+  task: "Ein Sensor schreibt Lastwerte in ein Array. Werte über einem Grenzwert sind Messfehler. Schreiben Sie eine statische Methode `kappen`, die ein double-Array `werte` und einen double-Wert `max` erhält und im Array alle Einträge größer als max durch max ersetzt.",
+  sol: R`public static void kappen(double[] werte, double max) {
+    for (int i = 0; i < werte.length; i++) {
+        if (werte[i] > max) {
+            werte[i] = max;
+        }
+    }
+}`,
+  check: ["Rückgabetyp void (das Array wird direkt verändert)", "Parameter `double[] werte, double max`", "for-Schleife mit Index (foreach könnte nicht schreiben)", "Grenze `i < werte.length`"] },
+{ sec: "A5", type: "write",
+  task: "Schreiben Sie eine statische Methode `zaehle`, die einen String und ein char erhält und zurückgibt, wie oft das Zeichen im String vorkommt. Beispiel: `zaehle(\"192.168.0.1\", '.')` liefert 3.",
+  sol: R`public static int zaehle(String text, char zeichen) {
+    int n = 0;
+    for (int i = 0; i < text.length(); i++) {
+        if (text.charAt(i) == zeichen) {
+            n++;
+        }
+    }
+    return n;
+}`,
+  check: ["`text.length()` mit Klammern (Methode!)", "`charAt(i)` und Vergleich mit `==` (char ist primitiv)", "Zähler zurückgeben"] },
+{ sec: "A5", type: "write",
+  task: "Eine quadratische Matrix ist in **unterer Dreiecksform**, wenn alle Einträge **oberhalb** der Hauptdiagonalen 0 sind. Schreiben Sie eine statische Methode, die ein zweidimensionales double-Array erhält und true oder false zurückgibt.",
+  sol: R`public static boolean istUntereDreiecksmatrix(double[][] m) {
+    for (int z = 0; z < m.length; z++) {
+        for (int s = z + 1; s < m[z].length; s++) {
+            if (m[z][s] != 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}`,
+  check: ["Parameter `double[][]`, Rückgabe boolean", "Oberhalb der Diagonalen heißt Spalte > Zeile (s startet bei z + 1)", "Früh `return false`, am Ende `return true`"] },
+{ sec: "A5", type: "write",
+  task: "Schreiben Sie eine statische Methode `zeilensummen`, die ein zweidimensionales double-Array erhält und ein Array mit der Summe jeder Zeile zurückgibt.",
+  sol: R`public static double[] zeilensummen(double[][] m) {
+    double[] erg = new double[m.length];
+    for (int z = 0; z < m.length; z++) {
+        for (int s = 0; s < m[z].length; s++) {
+            erg[z] += m[z][s];
+        }
+    }
+    return erg;
+}`,
+  check: ["Ergebnisarray mit Länge `m.length` (Anzahl Zeilen)", "Verschachtelte Schleifen", "Innere Grenze `m[z].length`"] },
+{ sec: "A5", type: "trace",
+  code: R`StringBuilder sb = new StringBuilder("GdP");
+String t = "GdP";
+t.toLowerCase();
+sb.append(1).reverse();
+System.out.println(t + " " + sb);`,
+  out: "GdP 1PdG",
+  why: "Der String bleibt unverändert, weil das Ergebnis von toLowerCase() verworfen wird. Der StringBuilder wird selbst verändert: \"GdP1\" und dann umgedreht." },
+{ sec: "A5", type: "trace",
+  code: R`int[] f = {4, 7, 1, 9};
+int m = f[0];
+for (int i = 1; i < f.length; i++) {
+    if (f[i] > m) m = f[i];
+}
+f[f.length - 1] = m * 2;
+System.out.println(m + " " + f[3] + " " + f.length);`,
+  out: "9 18 4",
+  why: "m wird zum Maximum 9. Das letzte Element (Index 3) wird 18. Die Länge bleibt 4." }
+];
+var EXAM_REL = ["VAR-2", "VAR-3", "VAR-1", "VAR-1", "VAR-5", "VAR-0", "VAR-4", "VAR-4", "VAR-2", "VAR-1", "VAR-2", "VAR-4", "ARR-1", "ARR-1", "ARR-2", "ARR-0", "ARR-0", "ARR-0", "ZKT-2", "VAR-5", "KLA-3", "KLA-2", "OBJ-0", "KLA-3", "VRB-2", "OBJ-3", "PJA-1", "KLA-1", "VRB-1", "EXC-0", "VRB-2", "VRB-2", "EXC-2", "VRB-4", "VER-2", "ITR-3", "VER-2", "ITR-2", "ITR-0", "STA-1", "STA-1", "OBJ-1", "ITR-1", "ARR-1", "ZKT-3", "ARR-1", "ZKT-1", "ARR-4", "ARR-4", "ZKT-3", "ARR-1"];
+EXAM.forEach(function(e, i){ e.id = e.sec + "-" + i; e.rel = EXAM_REL[i]; });
+
+// Musterlösungen für die Mini-Aufgaben in den Lern-Häppchen
+var SOLS = {
+  "EJP-1": R`public class Begruessung {
+    public static void main(String[] args) {
+        System.out.println("Dein Name");
+        System.out.println("Bachelor IT-Sicherheit");
+    }
+}
+// javac Begruessung.java
+// java Begruessung`,
+  "VAR-2": R`int sekunden = 3725;
+int h = sekunden / 3600;
+int m = (sekunden % 3600) / 60;
+int s = sekunden % 60;
+System.out.println(h + "h " + m + "m " + s + "s");  // 1h 2m 5s`,
+  "STA-1": R`public static boolean istPrivateIP(int a) {
+    return a == 10;
+}
+
+public static void main(String[] args) {
+    System.out.println(istPrivateIP(10));   // true
+    System.out.println(istPrivateIP(192));  // false
+}`,
+  "KLA-3": R`public class Benutzer {
+    private final String name;
+    private int fehlversuche;
+
+    public Benutzer(String name) {
+        this.name = name;
+        this.fehlversuche = 0;
+    }
+    public String getName() { return name; }
+    public int getFehlversuche() { return fehlversuche; }
+
+    public void fehlversuch() {
+        fehlversuche++;
+    }
+    public boolean istGesperrt() {
+        return fehlversuche >= 3;
+    }
+}`,
+  "VER-1": R`double score = sc.nextDouble();
+String stufe;
+if (score == 0.0) {
+    stufe = "Keine";
+} else if (score < 4.0) {
+    stufe = "Niedrig";
+} else if (score < 7.0) {
+    stufe = "Mittel";
+} else if (score < 9.0) {
+    stufe = "Hoch";
+} else {
+    stufe = "Kritisch";
+}
+System.out.println(stufe);`,
+  "ITR-2": R`for (int port = 20; port <= 25; port++) {
+    if (port == 22) {
+        System.out.println(port + " <- SSH");
+    } else {
+        System.out.println(port);
+    }
+}`,
+  "EXC-3": R`Scanner sc = new Scanner(System.in);
+int zahl = 0;
+boolean ok;
+do {
+    System.out.print("Zahl: ");
+    String eingabe = sc.nextLine();
+    try {
+        zahl = Integer.parseInt(eingabe);
+        ok = true;
+    } catch (NumberFormatException e) {
+        System.out.println("Keine gültige Zahl, bitte nochmal.");
+        ok = false;
+    }
+} while (!ok);`,
+  "ARR-2": R`int[] ms = {23, 41, 19, 87, 30, 25};
+int min = ms[0], max = ms[0], summe = 0;
+for (int x : ms) {
+    if (x < min) min = x;
+    if (x > max) max = x;
+    summe += x;
+}
+double schnitt = (double) summe / ms.length;   // Cast, sonst Ganzzahldivision!
+System.out.println(min + " " + max + " " + schnitt);  // 19 87 37.5`,
+  "ZKT-1": R`public static boolean ipGueltig(String ip) {
+    String[] teile = ip.split("\\.");
+    if (teile.length != 4) {
+        return false;
+    }
+    for (String t : teile) {
+        int wert = Integer.parseInt(t);
+        if (wert < 0 || wert > 255) {
+            return false;
+        }
+    }
+    return true;
+}`
+};
+
+
+// Reihenfolge der Lerneinheiten
+var ORDER = ["EIP","PUP","PJA","EJP","VAR","STA","OBJ","KLA","VER","ITR","VRB","EXC","ARR","ZKT"];
+CONTENT.sort(function(a,b){ return ORDER.indexOf(a.id) - ORDER.indexOf(b.id); });
+CONTENT.forEach(function(c){ c.nibbles.forEach(function(n, i){ n.key = c.id + "-" + i; n.chap = c; }); });
+
+var LOGO = '<svg viewBox="0 0 220 220" aria-hidden="true"><rect width="220" height="220" rx="52" fill="#16233A"/><path d="M58 78 L96 110 L58 142" fill="none" stroke="#E6EDF7" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="108" y="132" width="54" height="14" rx="7" fill="#3DDC97"/><circle cx="70" cy="176" r="7" fill="#3DDC97"/><circle cx="96" cy="176" r="7" fill="#3DDC97"/><circle cx="122" cy="176" r="7" fill="#2A3A55"/><circle cx="148" cy="176" r="7" fill="#2A3A55"/></svg>';
+
+// ---------- Speicher (nur in diesem Browser) ----------
+var KEY = "nibble-gp1-v1";
+var S = { minutes: 20, done: {}, wrong: {}, focus: null, days: [], answered: 0, correct: 0, mode: "learn", exam: {}, efocus: null, box: {}, stats: {}, log: [] };
+try { var raw = localStorage.getItem(KEY); if (raw) Object.assign(S, JSON.parse(raw)); } catch (e) {}
+// Alte Version: einfache Fehlerliste in Boxen übernehmen
+Object.keys(S.wrong || {}).forEach(function(k){ if (!S.box[k]) S.box[k] = { b: 0, due: 0 }; }); S.wrong = {};
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+// ---------- Hilfen ----------
+function esc(s) { return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function md(s) {
+  return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+}
+function hl(code) {
+  var kws = "public|private|protected|static|final|void|int|long|short|byte|double|float|char|boolean|class|enum|new|return|if|else|for|while|do|switch|case|default|break|continue|try|catch|throw|throws|extends|abstract|import|package|this|super|null|true|false|instanceof";
+  return code.split("\n").map(function(line){
+    var ci = line.indexOf("//"); var body = line, cm = "";
+    if (ci >= 0 && !/"[^"]*\/\/[^"]*"/.test(line)) { body = line.slice(0, ci); cm = line.slice(ci); }
+    var out = esc(body).replace(new RegExp("(&quot;.*?&quot;)|\\b(" + kws + ")\\b", "g"), function(m, str, kw){
+      return str ? '<span class="st">' + str + '</span>' : '<span class="kw">' + kw + '</span>';
+    });
+    return out + (cm ? '<span class="cm">' + esc(cm) + '</span>' : "");
+  }).join("\n");
+}
+function est(n) { return 3 + n.quiz.length + (n.task ? 5 : 0); } // Minuten
+function today() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
+function streak() {
+  var set = {}; S.days.forEach(function(d){ set[d] = 1; });
+  var n = 0, d = new Date();
+  if (!set[today()]) d.setDate(d.getDate() - 1);
+  while (true) { var k = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); if (!set[k]) break; n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function allNibbles() { var a = []; CONTENT.forEach(function(c){ a = a.concat(c.nibbles); }); return a; }
+function byKey(k) { var p = k.split("-"); var c = CONTENT.filter(function(x){ return x.id === p[0]; })[0]; return c && c.nibbles[+p[1]]; }
+
+// Session planen: erst falsch beantwortete Fragen wiederholen, dann neue Häppchen
+// ---------- Lernsystem: Leitner-Boxen + Fehlerprofil ----------
+var GAPS = [0, 1, 3, 7, 14];   // Tage bis zur nächsten Wiederholung je Box
+function dayNum() { var d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 60000) / 86400000); }
+function isDue(k) { return S.box[k] && S.box[k].due <= dayNum(); }
+// Jede Antwort läuft hier durch: Box anpassen, Thema zählen, Fehler protokollieren
+function record(itemKey, concept, ok, detail) {
+  var b = S.box[itemKey] || { b: 0, due: 0 };
+  b.b = ok ? Math.min(b.b + 1, GAPS.length - 1) : 0;
+  b.due = dayNum() + (ok ? GAPS[b.b] : 0);
+  S.box[itemKey] = b;
+  var st = S.stats[concept] || { n: 0, w: 0, ema: 0, last: 0 };
+  st.n++; if (!ok) { st.w++; st.last = Date.now(); }
+  st.ema = st.ema * 0.6 + (ok ? 0 : 1) * 0.4;   // jüngere Antworten zählen mehr
+  S.stats[concept] = st;
+  if (!ok && detail) {
+    detail.c = concept; detail.ts = Date.now();
+    S.log.unshift(detail); S.log = S.log.slice(0, 60);
+  }
+  if (sess) { sess.concepts[concept] = (sess.concepts[concept] || 0) + (ok ? 0 : 1); }
+  save();
+}
+// Baustellen: Themen mit aktueller Fehlerneigung, schlimmste zuerst
+function weakSpots() {
+  return Object.keys(S.stats).filter(function(k){ var s = S.stats[k]; return s.w > 0 && s.ema >= 0.15 && byKey(k); })
+    .sort(function(a, b){ return S.stats[b].ema - S.stats[a].ema || S.stats[b].w - S.stats[a].w; });
+}
+function dueCount() { return Object.keys(S.box).filter(isDue).length; }
+
+function plan(minutes) {
+  var items = [], used = 0;
+  var maxRev = Math.max(2, Math.floor(minutes / 5));
+  var rev = Object.keys(S.box).filter(function(k){ return k.indexOf("ex:") !== 0 && isDue(k); })
+    .sort(function(a, b){ return S.box[a].b - S.box[b].b; }).slice(0, maxRev);
+  rev.forEach(function(k){
+    var p = k.split("|"), n = byKey(p[0]); if (!n) return; var q = n.quiz[+p[1]]; if (!q) return;
+    items.push({ type: "review", n: n, qi: +p[1], key: k }); used += 1;
+  });
+  var pool = allNibbles().filter(function(n){ return !S.done[n.key]; });
+  if (S.focus) pool = pool.filter(function(n){ return n.chap.id === S.focus; }).concat(pool.filter(function(n){ return n.chap.id !== S.focus; }));
+  for (var i = 0; i < pool.length; i++) {
+    var m = est(pool[i]);
+    if (used + m > minutes && items.length) break;
+    items.push({ type: "nibble", n: pool[i] }); used += m;
+    if (used >= minutes) break;
+  }
+  return { items: items, minutes: used };
+}
+
+// ---------- Klausurtraining planen ----------
+var COST = { tf: 1, trace: 4, explain: 3, write: 8 };
+function examRank(e) { // 0 = fällig & zuletzt falsch, 1 = neu, 2 = fällige Auffrischung, 3 = noch nicht fällig
+  var b = S.box["ex:" + e.id];
+  if (!b) return 1;
+  if (b.due > dayNum()) return 3;
+  return b.b === 0 ? 0 : 2;
+}
+function planExam(minutes) {
+  var secs = S.efocus ? [S.efocus] : SECTIONS.map(function(s){ return s.id; });
+  var pools = {};
+  secs.forEach(function(id){
+    pools[id] = EXAM.filter(function(e){ return e.sec === id; })
+      .map(function(e, i){ return { e: e, r: examRank(e), i: i }; })
+      .sort(function(a, b){ return a.r - b.r || a.i - b.i; })
+      .filter(function(x){ return x.r < 3; }).map(function(x){ return x.e; });
+  });
+  // Startabschnitt rotiert, damit kurze Sessions nicht immer nur A1/A2 treffen
+  var rot = (S.eruns || 0) % secs.length;
+  secs = secs.slice(rot).concat(secs.slice(0, rot));
+  var picked = [], used = 0, progress = true, round = 0;
+  while (used < minutes && progress) {
+    progress = false;
+    secs.forEach(function(id){
+      if (used >= minutes) return;
+      var take = id === "A1" ? (round === 0 ? 4 : 2) : 1; // Richtig/Falsch im Block, wie in der Klausur
+      for (var k = 0; k < take; k++) {
+        var left = minutes - used, idx = -1;
+        for (var j = 0; j < pools[id].length; j++) { if (COST[pools[id][j].type] <= left) { idx = j; break; } }
+        if (idx < 0 && !picked.length && pools[id].length) idx = 0;
+        if (idx < 0) break;
+        var e = pools[id].splice(idx, 1)[0]; picked.push(e); used += COST[e.type]; progress = true;
+      }
+    });
+    round++;
+  }
+  picked.sort(function(a, b){ return a.sec < b.sec ? -1 : a.sec > b.sec ? 1 : 0; });
+  return { items: picked, minutes: used };
+}
+function secTitle(id) { return SECTIONS.filter(function(s){ return s.id === id; })[0].title; }
+
+// ---------- Ansichten ----------
+var app = document.getElementById("app");
+var timer = null, sess = null;
+
+function header() {
+  return '<header class="top">' + LOGO +
+    '<div class="brand"><b>nibble<span>_</span></b><small>Grundlagen der Programmierung 1</small></div>' +
+    '<img id="partnerLogo" alt="Logo" hidden></header>';
+}
+function applyPartner() {
+  var img = document.getElementById("partnerLogo");
+  if (img && PARTNER_LOGO) { img.src = PARTNER_LOGO; img.hidden = false; }
+}
+function currentPlan() { return S.mode === "exam" ? planExam(S.minutes) : plan(S.minutes); }
+
+function home() {
+  clearInterval(timer); sess = null;
+  var ex = S.mode === "exam";
+  var p = currentPlan();
+  var html = header();
+  html += '<div class="seg" role="group" aria-label="Modus">' +
+    '<button id="mLearn" aria-pressed="' + !ex + '">Lernen</button>' +
+    '<button id="mExam" aria-pressed="' + ex + '">Klausurtraining</button></div>';
+  html += '<section class="panel" aria-labelledby="h-time">' +
+    '<span class="label" id="h-time">Wie viel Zeit hast du gerade?</span>' +
+    '<div class="timepick"><output id="minOut" for="min">' + S.minutes + '</output><span>Minuten</span></div>' +
+    '<input type="range" id="min" min="10" max="45" step="5" value="' + S.minutes + '" aria-label="Lernzeit in Minuten">' +
+    '<div class="ticks"><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span><span>35</span><span>40</span><span>45</span></div>' +
+    '<div class="plan" id="plan">' + planHtml(p) + '</div>' +
+    '<button class="btn" id="go"' + (p.items.length ? "" : " disabled") + '>' + (ex ? "Training starten" : "Session starten") + '</button></section>';
+
+  html += weakPanel(3);
+  if (ex) {
+    var sitzt = EXAM.filter(function(e){ return S.exam[e.id] === 1; }).length;
+    var noch = EXAM.filter(function(e){ return S.exam[e.id] === 0; }).length;
+    html += '<section class="panel stats" aria-label="Fortschritt">' +
+      '<div class="stat"><b>' + sitzt + '/' + EXAM.length + '</b><small>Aufgaben sitzen</small></div>' +
+      '<div class="stat"><b>' + noch + '</b><small>offen</small></div>' +
+      '<div class="stat"><b>' + streak() + '</b><small>Tage in Folge</small></div></section>';
+    html += '<section class="panel" aria-labelledby="h-sec"><span class="label" id="h-sec">Aufbau wie die Klausur · antippen für Fokus</span><div class="chapters">';
+    SECTIONS.forEach(function(s){
+      var all = EXAM.filter(function(e){ return e.sec === s.id; });
+      var d = all.filter(function(e){ return S.exam[e.id] === 1; }).length;
+      html += '<button class="chap' + (S.efocus === s.id ? " focus" : "") + '" data-s="' + s.id + '" aria-pressed="' + (S.efocus === s.id) + '">' +
+        '<span class="code">' + s.id + '</span><span><span class="name">' + esc(s.title) + '</span><span class="bar"><i style="width:' + Math.round(100 * d / all.length) + '%"></i></span></span>' +
+        '<span class="pct">' + d + '/' + all.length + '</span></button>';
+    });
+    html += '</div></section>';
+  } else {
+    var all = allNibbles(), done = all.filter(function(n){ return S.done[n.key]; }).length;
+    var rate = S.answered ? Math.round(100 * S.correct / S.answered) : null;
+    html += '<section class="panel stats" style="grid-template-columns:repeat(2,minmax(0,1fr))" aria-label="Fortschritt">' +
+      '<div class="stat"><b>' + done + '/' + all.length + '</b><small>Häppchen</small></div>' +
+      '<div class="stat"><b>' + (rate === null ? "–" : rate + " %") + '</b><small>Quiz richtig</small></div>' +
+      '<div class="stat"><b>' + dueCount() + '</b><small>heute fällig</small></div>' +
+      '<div class="stat"><b>' + streak() + '</b><small>Tage in Folge</small></div></section>';
+    html += '<section class="panel" aria-labelledby="h-chap"><span class="label" id="h-chap">Lerneinheiten · antippen für Fokus</span><div class="chapters">';
+    CONTENT.forEach(function(c){
+      var d = c.nibbles.filter(function(n){ return S.done[n.key]; }).length, pc = Math.round(100 * d / c.nibbles.length);
+      html += '<button class="chap' + (S.focus === c.id ? " focus" : "") + '" data-c="' + c.id + '" aria-pressed="' + (S.focus === c.id) + '">' +
+        '<span class="code">' + c.id + '</span><span><span class="name">' + esc(c.title) + '</span><span class="bar"><i style="width:' + pc + '%"></i></span></span>' +
+        '<span class="pct">' + d + '/' + c.nibbles.length + '</span></button>';
+    });
+    html += '</div></section>';
+  }
+  html += '<div class="foot">Fortschritt wird auf diesem Gerät gespeichert.<br>' +
+    '<button class="linkbtn" id="exp">Fortschritt sichern</button>' +
+    '<label class="linkbtn" for="imp" style="display:inline-block;cursor:pointer">Fortschritt laden</label><input type="file" id="imp" accept=".json,application/json" hidden>' +
+    '<button class="linkbtn" id="reset">Zurücksetzen</button><div id="ioMsg" role="status" class="hint"></div></div>';
+  app.innerHTML = html; applyPartner();
+
+  bindWeak();
+  var wa = document.getElementById("weakAll"); if (wa) wa.onclick = weakView;
+  document.getElementById("mLearn").onclick = function(){ S.mode = "learn"; save(); home(); };
+  document.getElementById("mExam").onclick = function(){ S.mode = "exam"; save(); home(); };
+  var r = document.getElementById("min");
+  r.addEventListener("input", function(){
+    S.minutes = +r.value; document.getElementById("minOut").textContent = r.value;
+    var p2 = currentPlan(); document.getElementById("plan").innerHTML = planHtml(p2);
+    document.getElementById("go").disabled = !p2.items.length; save();
+  });
+  document.getElementById("go").onclick = function(){ start(currentPlan()); };
+  app.querySelectorAll(".chap").forEach(function(b){
+    b.onclick = function(){
+      if (b.dataset.s) S.efocus = S.efocus === b.dataset.s ? null : b.dataset.s;
+      else S.focus = S.focus === b.dataset.c ? null : b.dataset.c;
+      save(); home();
+    };
+  });
+  bindIO();
+  var rs = document.getElementById("reset");
+  rs.onclick = function(){
+    if (rs.dataset.armed) { S.done = {}; S.wrong = {}; S.answered = 0; S.correct = 0; S.days = []; S.exam = {}; S.box = {}; S.stats = {}; S.log = []; save(); home(); }
+    else { rs.dataset.armed = 1; rs.textContent = "Wirklich alles zurücksetzen? Nochmal tippen"; }
+  };
+}
+
+var TYPE_NAME = { tf: "Korrekt oder nicht?", trace: "Ausgabe angeben", write: "Code schreiben", explain: "Erläutern" };
+function planHtml(p) {
+  if (!p.items.length) return '<p class="muted">Alles geschafft! Setz den Fortschritt zurück, um von vorn zu wiederholen.</p>';
+  var h = '';
+  if (S.mode === "exam") {
+    var groups = {};
+    p.items.forEach(function(e){ (groups[e.sec] = groups[e.sec] || []).push(e); });
+    Object.keys(groups).forEach(function(sec){
+      var types = {}; groups[sec].forEach(function(e){ types[e.type] = (types[e.type] || 0) + 1; });
+      var desc = Object.keys(types).map(function(t){ return types[t] + "× " + TYPE_NAME[t]; }).join(", ");
+      h += '<div><span class="tag">' + sec + '</span><span>' + esc(secTitle(sec)) + ' <span class="muted">· ' + desc + '</span></span></div>';
+    });
+    return h;
+  }
+  var rev = p.items.filter(function(x){ return x.type === "review"; }).length;
+  if (rev) h += '<div><span class="tag rev">Wdh.</span><span>' + rev + ' Frage' + (rev > 1 ? "n" : "") + ' aus früheren Sessions</span></div>';
+  p.items.filter(function(x){ return x.type === "nibble"; }).forEach(function(x){
+    h += '<div><span class="tag">' + x.n.chap.id + '</span><span>' + esc(x.n.t) + '</span></div>';
+  });
+  return h;
+}
+
+// ---------- Session ----------
+function start(p) {
+  var steps = [];
+  if (S.mode === "exam") {
+    p.items.forEach(function(e){ steps.push({ k: "exam", e: e }); });
+  } else {
+    p.items.forEach(function(it){
+      if (it.type === "review") steps.push({ k: "q", n: it.n, qi: it.qi, review: it.key });
+      else {
+        steps.push({ k: "learn", n: it.n });
+        it.n.quiz.forEach(function(_, i){ steps.push({ k: "q", n: it.n, qi: i }); });
+        if (it.n.task) steps.push({ k: "task", n: it.n });
+        steps.push({ k: "fin", n: it.n });
+      }
+    });
+  }
+  sess = { steps: steps, i: 0, end: Date.now() + S.minutes * 60000, right: 0, total: 0, nibs: 0, warned: false, started: Date.now(), exam: S.mode === "exam", concepts: {} };
+  if (S.mode === "exam") S.eruns = (S.eruns || 0) + 1;
+  if (S.days.indexOf(today()) < 0) S.days.push(today());
+  save();
+  clearInterval(timer); timer = setInterval(tick, 1000);
+  step();
+}
+function remaining() { return Math.round((sess.end - Date.now()) / 1000); }
+function fmt(s) { var a = Math.abs(s); return (s < 0 ? "+" : "") + Math.floor(a / 60) + ":" + String(a % 60).padStart(2, "0"); }
+function tick() {
+  var c = document.getElementById("clock"); if (!c || !sess) return;
+  var r = remaining(); c.textContent = fmt(r); c.classList.toggle("over", r < 0);
+  if (r <= 0 && !sess.warned) { sess.warned = true; var tu = document.getElementById("timeup"); if (tu) tu.hidden = false; }
+}
+function showWs(t) { // Leerzeichen am Zeilenende sichtbar machen
+  return t.split("\n").map(function(l){
+    var m = l.match(/^(.*?)( *)$/);
+    return esc(m[1]) + '<span class="ws">' + m[2].replace(/ /g, "·") + '</span>';
+  }).join("\n");
+}
+function norm(t) { return t.replace(/\r/g, "").split("\n").map(function(l){ return l.replace(/\s+$/, ""); }).join("\n").replace(/\n+$/, ""); }
+
+function step() {
+  while (sess.i < sess.steps.length && sess.steps[sess.i].k === "fin") {
+    var f = sess.steps[sess.i]; S.done[f.n.key] = true; sess.nibs++; save(); sess.i++;
+    if (remaining() <= 0) return summary();
+  }
+  if (sess.i >= sess.steps.length) return summary();
+  if (sess.exam && sess.i > 0 && remaining() <= 0) return summary();
+  var s = sess.steps[sess.i];
+  var bars = sess.steps.filter(function(x){ return x.k !== "fin"; });
+  var cur = bars.indexOf(s);
+  var h = '<div class="sbar"><button class="iconbtn" id="quit" aria-label="Session beenden"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
+    '<div class="prog" aria-label="Schritt ' + (cur + 1) + ' von ' + bars.length + '">' +
+    bars.map(function(_, i){ return '<i class="' + (i < cur ? "done" : i === cur ? "now" : "") + '"></i>'; }).join("") + '</div>' +
+    '<span class="clock" id="clock" role="timer" aria-label="Verbleibende Zeit">' + fmt(remaining()) + '</span></div>';
+  h += '<div class="timeup" id="timeup"' + (sess.warned ? "" : " hidden") + '><span>Deine Zeit ist um. ' + (sess.exam ? "Diese Aufgabe noch abschließen?" : "Häppchen noch fertig machen?") + '</span><button class="btn" id="stopNow">Jetzt beenden</button></div>';
+
+  if (s.k === "exam") { h += examCard(s.e); }
+  else {
+    var tag = '<span class="label">' + s.n.chap.id + ' · ' + esc(s.n.chap.title) + '</span>';
+    if (s.k === "learn") {
+      h += '<article class="card">' + tag + '<h2>' + esc(s.n.t) + '</h2><ul class="learn">' +
+        s.n.learn.map(function(l){ return '<li>' + md(l) + '</li>'; }).join("") + '</ul>' +
+        (s.n.code ? '<pre><code>' + hl(s.n.code) + '</code></pre>' : '') +
+        '<button class="btn" id="next">Verstanden, zum Quiz</button></article>';
+    } else if (s.k === "q") {
+      var q = s.n.quiz[s.qi];
+      h += '<article class="card">' + tag + (s.review ? '<span class="label" style="color:var(--bad)">Wiederholung</span>' : '') +
+        '<p class="q">' + md(q.q) + '</p><div class="answers">' +
+        q.a.map(function(a, i){ return '<button class="ans" data-i="' + i + '"><span class="k">' + "ABCD"[i] + '</span><span>' + md(a) + '</span></button>'; }).join("") +
+        '</div><div id="fb"></div></article>';
+    } else if (s.k === "task") {
+      var sol = SOLS[s.n.key];
+      h += '<article class="card">' + tag + '<h2>Mini-Aufgabe</h2><div class="task"><p>' + md(s.n.task) + '</p><p class="hint">Am besten direkt in der IDE ausprobieren, ca. 5 Minuten.</p></div>' +
+        (sol ? '<button class="btn ghost" id="showSol">Musterlösung zeigen</button><div id="sol" class="reveal" hidden><span class="label">Musterlösung</span><pre><code>' + hl(sol) + '</code></pre></div>' : '') +
+        '<div class="row"><button class="btn ghost" id="skip">Später</button><button class="btn" id="next">Erledigt</button></div></article>';
+    }
+  }
+  app.innerHTML = h;
+  window.scrollTo(0, 0);
+  document.getElementById("quit").onclick = summary;
+  document.getElementById("stopNow").onclick = summary;
+  var nx = document.getElementById("next"); if (nx) nx.onclick = function(){ sess.i++; step(); };
+  var sk = document.getElementById("skip"); if (sk) sk.onclick = function(){ sess.i++; step(); };
+  var ss = document.getElementById("showSol"); if (ss) ss.onclick = function(){ document.getElementById("sol").hidden = false; ss.hidden = true; };
+  if (s.k === "q") bindQuiz(s);
+  if (s.k === "exam") bindExam(s.e);
+}
+
+function examCard(e) {
+  var h = '<article class="card"><span class="label">' + e.sec + ' · ' + esc(secTitle(e.sec)) + ' · ' + TYPE_NAME[e.type] + '</span>';
+  if (e.type === "tf") {
+    h += '<p class="stmt">' + md(e.s) + '</p><p class="hint">Formuliere die Begründung erst im Kopf, dann tippen.</p>' +
+      '<div class="tfrow"><button class="ans" data-v="1">Korrekt</button><button class="ans" data-v="0">Nicht korrekt</button></div>';
+  } else if (e.type === "trace") {
+    h += '<p class="q">Geben Sie exakt die produzierte Konsolenausgabe an.</p><pre><code>' + hl(e.code) + '</code></pre>' +
+      '<label class="hint" for="ans-' + e.id + '">Deine Ausgabe</label><textarea id="ans-' + e.id + '" spellcheck="false" autocapitalize="off" placeholder="Zeile für Zeile, wie auf der Konsole"></textarea>' +
+      '<button class="btn" id="reveal">Lösung zeigen</button>';
+  } else {
+    h += '<p class="q soltext">' + md(e.type === "write" ? e.task : e.q) + '</p>' +
+      '<label class="hint" for="ans-' + e.id + '">' + (e.type === "write" ? "Deine Lösung (Papier geht auch – wie in der Klausur)" : "Deine Antwort in Stichpunkten") + '</label>' +
+      '<textarea id="ans-' + e.id + '" spellcheck="false" autocapitalize="off"' + (e.type === "write" ? ' style="min-height:200px"' : '') + '></textarea>' +
+      '<button class="btn" id="reveal">' + (e.type === "write" ? "Musterlösung zeigen" : "Lösung zeigen") + '</button>';
+  }
+  return h + '<div id="fb" class="reveal"></div></article>';
+}
+
+function rateButtons(pre) {
+  return '<p class="hint">Wie lief es?</p><div class="row">' +
+    '<button class="btn ghost" id="rateNo"' + (pre === 0 ? ' style="border-color:var(--bad)"' : '') + '>Nochmal üben</button>' +
+    '<button class="btn" id="rateOk">Sitzt</button></div>';
+}
+function bindRate(e) {
+  function done(v) {
+    S.exam[e.id] = v; sess.total++; if (v) sess.right++;
+    var text = (e.type === "write" ? e.task : e.type === "trace" ? "Ausgabe angeben" : e.q).split("\n")[0];
+    record("ex:" + e.id, e.rel, !!v, { q: text, self: true, why: e.type === "trace" ? e.why : "" });
+    sess.i++; step();
+  }
+  document.getElementById("rateOk").onclick = function(){ done(1); };
+  document.getElementById("rateNo").onclick = function(){ done(0); };
+}
+
+function bindExam(e) {
+  var fb = document.getElementById("fb");
+  if (e.type === "tf") {
+    app.querySelectorAll(".tfrow .ans").forEach(function(b){
+      b.onclick = function(){
+        var pick = b.dataset.v === "1", ok = pick === e.ok;
+        app.querySelectorAll(".tfrow .ans").forEach(function(x){
+          x.disabled = true; var v = x.dataset.v === "1";
+          if (v === e.ok) x.classList.add("right"); else if (x === b) x.classList.add("wrong");
+        });
+        S.exam[e.id] = ok ? 1 : 0; sess.total++; if (ok) sess.right++;
+        record("ex:" + e.id, e.rel, ok, { q: e.s, pick: pick ? "korrekt" : "nicht korrekt", right: e.ok ? "korrekt" : "nicht korrekt", why: e.why });
+        fb.innerHTML = '<div class="why ' + (ok ? "ok" : "no") + '" role="status"><b>' + (ok ? "Richtig" : "Nicht ganz") + ' – die Aussage ist ' + (e.ok ? "korrekt" : "nicht korrekt") + '</b>' + md(e.why) + '</div>' + (ok ? '' : nudge(e.rel)) +
+          '<button class="btn" id="next">Weiter</button>';
+        var nx = document.getElementById("next"); nx.onclick = function(){ sess.i++; step(); }; nx.focus();
+      };
+    });
+    return;
+  }
+  var rv = document.getElementById("reveal");
+  rv.onclick = function(){
+    rv.hidden = true;
+    var mine = document.getElementById("ans-" + e.id).value, pre = null, h = '';
+    if (e.type === "trace") {
+      h += '<span class="label">Erwartete Ausgabe <span style="text-transform:none;letter-spacing:0">(· = Leerzeichen)</span></span><pre><code>' + showWs(e.out) + '</code></pre>';
+      if (mine.trim()) {
+        var ok = norm(mine) === norm(e.out); pre = ok ? 1 : 0;
+        h += '<p class="verdict ' + (ok ? "ok" : "no") + '">' + (ok ? "Stimmt überein (Leerzeichen am Zeilenende ignoriert)" : "Weicht ab – vergleiche Zeile für Zeile") + '</p>';
+      }
+      h += '<div class="why ok"><b>Erklärung</b>' + md(e.why) + '</div>';
+    } else {
+      h += '<span class="label">' + (e.type === "write" ? "Musterlösung" : "Lösung") + '</span>';
+      if (e.type === "write") h += '<pre><code>' + hl(e.sol) + '</code></pre>';
+      else h += '<p class="soltext">' + md(e.sol) + '</p>' + (e.code ? '<pre><code>' + hl(e.code) + '</code></pre>' : '');
+      h += '<span class="label">Darauf achten Korrektoren – hast du das?</span><ul class="check">' +
+        e.check.map(function(c, i){ return '<li><label><input type="checkbox" id="ck-' + e.id + '-' + i + '"><span>' + md(c) + '</span></label></li>'; }).join("") + '</ul>';
+    }
+    fb.innerHTML = h + rateButtons(pre);
+    bindRate(e);
+    fb.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+}
+
+function bindQuiz(s) {
+  var q = s.n.quiz[s.qi], k = s.n.key + "|" + s.qi;
+  app.querySelectorAll(".ans").forEach(function(b){
+    b.onclick = function(){
+      var pick = +b.dataset.i, ok = pick === q.c;
+      app.querySelectorAll(".ans").forEach(function(x){
+        x.disabled = true; var i = +x.dataset.i;
+        if (i === q.c) x.classList.add("right"); else if (i === pick) x.classList.add("wrong");
+      });
+      sess.total++; S.answered++; if (ok) { sess.right++; S.correct++; }
+      record(k, s.n.key, ok, { q: q.q, pick: q.a[pick], right: q.a[q.c], why: q.why });
+      document.getElementById("fb").innerHTML = '<div class="why ' + (ok ? "ok" : "no") + '" role="status"><b>' + (ok ? "Richtig" : "Nicht ganz – richtig ist " + "ABCD"[q.c]) + '</b>' + md(q.why) + '</div>' + (ok ? '' : nudge(s.n.key)) +
+        '<button class="btn" id="next" style="margin-top:14px;width:100%">Weiter</button>';
+      var nx = document.getElementById("next"); nx.onclick = function(){ sess.i++; step(); }; nx.focus();
+    };
+  });
+}
+
+function summary() {
+  clearInterval(timer);
+  var mins = Math.max(1, Math.round((Date.now() - sess.started) / 60000));
+  var ex = sess.exam;
+  var noch = ex ? EXAM.filter(function(e){ return S.exam[e.id] === 0; }).length : Object.keys(S.wrong).length;
+  var h = header() + '<article class="card"><span class="label">' + (ex ? "Training beendet" : "Session beendet") + '</span>' +
+    '<p class="big">' + (ex ? sess.total + ' Aufgaben' : sess.nibs + ' Häppchen') + ' in ' + mins + ' Min.</p>' +
+    '<div class="stats"><div class="stat"><b>' + sess.right + '/' + sess.total + '</b><small>' + (ex ? "sitzen" : "Fragen richtig") + '</small></div>' +
+    '<div class="stat"><b>' + noch + '</b><small>zum Wiederholen</small></div>' +
+    '<div class="stat"><b>' + streak() + '</b><small>Tage in Folge</small></div></div>' +
+    '<p class="muted">Was nicht saß, kommt in der nächsten Session wieder. Was saß, wird nach 1, 3, 7 und 14 Tagen nochmal geprüft, damit es hängen bleibt.</p>' +
+    sessionWeak(sess.concepts) +
+    '<button class="btn" id="home">Zur Übersicht</button></article>';
+  sess = null; app.innerHTML = h; applyPartner(); bindWeak();
+  document.getElementById("home").onclick = home;
+}
+
+
+// ---------- Sichern & Laden (z. B. für Gerätewechsel) ----------
+function bindIO() {
+  var msg = document.getElementById("ioMsg");
+  document.getElementById("exp").onclick = function(){
+    var data = JSON.stringify(S);
+    try {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
+      a.download = "nibble-fortschritt-" + today() + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      msg.textContent = "Datei wird heruntergeladen.";
+    } catch (e) { msg.textContent = "Download nicht möglich."; }
+    if (navigator.clipboard) navigator.clipboard.writeText(data).then(function(){ msg.textContent += " Zusätzlich in die Zwischenablage kopiert."; }, function(){});
+  };
+  document.getElementById("imp").onchange = function(ev){
+    var f = ev.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      try { var d = JSON.parse(r.result); if (!d || typeof d.done !== "object") throw 0; Object.assign(S, d); save(); home(); }
+      catch (e) { msg.textContent = "Die Datei ist keine gültige nibble-Sicherung."; }
+    };
+    r.readAsText(f);
+  };
+}
+
+// ---------- Baustellen ----------
+function conceptName(k) { var n = byKey(k); return n ? n.t : k; }
+function relatedExam(k) { return EXAM.filter(function(e){ return e.rel === k; }); }
+function nudge(k) {
+  var st = S.stats[k];
+  if (!st || st.w < 2) return '';
+  return '<p class="hint" style="margin-top:10px">„' + esc(conceptName(k)) + '“ hakt öfter (' + st.w + '× falsch). Du findest es unter <b>Meine Baustellen</b> zum gezielten Üben.</p>';
+}
+function weakRow(k) {
+  var st = S.stats[k], n = byKey(k), pct = Math.round(st.ema * 100);
+  var lvl = st.ema >= 0.5 ? "Hakt" : st.ema >= 0.3 ? "Wackelt" : "Wird besser";
+  return '<div class="weak"><div class="weak-h"><span class="code" style="font-family:var(--f-mono);font-size:12px">' + n.chap.id + '</span>' +
+    '<span class="name">' + esc(n.t) + '</span><span class="pill' + (st.ema >= 0.5 ? " hot" : "") + '">' + lvl + '</span></div>' +
+    '<div class="bar" aria-label="Fehlerneigung ' + pct + ' Prozent"><i style="width:' + Math.max(6, pct) + '%;background:var(--bad)"></i></div>' +
+    '<div class="row" style="align-items:center"><span class="hint" style="flex:1 1 160px">' + st.w + ' von ' + st.n + ' Antworten falsch</span>' +
+    '<button class="btn ghost small" data-train="' + k + '">Gezielt üben</button></div></div>';
+}
+function weakPanel(max) {
+  var w = weakSpots(); if (!w.length) return '';
+  return '<section class="panel" aria-labelledby="h-weak"><span class="label" id="h-weak">Meine Baustellen</span>' +
+    w.slice(0, max).map(weakRow).join("") +
+    '<button class="linkbtn" id="weakAll" style="align-self:flex-start">Alle Baustellen und Fehler ansehen</button></section>';
+}
+function sessionWeak(c) {
+  var ks = Object.keys(c || {}).filter(function(k){ return c[k] > 0 && byKey(k); });
+  if (!ks.length) return '';
+  return '<span class="label">Heute schwierig</span>' + ks.map(function(k){
+    return '<div class="row" style="align-items:center"><span style="flex:1 1 160px">' + esc(conceptName(k)) + ' <span class="muted">· ' + c[k] + '× falsch</span></span>' +
+      '<button class="btn ghost small" data-train="' + k + '">Gleich üben</button></div>';
+  }).join("");
+}
+function bindWeak() {
+  app.querySelectorAll("[data-train]").forEach(function(b){ b.onclick = function(){ startFocus(b.dataset.train); }; });
+}
+function weakView() {
+  clearInterval(timer); sess = null;
+  var w = weakSpots();
+  var h = header() + '<button class="btn ghost" id="back" style="align-self:flex-start;padding:8px 14px;min-height:44px">← Übersicht</button>' +
+    '<section class="panel"><h2 style="font-size:22px">Meine Baustellen</h2>' +
+    '<p class="hint">Sortiert nach aktueller Fehlerneigung: Neuere Antworten zählen stärker. Sobald du ein Thema mehrmals richtig hast, rutscht es nach unten und verschwindet.</p>' +
+    (w.length ? w.map(weakRow).join("") : '<p class="muted">Gerade keine Baustellen. Stark!</p>') + '</section>';
+  if (S.log.length) {
+    h += '<section class="panel"><h2 style="font-size:20px">Letzte Fehler</h2><div class="log">' + S.log.slice(0, 25).map(function(l){
+      var when = new Date(l.ts).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+      return '<details class="logitem"><summary><span class="muted mono" style="font-size:12px">' + when + '</span> ' + esc(conceptName(l.c)) + '</summary>' +
+        '<p class="q" style="font-size:15px">' + md(l.q) + '</p>' +
+        (l.self ? '<p class="hint">Selbst als „Nochmal üben“ markiert.</p>' :
+          '<p><span class="pill hot">Deine Antwort</span> ' + md(l.pick) + '</p><p><span class="pill">Richtig</span> ' + md(l.right) + '</p>') +
+        (l.why ? '<p class="hint">' + md(l.why) + '</p>' : '') + '</details>';
+    }).join("") + '</div></section>';
+  }
+  app.innerHTML = h; applyPartner(); bindWeak();
+  document.getElementById("back").onclick = home;
+  window.scrollTo(0, 0);
+}
+// Gezielt üben: Erklärung nochmal, alle Fragen zum Thema, passende Klausuraufgaben
+function startFocus(k) {
+  var n = byKey(k); if (!n) return;
+  var steps = [{ k: "learn", n: n, focus: true }];
+  n.quiz.forEach(function(_, i){ steps.push({ k: "q", n: n, qi: i }); });
+  relatedExam(k).sort(function(a, b){ return COST[a.type] - COST[b.type]; }).slice(0, 4)
+    .forEach(function(e){ steps.push({ k: "exam", e: e }); });
+  var mins = Math.max(10, Math.min(30, 3 + n.quiz.length + steps.filter(function(s){ return s.e; }).reduce(function(a, s){ return a + COST[s.e.type]; }, 0)));
+  sess = { steps: steps, i: 0, end: Date.now() + mins * 60000, right: 0, total: 0, nibs: 0, warned: false, started: Date.now(), exam: false, concepts: {}, focusKey: k };
+  if (S.days.indexOf(today()) < 0) { S.days.push(today()); save(); }
+  clearInterval(timer); timer = setInterval(tick, 1000);
+  step();
+}
+
+home();
+
+if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|anthropic/.test(location.hostname)) {
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
+}
+</script>
+
+</body>
+</html>
