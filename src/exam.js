@@ -247,17 +247,17 @@ System.out.println(k + " " + n);`,
 }`,
   check: ["Rückgabetyp void (das Array wird direkt verändert)", "Parameter `double[] werte, double max`", "for-Schleife mit Index (foreach könnte nicht schreiben)", "Grenze `i < werte.length`"] },
 { sec: "A5", type: "write",
-  task: "Schreiben Sie eine statische Methode `zaehle`, die einen String und ein char erhält und zurückgibt, wie oft das Zeichen im String vorkommt. Beispiel: `zaehle(\"192.168.0.1\", '.')` liefert 3.",
-  sol: R`public static int zaehle(String text, char zeichen) {
+  task: "Schreiben Sie eine statische Methode `grossbuchstaben`, die einen String erhält und zurückgibt, wie viele Großbuchstaben er enthält. Verwenden Sie `Character.isUpperCase(char)`. Beispiel: `grossbuchstaben(\"Grundlagen der Programmierung\")` liefert 2.",
+  sol: R`public static int grossbuchstaben(String text) {
     int n = 0;
     for (int i = 0; i < text.length(); i++) {
-        if (text.charAt(i) == zeichen) {
+        if (Character.isUpperCase(text.charAt(i))) {
             n++;
         }
     }
     return n;
 }`,
-  check: ["`text.length()` mit Klammern (Methode!)", "`charAt(i)` und Vergleich mit `==` (char ist primitiv)", "Zähler zurückgeben"] },
+  check: ["`text.length()` mit Klammern (Methode!)", "`charAt(i)` liefert ein char", "Statische Methode der Klasse Character: `Character.isUpperCase(...)`", "Zähler zurückgeben"] },
 { sec: "A5", type: "write",
   task: "Eine quadratische Matrix ist in **unterer Dreiecksform**, wenn alle Einträge **oberhalb** der Hauptdiagonalen 0 sind. Schreiben Sie eine statische Methode, die ein zweidimensionales double-Array erhält und true oder false zurückgibt.",
   sol: R`public static boolean istUntereDreiecksmatrix(double[][] m) {

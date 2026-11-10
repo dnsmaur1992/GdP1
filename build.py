@@ -3,7 +3,8 @@
 
     python3 build.py
 
-Inhalte ändern: src/content*.js (Lern-Häppchen) und src/exam.js (Klausurtraining).
+Inhalte ändern: src/content*.js (Lern-Häppchen), src/exam.js (Klausurtraining),
+src/gen.js (Aufgabengeneratoren), src/units.js (Lehrplan), src/app.js (Logik).
 Danach build.py ausführen und index.html committen.
 """
 from pathlib import Path
@@ -13,6 +14,8 @@ src = root / "src"
 t = (src / "template.html").read_text(encoding="utf-8")
 content = "".join((src / f"content{i}.js").read_text(encoding="utf-8") for i in (1, 2, 3))
 t = t.replace("/*CONTENT*/", content).replace("/*EXAM*/", (src / "exam.js").read_text(encoding="utf-8"))
+for name in ("gen", "units", "app"):
+    t = t.replace("/*" + name.upper() + "*/", (src / (name + ".js")).read_text(encoding="utf-8"))
 t = t.replace("<!--PWA-->", "")
 
 split = t.index('<div class="app"')

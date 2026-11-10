@@ -1,6 +1,6 @@
 // Service Worker: App offline verfügbar machen.
 // Bei jeder neuen Version VERSION erhöhen, damit Handys die neue index.html laden.
-const VERSION = "nibble-v3";
+const VERSION = "nibble-v4";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/logo.svg",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png"];
 
