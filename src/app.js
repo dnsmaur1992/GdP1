@@ -272,13 +272,12 @@ function header() {
 function applyPartner() { var img = document.getElementById("partnerLogo"); if (img && PARTNER_LOGO) { img.src = PARTNER_LOGO; img.hidden = false; } }
 function render(h) { app.innerHTML = h; applyPartner(); window.scrollTo(0, 0); }
 function timePicker() {
-  return '<div class="timepick"><output id="minOut" for="min">' + S.minutes + '</output><span>Minuten</span></div>' +
-    '<input type="range" id="min" min="10" max="45" step="5" value="' + S.minutes + '" aria-label="Lernzeit in Minuten">' +
-    '<div class="ticks"><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span><span>35</span><span>40</span><span>45</span></div>';
+  return '<div class="timepick"><label for="min">Zeit heute</label><span class="tval"><output id="minOut" for="min">' + S.minutes + '</output> Min.</span>' +
+    '<input type="range" id="min" min="10" max="45" step="5" value="' + S.minutes + '" aria-label="Lernzeit in Minuten" style="--p:' + ((S.minutes - 10) / 35 * 100) + '%"></div>';
 }
 function bindTime(onChange) {
   var r = document.getElementById("min");
-  r.addEventListener("input", function(){ S.minutes = +r.value; document.getElementById("minOut").textContent = r.value; save(); if (onChange) onChange(); });
+  r.addEventListener("input", function(){ S.minutes = +r.value; r.style.setProperty("--p", ((S.minutes - 10) / 35 * 100) + "%"); document.getElementById("minOut").textContent = r.value; var gm = document.getElementById("goMin"); if (gm) gm.textContent = r.value; save(); if (onChange) onChange(); });
 }
 function pill(u) {
   if (unitDone(u)) return '<span class="pill ok">fertig</span>';
@@ -291,11 +290,16 @@ function stageBar(u) {
   return '<span class="stages">' + seg.filter(function(x){ return x !== null; }).map(function(x){ return '<i><b style="width:' + Math.round(x * 100) + '%"></b></i>'; }).join("") + '</span>';
 }
 
+function bitState(u) { if (unitDone(u)) return "on"; var l = learnStat(u); return (l.done > 0 || (S.prog[u] || 0) > 0) ? "half" : ""; }
+function register(cur) {
+  return '<div class="register" role="img" aria-label="' + UNITS.filter(function(x){ return unitDone(x.id); }).length + ' von ' + UNITS.length + ' Einheiten abgeschlossen">' +
+    ORDER.map(function(u){ return '<span class="bit ' + bitState(u) + (u === cur ? " cur" : "") + '" title="' + u + '"></span>'; }).join("") + '</div>';
+}
 function home() {
   clearInterval(timer); sess = null;
   if (!S.unit || !UNIT[S.unit]) S.unit = nextUnit();
   var ex = S.mode === "exam", cd = S.mode === "code";
-  var h = header() + '<div class="seg three" role="group" aria-label="Modus"><button id="mPath" aria-pressed="' + (!ex && !cd) + '">Lernpfad</button><button id="mCode" aria-pressed="' + cd + '">Programmieren</button><button id="mExam" aria-pressed="' + ex + '">Klausur</button></div>';
+  var h = header() + '<nav class="tabs" aria-label="Modus"><button id="mPath" aria-pressed="' + (!ex && !cd) + '">Lernpfad</button><button id="mCode" aria-pressed="' + cd + '">Programmieren</button><button id="mExam" aria-pressed="' + ex + '">Klausur</button></nav>';
   if (!ex && !cd) h += planCard();
   if (ex) h += examHome(); else if (cd) h += codeHome(); else h += pathHome();
   h += weakPanel(3);
@@ -319,26 +323,32 @@ function home() {
 function pathHome() {
   var u = S.unit, U = UNIT[u], st = unitStage(u), p = planUnit(u, S.minutes), sug = nextUnit();
   var doneN = UNITS.filter(function(x){ return unitDone(x.id); }).length;
-  var h = (examPlan().finalPhase ? '<button class="btn" id="toExam">Endspurt: Klausurtraining starten</button>' : '') + '<section class="panel hero" aria-labelledby="h-now"><span class="label" id="h-now">' + (u === sug ? "Als Nächstes im Lehrplan" : "Gewählte Lerneinheit") + '</span>' +
-    '<button class="unitlink" id="openUnit"><span class="code big">' + u + '</span><span><b>' + esc(U.chap.title) + '</b><br><span class="hint">' + st.text + '</span></span><span aria-hidden="true">›</span></button>' +
+  var l = learnStat(u), pg = progStat(u), ck = checkStat(u);
+  var h = (examPlan().finalPhase ? '<button class="btn" id="toExam">Endspurt: Klausurtraining starten</button>' : '') + '<section class="hero" aria-labelledby="h-now">' +
+    '<div class="hero-top"><span class="prompt" aria-hidden="true">&gt;_</span><span id="h-now">' + (u === sug ? "Als Nächstes im Lehrplan" : "Gewählte Einheit") + ' · ' + (ORDER.indexOf(u) + 1) + ' von ' + ORDER.length + '</span></div>' +
+    '<button class="unitlink" id="openUnit"><span class="ucode">' + u + '</span><span class="utitle">' + esc(U.chap.title) + '</span><span class="chev" aria-hidden="true">›</span></button>' +
+    '<ol class="steps3" aria-label="' + esc(st.text) + '">' +
+      '<li class="' + (l.done >= l.total ? "ok" : st.id === "learn" ? "now" : "") + '"><b>Lernen</b><span>' + l.done + '/' + l.total + '</span></li>' +
+      (pg.total ? '<li class="' + (pg.done >= pg.total ? "ok" : st.id === "prog" ? "now" : "") + '"><b>Programmieren</b><span>' + pg.done + '/' + pg.total + '</span></li>' : '') +
+      '<li class="' + (ck.passed ? "ok" : st.id === "check" ? "now" : "") + '"><b>Check</b><span>' + (ck.passed ? "✓" : ck.best ? Math.round(ck.best * 100) + " %" : "–") + '</span></li></ol>' +
     timePicker() + '<div class="plan" id="plan">' + planUnitHtml(p) + '</div>' +
-    '<button class="btn" id="go">Session starten</button>' +
-    '<button class="btn ghost" id="goRead">Skript lesen: ' + u + '</button>' +
-    (U.gens.length ? '<button class="btn ghost" id="goCode">Nur Programmieren: Aufgabe aus ' + u + '</button>' : '') +
-    (u !== sug ? '<button class="linkbtn" id="toSug" style="align-self:flex-start">Zurück zum Lehrplan: ' + sug + '</button>' : '') + '</section>';
-  h += '<section class="panel stats" aria-label="Fortschritt"><div class="stat"><b>' + doneN + '/' + UNITS.length + '</b><small>Einheiten fertig</small></div>' +
-    '<div class="stat"><b>' + dueCount() + '</b><small>heute fällig</small></div><div class="stat"><b>' + streak() + '</b><small>Tage in Folge</small></div></section>';
-  h += '<section class="panel" aria-labelledby="h-lp"><span class="label" id="h-lp">Lehrplan · Einheit antippen</span><div class="chapters">';
+    '<button class="btn go" id="go">Session starten · <span id="goMin">' + S.minutes + '</span> Min.</button>' +
+    '<div class="herolinks"><button class="tlink" id="goRead">Skript lesen</button>' +
+    (U.gens.length ? '<button class="tlink" id="goCode">Nur programmieren</button>' : '') +
+    (u !== sug ? '<button class="tlink" id="toSug">Zurück zu ' + sug + '</button>' : '') + '</div></section>';
+  h += '<section class="figures" aria-label="Fortschritt"><div class="stat"><b>' + doneN + '<small>/' + UNITS.length + '</small></b><span>Einheiten fertig</span></div>' +
+    '<div class="stat"><b>' + dueCount() + '</b><span>heute fällig</span></div><div class="stat"><b>' + streak() + '</b><span>Tage in Folge</span></div></section>';
+  h += '<section class="panel" aria-labelledby="h-lp"><h2 class="sec" id="h-lp">Lehrplan</h2><div class="chapters">';
   UNITS.forEach(function(x){
     h += '<button class="chap' + (x.id === u ? " focus" : "") + '" data-u="' + x.id + '"><span class="code">' + x.id + '</span>' +
-      '<span><span class="name">' + esc(x.chap.title) + '</span>' + stageBar(x.id) + '</span><span class="pct">' + pill(x.id) + '</span></button>';
+      '<span><span class="name">' + esc(x.chap.title) + '</span>' + stageBar(x.id) + '</span><span class="bit sm ' + bitState(x.id) + '" role="img" aria-label="' + (unitDone(x.id) ? "abgeschlossen" : bitState(x.id) ? "begonnen" : "offen") + '"></span></button>';
   });
-  return h + '</div><p class="hint">Balken: Lernen · Programmieren · Kapitel-Check. Abgeschlossene Einheiten kommen als Rückblick in späteren Sessions wieder.</p></section>';
+  return h + '</div><p class="hint">Die drei Striche je Einheit: Lernen, Programmieren, Kapitel-Check. Abgeschlossene Einheiten kommen als Rückblick in späteren Sessions wieder.</p></section>';
 }
 function planUnitHtml(p) {
   var rev = p.items.filter(function(x){ return x.tag === "rev"; }).length, back = p.items.filter(function(x){ return x.tag === "back"; }).length;
   var h = '';
-  if (rev) h += '<div><span class="tag rev">Wdh.</span><span>' + rev + ' fällige Wiederholung' + (rev > 1 ? "en" : "") + '</span></div>';
+  if (rev) h += '<div><span class="tag rev">Wdh</span><span>' + rev + ' fällige Wiederholung' + (rev > 1 ? "en" : "") + '</span></div>';
   if (back) h += '<div><span class="tag">Rückblick</span><span>' + back + ' Frage' + (back > 1 ? "n" : "") + ' aus abgeschlossenen Einheiten</span></div>';
   p.items.forEach(function(x){
     if (x.type === "nibble") h += '<div><span class="tag">Lernen</span><span>' + esc(x.n.t) + (readOf(x.n) ? ' <span class="hint">· Lesen, ' + (readOf(x.n).fill ? 'Lücken, ' : '') + 'Quiz</span>' : '') + '</span></div>';
@@ -393,12 +403,11 @@ function readiness() {
 }
 function planCard() {
   var P = examPlan(), R = readiness();
-  var h = '<section class="panel plancard" aria-labelledby="h-plan"><div class="weak-h"><span class="label" id="h-plan" style="flex:1">Klausur ' + fmtDate(P.exam) + ' · Ziel 1,0</span><span class="pill' + (P.behind.length ? " hot" : " ok") + '">' + (P.left >= 0 ? "noch " + P.left + " Tage" : "vorbei") + '</span></div>';
+  var h = '<section class="plancard" aria-labelledby="h-plan"><div class="countdown"><b class="days' + (P.behind.length ? " late" : "") + '">' + Math.max(0, P.left) + '</b><span id="h-plan">' + (P.left >= 0 ? "Tage bis zur Klausur" : "Klausur vorbei") + '<br><span class="hint">' + fmtDate(P.exam) + ' · Ziel 1,0 · Klausurreife ' + R.pct + ' %</span></span></div>' + register(S.unit);
   if (P.finalPhase) h += '<p><b>Endspurt:</b> Jetzt täglich Klausurtraining und Baustellen. Schreib die Probeklausur ca. 4 Tage vorher einmal unter echten Bedingungen (nur Papier, Zeit stoppen).</p>';
   else if (P.behind.length) h += '<p><b>' + P.behind.length + ' Einheit' + (P.behind.length > 1 ? "en" : "") + ' hinter dem Plan:</b> ' + P.behind.join(", ") + '. Plane diese Woche zusätzliche Sessions ein.</p>';
   else h += '<p><b>Im Plan.</b> ' + (P.thisWeek.length ? "Diese Woche dran: " + P.thisWeek.map(function(u){ return u + " (bis " + fmtDate(P.due[u]) + ")"; }).join(", ") + "." : "Nächste Einheit: " + nextUnit() + " bis " + fmtDate(P.due[nextUnit()]) + ".") + '</p>';
-  h += '<div class="ready"><div class="bar"><i style="width:' + Math.max(2, R.pct) + '%"></i></div><span class="mono">' + R.pct + ' %</span></div><p class="hint">Klausurreife – Schätzung aus deinem Fortschritt' + (R.todo.length ? '. Noch offen: ' + R.todo.slice(0, 3).join(" · ") : '') + '</p>' +
-    '<details><summary class="hint">Zeitplan und Klausurdatum</summary><ol class="tlist num">' + ORDER.map(function(u){ return '<li>' + u + ' bis ' + fmtDate(P.due[u]) + (unitDone(u) ? ' ✓' : '') + '</li>'; }).join("") + '<li>Ab ' + fmtDate(P.learnEnd) + ': Klausurtraining, Probeklausur, Wiederholung</li></ol>' +
+  h += '<details><summary class="hint">Zeitplan, Klausurreife und Datum</summary><p class="hint">Klausurreife ist eine Schätzung aus deinem Fortschritt.' + (R.todo.length ? ' Noch offen: ' + R.todo.slice(0, 3).join(", ") + '.' : '') + '</p><ol class="tlist num">' + ORDER.map(function(u){ return '<li>' + u + ' bis ' + fmtDate(P.due[u]) + (unitDone(u) ? ' ✓' : '') + '</li>'; }).join("") + '<li>Ab ' + fmtDate(P.learnEnd) + ': Klausurtraining, Probeklausur, Wiederholung</li></ol>' +
     '<label class="hint" for="exDate">Klausurdatum</label> <input type="date" id="exDate" value="' + S.examDate + '"> <button class="linkbtn" id="replan">Plan ab heute neu verteilen</button></details></section>';
   return h;
 }
@@ -413,14 +422,14 @@ function unitView(u) {
   clearInterval(timer); sess = null;
   var U = UNIT[u], l = learnStat(u), p = progStat(u), c = checkStat(u);
   var h = header() + '<button class="btn ghost back" id="back">← Übersicht</button>' +
-    '<section class="panel"><span class="label">' + u + ' · Lerneinheit ' + (ORDER.indexOf(u) + 1) + ' von ' + ORDER.length + '</span><h2>' + esc(U.chap.title) + '</h2>' +
-    (unitDone(u) ? '<p class="pill ok" style="align-self:flex-start">abgeschlossen</p>' : '') + '</section>';
-  h += '<section class="panel"><div class="stage"><span class="num">1</span><div><b>Lernen</b><p class="hint">' + l.done + ' von ' + l.total + ' Häppchen mit Quiz</p></div><button class="btn small" id="sLearn">' + (l.done < l.total ? "Weiter" : "Wiederholen") + '</button></div>';
+    '<section class="unithead"><span class="ucode">' + u + '</span><div><h1>' + esc(U.chap.title) + '</h1><p class="hint">Lerneinheit ' + (ORDER.indexOf(u) + 1) + ' von ' + ORDER.length + (unitDone(u) ? ' · abgeschlossen' : '') + '</p></div></section>';
+  var cur = unitStage(u).id; function sb(id){ return 'btn small' + (cur === id ? '' : ' ghost'); }
+  h += '<section class="panel"><div class="stage"><span class="num">1</span><div><b>Lernen</b><p class="hint">' + l.done + ' von ' + l.total + ' Häppchen mit Quiz</p></div><button class="' + sb("learn") + '" id="sLearn">' + (l.done < l.total ? "Weiter" : "Wiederholen") + '</button></div>';
   if (p.total) {
-    h += '<div class="stage"><span class="num">2</span><div><b>Programmieren</b><p class="hint">' + p.done + ' von ' + p.total + ' Aufgaben gelöst · danach unbegrenzt weiterüben</p></div><button class="btn small" id="sProg">Aufgabe</button></div>' +
+    h += '<div class="stage"><span class="num">2</span><div><b>Programmieren</b><p class="hint">' + p.done + ' von ' + p.total + ' Aufgaben gelöst · danach unbegrenzt weiterüben</p></div><button class="' + sb("prog") + '" id="sProg">Aufgabe</button></div>' +
       '<div class="chips">' + U.gens.map(function(g){ return '<button class="chip" data-g="' + g + '">' + esc(genTitle(g)) + '</button>'; }).join("") + '</div>';
   }
-  h += '<div class="stage"><span class="num">' + (p.total ? 3 : 2) + '</span><div><b>Kapitel-Check</b><p class="hint">' + (c.passed ? "Bestanden (" + Math.round(c.best * 100) + " %)" : c.best ? "Bestes Ergebnis " + Math.round(c.best * 100) + " % – 80 % nötig" : "Gemischter Test, 80 % zum Abschließen") + '</p></div><button class="btn small" id="sCheck">Check</button></div></section>';
+  h += '<div class="stage"><span class="num">' + (p.total ? 3 : 2) + '</span><div><b>Kapitel-Check</b><p class="hint">' + (c.passed ? "Bestanden (" + Math.round(c.best * 100) + " %)" : c.best ? "Bestes Ergebnis " + Math.round(c.best * 100) + " % – 80 % nötig" : "Gemischter Test, 80 % zum Abschließen") + '</p></div><button class="' + sb("check") + '" id="sCheck">Check</button></div></section>';
   var rd = U.chap.nibbles.filter(function(n){ return S.read[n.key]; }).length;
   h += '<section class="panel"><h2 style="font-size:20px">Skript</h2><p class="hint">Die ganze Einheit zum Durchlesen – in eigenen Worten nach dem Kursmaterial, ohne Timer. ' + rd + ' von ' + U.chap.nibbles.length + ' Abschnitten gelesen.</p><div class="toc">' +
     U.chap.nibbles.map(function(n, i){ return '<button class="tocitem" data-r="' + i + '"><span class="tick' + (S.read[n.key] ? " on" : "") + '" aria-hidden="true">' + (S.read[n.key] ? "✓" : i + 1) + '</span><span>' + esc(n.t) + '</span><span aria-hidden="true">›</span></button>'; }).join("") + '</div></section>';
@@ -904,7 +913,7 @@ function weakRow(k) {
 }
 function weakPanel(max) {
   var w = weakSpots(); if (!w.length) return '';
-  return '<section class="panel" aria-labelledby="h-weak"><span class="label" id="h-weak">Meine Baustellen</span>' + w.slice(0, max).map(weakRow).join("") +
+  return '<section class="panel" aria-labelledby="h-weak"><h2 class="sec" id="h-weak">Meine Baustellen</h2>' + w.slice(0, max).map(weakRow).join("") +
     '<button class="linkbtn" id="weakAll" style="align-self:flex-start">Alle Baustellen und Fehler ansehen</button></section>';
 }
 function sessionWeak(c) {
