@@ -75,7 +75,7 @@ Nach einer Änderung:
 python3 build.py          # baut index.html neu
 ```
 
-Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v7";` hochzählen (z. B. `nibble-v8`), damit installierte Apps die neue Version laden. Danach committen und pushen.
+Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v8";` hochzählen (z. B. `nibble-v9`), damit installierte Apps die neue Version laden. Danach committen und pushen.
 
 ## Farben und Logo
 

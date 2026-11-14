@@ -21,7 +21,7 @@ img { max-width: 100%; }
 <title>nibble GP1</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <style>
 /* Layout: eine Spalte, max. 560px, Bildschirm-für-Bildschirm wie eine Handy-App.
    ================================================================
@@ -29,28 +29,33 @@ img { max-width: 100%; }
    --accent = Hauptfarbe, --accent-ink = Text auf Hauptfarbe
    ================================================================ */
 :root {
-  --bg: #F3F6FA; --surface: #FFFFFF; --surface-2: #E8EEF5; --line: #D3DCE8;
-  --fg: #0E1726; --muted: #4E5D73;
-  --accent: #0B8457; --accent-ink: #FFFFFF; --accent-soft: #D5F2E5;
-  --ok: #0B8457; --ok-soft: #D5F2E5; --bad: #C8323B; --bad-soft: #FBE1E2; --warn: #9A6200;
-  --code-bg: #0E1726; --code-fg: #D8E2F0; --code-kw: #3DDC97;
-  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  /* Papier und Tinte: kühles Grau-Blau; Markenfarben aus dem Logo (Navy + Mint).
+     HIER FARBEN ÄNDERN: --accent = Hauptfarbe, --ink = Farbe des Startpanels */
+  --bg: #F4F6F9; --surface: #FFFFFF; --surface-2: #E9EDF3; --line: #D8DEE7; --line-2: #C3CCD9;
+  --fg: #101A2B; --muted: #56627A;
+  --accent: #087A50; --accent-ink: #FFFFFF; --accent-soft: #DDF3E9;
+  --ok: #087A50; --ok-soft: #DDF3E9; --bad: #C2333D; --bad-soft: #FBE4E5; --warn: #985A00; --warn-soft: #FBEFD9;
+  --ink: #16233A; --ink-2: #2A3D5E; --ink-fg: #E8EEF7; --ink-muted: #93A5C2; --mint: #3DDC97;
+  --code-bg: #16233A; --code-fg: #DCE5F2; --code-kw: #3DDC97; --shadow: rgba(16,26,43,.16);
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
   --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
-  --r: 14px;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r: 12px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0E1726; --surface: #16233A; --surface-2: #1D2C46; --line: #2A3A55;
-  --fg: #E6EDF7; --muted: #9FB0C8;
-  --accent: #3DDC97; --accent-ink: #062016; --accent-soft: #143A31;
-  --ok: #3DDC97; --ok-soft: #143A31; --bad: #FF7A80; --bad-soft: #3E1E27; --warn: #F5A524;
-  --code-bg: #0A111D; --code-fg: #D8E2F0; --code-kw: #3DDC97; color-scheme: dark } }
+  --bg: #0F1828; --surface: #16223A; --surface-2: #1D2B45; --line: #26385A; --line-2: #34496E;
+  --fg: #E8EEF7; --muted: #95A6C0;
+  --accent: #3DDC97; --accent-ink: #072117; --accent-soft: #15382F;
+  --ok: #3DDC97; --ok-soft: #15382F; --bad: #FF8389; --bad-soft: #3C2030; --warn: #F2B14A; --warn-soft: #3A2C17;
+  --ink: #1B2B4A; --ink-2: #2C4167; --ink-fg: #E8EEF7; --ink-muted: #93A5C2; --mint: #3DDC97;
+  --code-bg: #0B1322; --code-fg: #DCE5F2; --code-kw: #3DDC97; --shadow: rgba(0,0,0,.45); color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #0E1726; --surface: #16233A; --surface-2: #1D2C46; --line: #2A3A55;
-  --fg: #E6EDF7; --muted: #9FB0C8;
-  --accent: #3DDC97; --accent-ink: #062016; --accent-soft: #143A31;
-  --ok: #3DDC97; --ok-soft: #143A31; --bad: #FF7A80; --bad-soft: #3E1E27; --warn: #F5A524;
-  --code-bg: #0A111D; --code-fg: #D8E2F0; --code-kw: #3DDC97; color-scheme: dark }
+  --bg: #0F1828; --surface: #16223A; --surface-2: #1D2B45; --line: #26385A; --line-2: #34496E;
+  --fg: #E8EEF7; --muted: #95A6C0;
+  --accent: #3DDC97; --accent-ink: #072117; --accent-soft: #15382F;
+  --ok: #3DDC97; --ok-soft: #15382F; --bad: #FF8389; --bad-soft: #3C2030; --warn: #F2B14A; --warn-soft: #3A2C17;
+  --ink: #1B2B4A; --ink-2: #2C4167; --ink-fg: #E8EEF7; --ink-muted: #93A5C2; --mint: #3DDC97;
+  --code-bg: #0B1322; --code-fg: #DCE5F2; --code-kw: #3DDC97; --shadow: rgba(0,0,0,.45); color-scheme: dark }
 
 html, body { height: 100%; }
 body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55;
@@ -226,6 +231,171 @@ mark.sol { background: color-mix(in srgb, var(--ok) 30%, transparent); color: in
 .tocitem { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 10px 4px; min-height: 48px; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; text-align: left; width: 100%; font-size: 15px; }
 .tick { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-mono); font-size: 12px; background: var(--surface-2); color: var(--muted); }
 .tick.on { background: var(--ok-soft); color: var(--ok); font-weight: 700; }
+
+/* ================= Feinschliff: Typografie, Rhythmus, Register ================= */
+body { -webkit-font-smoothing: antialiased; }
+.app { gap: 24px; padding-block: 18px 56px; }
+h1, h2, h3 { font-weight: 600; }
+.label { font-family: var(--f-body); font-size: 13px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted); }
+code { border-radius: 4px; padding: 1px 4px; }
+
+/* Kopf + Tabs */
+.top { gap: 10px; }
+.top svg { width: 34px; height: 34px; }
+.brand { flex-direction: row; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.brand b { font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
+.brand small { font-size: 13px; }
+.tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--line); margin-top: -8px; overflow-x: auto; }
+.tabs button { background: none; border: 0; padding: 10px 0 11px; min-height: 44px; color: var(--muted); font-family: var(--f-display); font-weight: 600; font-size: 17px; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button[aria-pressed="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+.tabs button:hover { color: var(--fg); }
+
+/* Abschnitte statt Karten: Inhalt liegt auf der Seite, Haarlinien trennen */
+.panel { background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 22px 0 0; gap: 14px; }
+.panel h2, h2.sec { font-size: 21px !important; }
+.btn { border-radius: 10px; font-size: 16px; transition: filter .15s, background .15s; }
+.btn:hover:not(:disabled) { filter: brightness(1.07); }
+.btn.ghost { border-color: var(--line-2); }
+.btn.ghost:hover { background: var(--surface); }
+.back { border: 0 !important; padding-left: 0; color: var(--muted); background: none !important; }
+.back:hover { color: var(--fg); }
+
+/* Klausur-Countdown + Register der 14 Einheiten */
+.plancard { display: flex; flex-direction: column; gap: 12px; }
+.countdown { display: flex; align-items: center; gap: 14px; line-height: 1.3; }
+.countdown .days { font-family: var(--f-mono); font-size: 44px; font-weight: 500; line-height: 1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.countdown .days.late { color: var(--warn); }
+.countdown > span { font-family: var(--f-display); font-size: 17px; font-weight: 600; }
+.countdown .hint { font-family: var(--f-body); font-weight: 400; font-size: 13px; }
+.register { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; }
+.bit { display: block; aspect-ratio: 1; border-radius: 3px; background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-2); }
+.bit.half { background: linear-gradient(to top, var(--accent) 40%, transparent 40%); }
+.bit.on { background: var(--accent); box-shadow: none; }
+.bit.cur { box-shadow: inset 0 0 0 1.5px var(--line-2), 0 0 0 2px var(--bg), 0 0 0 3.5px var(--fg); }
+.bit.on.cur { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--fg); }
+.bit.sm { width: 12px; height: 12px; aspect-ratio: auto; border-radius: 2px; }
+.plancard > p { font-size: 15px; }
+.plancard details[open] { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+
+/* Startpanel: die eine laute Stelle der Seite – Navy wie das Logo */
+.hero { background: var(--ink); color: var(--ink-fg); border-radius: 16px; padding: 18px 18px 12px; display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; }
+.hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(61,220,151,.18); box-shadow: 0 0 0 24px rgba(61,220,151,.035), 0 0 0 48px rgba(61,220,151,.02); pointer-events: none; }
+.hero .hint { color: var(--ink-muted); }
+.hero-top { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-muted); }
+.prompt { font-family: var(--f-mono); font-weight: 600; color: var(--mint); font-size: 14px; }
+.unitlink { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 14px; align-items: center; background: none; padding: 0; min-height: 0; color: inherit; border-radius: 8px; text-align: left; border: 0; position: relative; z-index: 1; }
+.ucode { font-family: var(--f-mono); font-weight: 600; font-size: 30px; letter-spacing: -.03em; color: var(--mint); line-height: 1; }
+.utitle { font-family: var(--f-display); font-size: 23px; font-weight: 600; line-height: 1.12; text-wrap: balance; }
+.chev { font-size: 26px; color: var(--ink-muted); }
+.steps3 { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; }
+.steps3 li { border-top: 3px solid var(--ink-2); padding-top: 7px; display: flex; flex-direction: column; font-size: 12px; color: var(--ink-muted); min-width: 0; line-height: 1.35; }
+.steps3 li b { font-weight: 500; font-size: 13px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.steps3 li span { font-family: var(--f-mono); }
+.steps3 li.ok { border-top-color: var(--mint); }
+.steps3 li.now { border-top-color: var(--ink-fg); }
+.steps3 li.now b, .steps3 li.now span { color: var(--ink-fg); }
+.timepick { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 10px; --tr-on: var(--accent); --tr-off: var(--line-2); --th-bg: var(--surface); }
+.hero .timepick { --tr-on: var(--mint); --tr-off: var(--ink-2); --th-bg: var(--ink); }
+.timepick label { font-size: 13px; color: var(--muted); }
+.hero .timepick label { color: var(--ink-muted); }
+.tval { font-family: var(--f-mono); font-size: 14px; color: var(--muted); }
+.tval output { font-size: 26px; font-weight: 500; color: var(--fg); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.hero .tval { color: var(--ink-muted); }
+.hero .tval output { color: var(--ink-fg); }
+.timepick input[type=range] { grid-column: 1 / -1; -webkit-appearance: none; appearance: none; background: transparent; height: 32px; margin: 0; width: 100%; }
+.timepick input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--tr-on) var(--p, 30%), var(--tr-off) var(--p, 30%)); }
+.timepick input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--tr-off); }
+.timepick input[type=range]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--tr-on); }
+.timepick input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--th-bg); border: 5px solid var(--tr-on); margin-top: -9px; }
+.timepick input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--th-bg); border: 5px solid var(--tr-on); }
+.tabs + .panel, .tabs + .plancard { border-top: 0; padding-top: 0; }
+.hero .plan { font-size: 13.5px; color: var(--ink-fg); gap: 6px; }
+.hero .plan .tag { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-2); color: var(--ink-muted); font-size: 11px; min-width: 64px; text-align: center; }
+.hero .plan .tag.rev { box-shadow: inset 0 0 0 1px rgba(255,131,137,.45); color: #FF9CA1; background: transparent; }
+.hero .plan .hint { font-size: 13px; }
+.hero .btn.go { background: var(--mint); color: #072117; font-size: 17px; min-height: 52px; }
+.herolinks { display: flex; flex-wrap: wrap; gap: 0 20px; margin-top: -8px; }
+.tlink { background: none; border: 0; padding: 8px 0; min-height: 44px; color: var(--ink-fg); font-size: 14px; text-decoration: underline; text-decoration-color: rgba(232,238,247,.35); text-underline-offset: 4px; }
+.tlink:hover { text-decoration-color: var(--mint); }
+.hero :focus-visible { outline-color: var(--mint); }
+.hero .chev, .hero .unitlink:hover .utitle { transition: color .15s; }
+.hero .unitlink:hover .chev { color: var(--mint); }
+
+/* Kennzahlen: drei ruhige Zahlen, keine Kacheln */
+.figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.figures .stat b { font-family: var(--f-mono); font-size: 26px; font-weight: 500; letter-spacing: -.04em; line-height: 1.1; }
+.figures .stat b small { font-size: 15px; color: var(--muted); letter-spacing: 0; }
+.figures .stat span { font-size: 13px; color: var(--muted); }
+.stats .stat b { font-family: var(--f-mono); font-weight: 500; letter-spacing: -.03em; }
+
+/* Lehrplan und Klausurbereiche */
+.chap { grid-template-columns: 44px minmax(0,1fr) auto; padding: 13px 0; gap: 14px; }
+.chap .code { background: none; font-size: 14px; text-align: left; padding: 0; color: var(--muted); }
+.chap.focus .code { background: none; color: var(--accent); }
+.chap.focus .name { font-weight: 600; }
+.chap:hover .name { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+.stages { gap: 3px; margin-top: 7px; max-width: 168px; }
+.stages i { height: 3px; }
+
+/* Einheit, Skript, Stufen */
+.stage { padding-block: 12px; }
+.stage .num { background: none; box-shadow: inset 0 0 0 1.5px var(--line-2); }
+.tocitem { padding: 11px 0; }
+.tocitem:hover span:nth-child(2) { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+.tick { background: none; box-shadow: inset 0 0 0 1.5px var(--line-2); }
+.tick.on { box-shadow: none; background: var(--ok-soft); }
+.chip { border-color: var(--line-2); background: transparent; }
+.chip:hover { border-color: var(--fg); }
+.pill { font-family: var(--f-body); font-size: 12px; font-weight: 500; }
+.esa { padding-block: 16px; }
+.esa b { font-family: var(--f-display); font-size: 17px; }
+
+/* Session */
+.sbar { border-bottom: 0; padding-block: 12px; }
+.prog i { height: 4px; }
+.prog i.now { background: var(--fg); }
+.clock { font-weight: 500; font-size: 20px; letter-spacing: -.03em; }
+.iconbtn { border-color: var(--line-2); background: transparent; }
+.card { border: 0; border-radius: 16px; padding: 22px 20px; gap: 16px; box-shadow: 0 0 0 1px var(--line), 0 14px 34px -20px var(--shadow); }
+.card h2 { font-size: 26px; line-height: 1.12; }
+.q { font-size: 18px; font-weight: 500; line-height: 1.45; }
+.ans { border-color: var(--line-2); border-radius: 10px; padding: 12px 14px; gap: 12px; transition: border-color .12s, background .12s; }
+.ans:hover:not(:disabled) { border-color: var(--fg); }
+.ans .k { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--line-2); font-weight: 600; font-size: 12px; }
+.ans.right .k { background: var(--ok); color: var(--surface); box-shadow: none; }
+.ans.wrong .k { background: var(--bad); color: var(--surface); box-shadow: none; }
+.why { border-radius: 0 10px 10px 0; border-left: 3px solid; padding: 12px 14px; line-height: 1.5; }
+.why.ok { border-color: var(--ok); }
+.why.no { border-color: var(--bad); }
+.why b { margin-bottom: 3px; }
+.learn { padding-left: 0; list-style: none; gap: 10px; }
+.learn li { padding-left: 22px; position: relative; }
+.learn li::before { content: ">"; position: absolute; left: 2px; top: 0; font-family: var(--f-mono); font-weight: 600; color: var(--accent); }
+.task { border: 0; border-radius: 10px; background: var(--accent-soft); }
+pre { border-radius: 10px; padding: 14px 16px; line-height: 1.6; }
+.seg { background: none; box-shadow: inset 0 0 0 1px var(--line-2); border-radius: 10px; padding: 3px; }
+.seg button { border-radius: 8px; font-size: 14px; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); box-shadow: none; }
+.big { font-family: var(--f-mono); font-weight: 500; letter-spacing: -.04em; font-size: 34px; }
+
+/* Lesetext: ruhig gesetzt wie ein gutes Skript */
+.read { font-size: 16.5px; line-height: 1.68; gap: 14px; }
+.read strong { font-weight: 600; }
+.read pre { margin-block: 2px; }
+.pit { border-left-color: var(--warn); background: var(--warn-soft); }
+.pit b { color: var(--warn); }
+input.gap { background: rgba(147,165,194,.2); border-bottom-color: var(--mint); }
+.filltext input.gap { background: var(--surface-2); border-bottom-color: var(--accent); }
+
+.unithead { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 14px; align-items: start; }
+.unithead .ucode { color: var(--accent); font-size: 28px; padding-top: 3px; }
+.unithead h1 { font-size: 26px; line-height: 1.12; }
+.unithead .hint { margin-top: 4px; }
+:root:not([data-theme="light"]) .hero { box-shadow: inset 0 0 0 1px rgba(232,238,247,.06); }
+@media (prefers-reduced-motion: no-preference) {
+  .hero .prompt::after { content: ""; display: inline-block; width: .55em; height: 2px; margin-left: 2px; background: var(--mint); animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0 } }
+}
 @media (prefers-reduced-motion: no-preference) { .card { animation: in .25s ease-out; } @keyframes in { from { transform: translateY(6px); opacity: .6 } } }
 </style>
 
@@ -3882,13 +4052,12 @@ function header() {
 function applyPartner() { var img = document.getElementById("partnerLogo"); if (img && PARTNER_LOGO) { img.src = PARTNER_LOGO; img.hidden = false; } }
 function render(h) { app.innerHTML = h; applyPartner(); window.scrollTo(0, 0); }
 function timePicker() {
-  return '<div class="timepick"><output id="minOut" for="min">' + S.minutes + '</output><span>Minuten</span></div>' +
-    '<input type="range" id="min" min="10" max="45" step="5" value="' + S.minutes + '" aria-label="Lernzeit in Minuten">' +
-    '<div class="ticks"><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span><span>35</span><span>40</span><span>45</span></div>';
+  return '<div class="timepick"><label for="min">Zeit heute</label><span class="tval"><output id="minOut" for="min">' + S.minutes + '</output> Min.</span>' +
+    '<input type="range" id="min" min="10" max="45" step="5" value="' + S.minutes + '" aria-label="Lernzeit in Minuten" style="--p:' + ((S.minutes - 10) / 35 * 100) + '%"></div>';
 }
 function bindTime(onChange) {
   var r = document.getElementById("min");
-  r.addEventListener("input", function(){ S.minutes = +r.value; document.getElementById("minOut").textContent = r.value; save(); if (onChange) onChange(); });
+  r.addEventListener("input", function(){ S.minutes = +r.value; r.style.setProperty("--p", ((S.minutes - 10) / 35 * 100) + "%"); document.getElementById("minOut").textContent = r.value; var gm = document.getElementById("goMin"); if (gm) gm.textContent = r.value; save(); if (onChange) onChange(); });
 }
 function pill(u) {
   if (unitDone(u)) return '<span class="pill ok">fertig</span>';
@@ -3901,11 +4070,16 @@ function stageBar(u) {
   return '<span class="stages">' + seg.filter(function(x){ return x !== null; }).map(function(x){ return '<i><b style="width:' + Math.round(x * 100) + '%"></b></i>'; }).join("") + '</span>';
 }
 
+function bitState(u) { if (unitDone(u)) return "on"; var l = learnStat(u); return (l.done > 0 || (S.prog[u] || 0) > 0) ? "half" : ""; }
+function register(cur) {
+  return '<div class="register" role="img" aria-label="' + UNITS.filter(function(x){ return unitDone(x.id); }).length + ' von ' + UNITS.length + ' Einheiten abgeschlossen">' +
+    ORDER.map(function(u){ return '<span class="bit ' + bitState(u) + (u === cur ? " cur" : "") + '" title="' + u + '"></span>'; }).join("") + '</div>';
+}
 function home() {
   clearInterval(timer); sess = null;
   if (!S.unit || !UNIT[S.unit]) S.unit = nextUnit();
   var ex = S.mode === "exam", cd = S.mode === "code";
-  var h = header() + '<div class="seg three" role="group" aria-label="Modus"><button id="mPath" aria-pressed="' + (!ex && !cd) + '">Lernpfad</button><button id="mCode" aria-pressed="' + cd + '">Programmieren</button><button id="mExam" aria-pressed="' + ex + '">Klausur</button></div>';
+  var h = header() + '<nav class="tabs" aria-label="Modus"><button id="mPath" aria-pressed="' + (!ex && !cd) + '">Lernpfad</button><button id="mCode" aria-pressed="' + cd + '">Programmieren</button><button id="mExam" aria-pressed="' + ex + '">Klausur</button></nav>';
   if (!ex && !cd) h += planCard();
   if (ex) h += examHome(); else if (cd) h += codeHome(); else h += pathHome();
   h += weakPanel(3);
@@ -3929,26 +4103,32 @@ function home() {
 function pathHome() {
   var u = S.unit, U = UNIT[u], st = unitStage(u), p = planUnit(u, S.minutes), sug = nextUnit();
   var doneN = UNITS.filter(function(x){ return unitDone(x.id); }).length;
-  var h = (examPlan().finalPhase ? '<button class="btn" id="toExam">Endspurt: Klausurtraining starten</button>' : '') + '<section class="panel hero" aria-labelledby="h-now"><span class="label" id="h-now">' + (u === sug ? "Als Nächstes im Lehrplan" : "Gewählte Lerneinheit") + '</span>' +
-    '<button class="unitlink" id="openUnit"><span class="code big">' + u + '</span><span><b>' + esc(U.chap.title) + '</b><br><span class="hint">' + st.text + '</span></span><span aria-hidden="true">›</span></button>' +
+  var l = learnStat(u), pg = progStat(u), ck = checkStat(u);
+  var h = (examPlan().finalPhase ? '<button class="btn" id="toExam">Endspurt: Klausurtraining starten</button>' : '') + '<section class="hero" aria-labelledby="h-now">' +
+    '<div class="hero-top"><span class="prompt" aria-hidden="true">&gt;_</span><span id="h-now">' + (u === sug ? "Als Nächstes im Lehrplan" : "Gewählte Einheit") + ' · ' + (ORDER.indexOf(u) + 1) + ' von ' + ORDER.length + '</span></div>' +
+    '<button class="unitlink" id="openUnit"><span class="ucode">' + u + '</span><span class="utitle">' + esc(U.chap.title) + '</span><span class="chev" aria-hidden="true">›</span></button>' +
+    '<ol class="steps3" aria-label="' + esc(st.text) + '">' +
+      '<li class="' + (l.done >= l.total ? "ok" : st.id === "learn" ? "now" : "") + '"><b>Lernen</b><span>' + l.done + '/' + l.total + '</span></li>' +
+      (pg.total ? '<li class="' + (pg.done >= pg.total ? "ok" : st.id === "prog" ? "now" : "") + '"><b>Programmieren</b><span>' + pg.done + '/' + pg.total + '</span></li>' : '') +
+      '<li class="' + (ck.passed ? "ok" : st.id === "check" ? "now" : "") + '"><b>Check</b><span>' + (ck.passed ? "✓" : ck.best ? Math.round(ck.best * 100) + " %" : "–") + '</span></li></ol>' +
     timePicker() + '<div class="plan" id="plan">' + planUnitHtml(p) + '</div>' +
-    '<button class="btn" id="go">Session starten</button>' +
-    '<button class="btn ghost" id="goRead">Skript lesen: ' + u + '</button>' +
-    (U.gens.length ? '<button class="btn ghost" id="goCode">Nur Programmieren: Aufgabe aus ' + u + '</button>' : '') +
-    (u !== sug ? '<button class="linkbtn" id="toSug" style="align-self:flex-start">Zurück zum Lehrplan: ' + sug + '</button>' : '') + '</section>';
-  h += '<section class="panel stats" aria-label="Fortschritt"><div class="stat"><b>' + doneN + '/' + UNITS.length + '</b><small>Einheiten fertig</small></div>' +
-    '<div class="stat"><b>' + dueCount() + '</b><small>heute fällig</small></div><div class="stat"><b>' + streak() + '</b><small>Tage in Folge</small></div></section>';
-  h += '<section class="panel" aria-labelledby="h-lp"><span class="label" id="h-lp">Lehrplan · Einheit antippen</span><div class="chapters">';
+    '<button class="btn go" id="go">Session starten · <span id="goMin">' + S.minutes + '</span> Min.</button>' +
+    '<div class="herolinks"><button class="tlink" id="goRead">Skript lesen</button>' +
+    (U.gens.length ? '<button class="tlink" id="goCode">Nur programmieren</button>' : '') +
+    (u !== sug ? '<button class="tlink" id="toSug">Zurück zu ' + sug + '</button>' : '') + '</div></section>';
+  h += '<section class="figures" aria-label="Fortschritt"><div class="stat"><b>' + doneN + '<small>/' + UNITS.length + '</small></b><span>Einheiten fertig</span></div>' +
+    '<div class="stat"><b>' + dueCount() + '</b><span>heute fällig</span></div><div class="stat"><b>' + streak() + '</b><span>Tage in Folge</span></div></section>';
+  h += '<section class="panel" aria-labelledby="h-lp"><h2 class="sec" id="h-lp">Lehrplan</h2><div class="chapters">';
   UNITS.forEach(function(x){
     h += '<button class="chap' + (x.id === u ? " focus" : "") + '" data-u="' + x.id + '"><span class="code">' + x.id + '</span>' +
-      '<span><span class="name">' + esc(x.chap.title) + '</span>' + stageBar(x.id) + '</span><span class="pct">' + pill(x.id) + '</span></button>';
+      '<span><span class="name">' + esc(x.chap.title) + '</span>' + stageBar(x.id) + '</span><span class="bit sm ' + bitState(x.id) + '" role="img" aria-label="' + (unitDone(x.id) ? "abgeschlossen" : bitState(x.id) ? "begonnen" : "offen") + '"></span></button>';
   });
-  return h + '</div><p class="hint">Balken: Lernen · Programmieren · Kapitel-Check. Abgeschlossene Einheiten kommen als Rückblick in späteren Sessions wieder.</p></section>';
+  return h + '</div><p class="hint">Die drei Striche je Einheit: Lernen, Programmieren, Kapitel-Check. Abgeschlossene Einheiten kommen als Rückblick in späteren Sessions wieder.</p></section>';
 }
 function planUnitHtml(p) {
   var rev = p.items.filter(function(x){ return x.tag === "rev"; }).length, back = p.items.filter(function(x){ return x.tag === "back"; }).length;
   var h = '';
-  if (rev) h += '<div><span class="tag rev">Wdh.</span><span>' + rev + ' fällige Wiederholung' + (rev > 1 ? "en" : "") + '</span></div>';
+  if (rev) h += '<div><span class="tag rev">Wdh</span><span>' + rev + ' fällige Wiederholung' + (rev > 1 ? "en" : "") + '</span></div>';
   if (back) h += '<div><span class="tag">Rückblick</span><span>' + back + ' Frage' + (back > 1 ? "n" : "") + ' aus abgeschlossenen Einheiten</span></div>';
   p.items.forEach(function(x){
     if (x.type === "nibble") h += '<div><span class="tag">Lernen</span><span>' + esc(x.n.t) + (readOf(x.n) ? ' <span class="hint">· Lesen, ' + (readOf(x.n).fill ? 'Lücken, ' : '') + 'Quiz</span>' : '') + '</span></div>';
@@ -4003,12 +4183,11 @@ function readiness() {
 }
 function planCard() {
   var P = examPlan(), R = readiness();
-  var h = '<section class="panel plancard" aria-labelledby="h-plan"><div class="weak-h"><span class="label" id="h-plan" style="flex:1">Klausur ' + fmtDate(P.exam) + ' · Ziel 1,0</span><span class="pill' + (P.behind.length ? " hot" : " ok") + '">' + (P.left >= 0 ? "noch " + P.left + " Tage" : "vorbei") + '</span></div>';
+  var h = '<section class="plancard" aria-labelledby="h-plan"><div class="countdown"><b class="days' + (P.behind.length ? " late" : "") + '">' + Math.max(0, P.left) + '</b><span id="h-plan">' + (P.left >= 0 ? "Tage bis zur Klausur" : "Klausur vorbei") + '<br><span class="hint">' + fmtDate(P.exam) + ' · Ziel 1,0 · Klausurreife ' + R.pct + ' %</span></span></div>' + register(S.unit);
   if (P.finalPhase) h += '<p><b>Endspurt:</b> Jetzt täglich Klausurtraining und Baustellen. Schreib die Probeklausur ca. 4 Tage vorher einmal unter echten Bedingungen (nur Papier, Zeit stoppen).</p>';
   else if (P.behind.length) h += '<p><b>' + P.behind.length + ' Einheit' + (P.behind.length > 1 ? "en" : "") + ' hinter dem Plan:</b> ' + P.behind.join(", ") + '. Plane diese Woche zusätzliche Sessions ein.</p>';
   else h += '<p><b>Im Plan.</b> ' + (P.thisWeek.length ? "Diese Woche dran: " + P.thisWeek.map(function(u){ return u + " (bis " + fmtDate(P.due[u]) + ")"; }).join(", ") + "." : "Nächste Einheit: " + nextUnit() + " bis " + fmtDate(P.due[nextUnit()]) + ".") + '</p>';
-  h += '<div class="ready"><div class="bar"><i style="width:' + Math.max(2, R.pct) + '%"></i></div><span class="mono">' + R.pct + ' %</span></div><p class="hint">Klausurreife – Schätzung aus deinem Fortschritt' + (R.todo.length ? '. Noch offen: ' + R.todo.slice(0, 3).join(" · ") : '') + '</p>' +
-    '<details><summary class="hint">Zeitplan und Klausurdatum</summary><ol class="tlist num">' + ORDER.map(function(u){ return '<li>' + u + ' bis ' + fmtDate(P.due[u]) + (unitDone(u) ? ' ✓' : '') + '</li>'; }).join("") + '<li>Ab ' + fmtDate(P.learnEnd) + ': Klausurtraining, Probeklausur, Wiederholung</li></ol>' +
+  h += '<details><summary class="hint">Zeitplan, Klausurreife und Datum</summary><p class="hint">Klausurreife ist eine Schätzung aus deinem Fortschritt.' + (R.todo.length ? ' Noch offen: ' + R.todo.slice(0, 3).join(", ") + '.' : '') + '</p><ol class="tlist num">' + ORDER.map(function(u){ return '<li>' + u + ' bis ' + fmtDate(P.due[u]) + (unitDone(u) ? ' ✓' : '') + '</li>'; }).join("") + '<li>Ab ' + fmtDate(P.learnEnd) + ': Klausurtraining, Probeklausur, Wiederholung</li></ol>' +
     '<label class="hint" for="exDate">Klausurdatum</label> <input type="date" id="exDate" value="' + S.examDate + '"> <button class="linkbtn" id="replan">Plan ab heute neu verteilen</button></details></section>';
   return h;
 }
@@ -4023,14 +4202,14 @@ function unitView(u) {
   clearInterval(timer); sess = null;
   var U = UNIT[u], l = learnStat(u), p = progStat(u), c = checkStat(u);
   var h = header() + '<button class="btn ghost back" id="back">← Übersicht</button>' +
-    '<section class="panel"><span class="label">' + u + ' · Lerneinheit ' + (ORDER.indexOf(u) + 1) + ' von ' + ORDER.length + '</span><h2>' + esc(U.chap.title) + '</h2>' +
-    (unitDone(u) ? '<p class="pill ok" style="align-self:flex-start">abgeschlossen</p>' : '') + '</section>';
-  h += '<section class="panel"><div class="stage"><span class="num">1</span><div><b>Lernen</b><p class="hint">' + l.done + ' von ' + l.total + ' Häppchen mit Quiz</p></div><button class="btn small" id="sLearn">' + (l.done < l.total ? "Weiter" : "Wiederholen") + '</button></div>';
+    '<section class="unithead"><span class="ucode">' + u + '</span><div><h1>' + esc(U.chap.title) + '</h1><p class="hint">Lerneinheit ' + (ORDER.indexOf(u) + 1) + ' von ' + ORDER.length + (unitDone(u) ? ' · abgeschlossen' : '') + '</p></div></section>';
+  var cur = unitStage(u).id; function sb(id){ return 'btn small' + (cur === id ? '' : ' ghost'); }
+  h += '<section class="panel"><div class="stage"><span class="num">1</span><div><b>Lernen</b><p class="hint">' + l.done + ' von ' + l.total + ' Häppchen mit Quiz</p></div><button class="' + sb("learn") + '" id="sLearn">' + (l.done < l.total ? "Weiter" : "Wiederholen") + '</button></div>';
   if (p.total) {
-    h += '<div class="stage"><span class="num">2</span><div><b>Programmieren</b><p class="hint">' + p.done + ' von ' + p.total + ' Aufgaben gelöst · danach unbegrenzt weiterüben</p></div><button class="btn small" id="sProg">Aufgabe</button></div>' +
+    h += '<div class="stage"><span class="num">2</span><div><b>Programmieren</b><p class="hint">' + p.done + ' von ' + p.total + ' Aufgaben gelöst · danach unbegrenzt weiterüben</p></div><button class="' + sb("prog") + '" id="sProg">Aufgabe</button></div>' +
       '<div class="chips">' + U.gens.map(function(g){ return '<button class="chip" data-g="' + g + '">' + esc(genTitle(g)) + '</button>'; }).join("") + '</div>';
   }
-  h += '<div class="stage"><span class="num">' + (p.total ? 3 : 2) + '</span><div><b>Kapitel-Check</b><p class="hint">' + (c.passed ? "Bestanden (" + Math.round(c.best * 100) + " %)" : c.best ? "Bestes Ergebnis " + Math.round(c.best * 100) + " % – 80 % nötig" : "Gemischter Test, 80 % zum Abschließen") + '</p></div><button class="btn small" id="sCheck">Check</button></div></section>';
+  h += '<div class="stage"><span class="num">' + (p.total ? 3 : 2) + '</span><div><b>Kapitel-Check</b><p class="hint">' + (c.passed ? "Bestanden (" + Math.round(c.best * 100) + " %)" : c.best ? "Bestes Ergebnis " + Math.round(c.best * 100) + " % – 80 % nötig" : "Gemischter Test, 80 % zum Abschließen") + '</p></div><button class="' + sb("check") + '" id="sCheck">Check</button></div></section>';
   var rd = U.chap.nibbles.filter(function(n){ return S.read[n.key]; }).length;
   h += '<section class="panel"><h2 style="font-size:20px">Skript</h2><p class="hint">Die ganze Einheit zum Durchlesen – in eigenen Worten nach dem Kursmaterial, ohne Timer. ' + rd + ' von ' + U.chap.nibbles.length + ' Abschnitten gelesen.</p><div class="toc">' +
     U.chap.nibbles.map(function(n, i){ return '<button class="tocitem" data-r="' + i + '"><span class="tick' + (S.read[n.key] ? " on" : "") + '" aria-hidden="true">' + (S.read[n.key] ? "✓" : i + 1) + '</span><span>' + esc(n.t) + '</span><span aria-hidden="true">›</span></button>'; }).join("") + '</div></section>';
@@ -4514,7 +4693,7 @@ function weakRow(k) {
 }
 function weakPanel(max) {
   var w = weakSpots(); if (!w.length) return '';
-  return '<section class="panel" aria-labelledby="h-weak"><span class="label" id="h-weak">Meine Baustellen</span>' + w.slice(0, max).map(weakRow).join("") +
+  return '<section class="panel" aria-labelledby="h-weak"><h2 class="sec" id="h-weak">Meine Baustellen</h2>' + w.slice(0, max).map(weakRow).join("") +
     '<button class="linkbtn" id="weakAll" style="align-self:flex-start">Alle Baustellen und Fehler ansehen</button></section>';
 }
 function sessionWeak(c) {
@@ -4548,7 +4727,7 @@ function startFocus(k) {
 home();
 
 // ---------- Webapp: Offline-Betrieb und automatische Updates ----------
-var BUILD = "20261114-100355";
+var BUILD = "20261114-102059";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|anthropic/.test(location.hostname)) {
   var reloading = false;
   navigator.serviceWorker.addEventListener("controllerchange", function(){ if (!reloading && !sess) { reloading = true; location.reload(); } });
