@@ -862,7 +862,7 @@ function bindCodeHome() {
 // ---------- Klausurtraining: Startseite ----------
 function examHome() {
   var p = planExam(S.minutes), sitzt = EXAM.filter(function(e){ return S.exam[e.id] === 1; }).length;
-  var h = '<section class="panel"><span class="label">Aufbau wie die Probeklausur</span>' + timePicker() + '<div class="plan" id="plan">' + planExamHtml(p) + '</div><button class="btn" id="go">Training starten</button></section>';
+  var h = mockPanel() + '<section class="panel"><h2 class="sec">Einzelaufgaben trainieren</h2><p class="hint">Feste Aufgaben im Aufbau der Probeklausur, mit Wiederholung bis sie sitzen.</p>' + timePicker() + '<div class="plan" id="plan">' + planExamHtml(p) + '</div><button class="btn" id="go">Training starten</button></section>';
   h += '<section class="panel stats"><div class="stat"><b>' + sitzt + '/' + EXAM.length + '</b><small>Aufgaben sitzen</small></div><div class="stat"><b>' + EXAM.filter(function(e){ return S.exam[e.id] === 0; }).length + '</b><small>offen</small></div><div class="stat"><b>' + streak() + '</b><small>Tage in Folge</small></div></section>';
   h += '<section class="panel"><span class="label">Abschnitte · antippen für Fokus</span><div class="chapters">';
   SECTIONS.forEach(function(s){
@@ -880,10 +880,158 @@ function planExamHtml(p) {
   }).join("");
 }
 function bindExamHome() {
+  bindMockPanel();
   bindTime(function(){ var p = planExam(S.minutes); document.getElementById("plan").innerHTML = planExamHtml(p); document.getElementById("go").disabled = !p.items.length; });
   var p = planExam(S.minutes); document.getElementById("go").disabled = !p.items.length;
   document.getElementById("go").onclick = function(){ S.eruns = (S.eruns || 0) + 1; newSess(planExam(S.minutes).items.map(function(e){ return { k: "exam", e: e }; }), S.minutes, { exam: true }); };
   app.querySelectorAll("[data-s]").forEach(function(b){ b.onclick = function(){ S.efocus = S.efocus === b.dataset.s ? null : b.dataset.s; save(); home(); }; });
+}
+
+
+// ---------- Probeklausur-Generator ----------
+var MOCKCACHE = null;
+function mockExam(seed) { if (!MOCKCACHE || MOCKCACHE.seed !== seed) MOCKCACHE = MOCK.make(seed, { GEN: GEN, EXAM: EXAM }); return MOCKCACHE; }
+function mockText(s) { // Markdown-light plus ```Codeblöcke```
+  return s.split(/```\n?([\s\S]*?)```/).map(function(part, i){ return i % 2 ? '<pre><code>' + hl(part.replace(/\n$/, "")) + '</code></pre>' : mdBlock(part); }).join("");
+}
+function mockLeft() { var m = S.mock; return Math.round((m.start + m.minutes * 60000 - Date.now()) / 1000); }
+function statOnly(concept, ok, detail) { // Fehlerstatistik ohne Wiederholungskarte (die Klausur ist jedes Mal neu)
+  var st = S.stats[concept] || { n: 0, w: 0, ema: 0, last: 0 };
+  st.n++; if (!ok) { st.w++; st.last = Date.now(); }
+  st.ema = st.ema * 0.6 + (ok ? 0 : 1) * 0.4; S.stats[concept] = st;
+  if (!ok && detail) { detail.c = concept; detail.ts = Date.now(); S.log.unshift(detail); S.log = S.log.slice(0, 60); }
+}
+function mockPanel() {
+  var m = S.mock, hist = (S.mockHist || []).slice(-5).reverse(), dur = S.mockMin || 90;
+  var h = '<section class="hero" aria-labelledby="h-mock"><div class="hero-top"><span class="prompt" aria-hidden="true">&gt;_</span><span>Probeklausur-Generator</span></div>' +
+    '<h2 class="utitle" id="h-mock">Eine komplette Klausur, jedes Mal neu</h2>' +
+    '<p class="hint">Aufbau wie die Probeaufgaben: A1 Korrekt oder nicht, A2 Klasse schreiben, A3 Vererbung und Ausnahmen, A4 Ausgabe und statische Methode, A5 Arrays und Zeichenketten. Klassen, Namen, Zahlen und Codes werden jedes Mal neu zusammengesetzt.</p>';
+  if (m) {
+    var left = mockLeft();
+    h += '<button class="btn go" id="mkGo">' + (m.phase === "review" ? "Korrektur fortsetzen" : "Weiter: Klausur Nr. " + m.seed) + '</button>' +
+      '<p class="hint">' + (m.phase === "review" ? "Abgegeben – die Korrektur ist noch offen." : left > 0 ? "Noch " + Math.ceil(left / 60) + " Min. Zeit." : "Zeit abgelaufen – jetzt abgeben und korrigieren.") + '</p>' +
+      '<div class="herolinks"><button class="tlink" id="mkNew">Verwerfen und neue Klausur</button></div>';
+  } else {
+    h += '<div class="durrow" role="group" aria-label="Bearbeitungszeit">' + [60, 90, 120].map(function(d){ return '<button class="dur" data-dur="' + d + '" aria-pressed="' + (d === dur) + '">' + d + ' Min.</button>'; }).join("") + '</div>' +
+      '<button class="btn go" id="mkNew">Neue Probeklausur erzeugen</button>';
+  }
+  h += '</section>';
+  if (hist.length) h += '<section class="panel"><h2 class="sec">Deine Probeklausuren</h2><div class="mkhist">' + hist.map(function(x){
+    var pct = Math.round(100 * x.pts / x.total);
+    return '<div class="mkrow"><span class="mono">Nr. ' + x.seed + '</span><span class="hint">' + x.date + '</span><span class="mkbar"><i style="width:' + pct + '%"></i></span><b class="mono">' + pct + ' %</b></div>';
+  }).join("") + '</div><p class="hint">Punkte sind Richtwerte der App, keine offizielle Bewertung.</p></section>';
+  return h;
+}
+function bindMockPanel() {
+  app.querySelectorAll("[data-dur]").forEach(function(b){ b.onclick = function(){ S.mockMin = +b.dataset.dur; save(); home(); }; });
+  var go = document.getElementById("mkGo"); if (go) go.onclick = mockView;
+  var nw = document.getElementById("mkNew");
+  nw.onclick = function(){
+    if (S.mock && !nw.dataset.armed) { nw.dataset.armed = 1; nw.textContent = "Wirklich verwerfen? Nochmal tippen"; return; }
+    S.mock = { seed: Math.floor(Math.random() * 90000) + 10000, start: Date.now(), minutes: S.mockMin || 90, ans: {}, ticks: {}, self: {}, phase: "write" };
+    save(); mockView();
+  };
+}
+var mockTimer = null;
+function mockView() {
+  clearInterval(timer); sess = null; clearInterval(mockTimer);
+  var m = S.mock, ex = mockExam(m.seed), rev = m.phase === "review";
+  var h = '<div class="sbar"><button class="iconbtn" id="mkBack" aria-label="Zur Übersicht (Fortschritt bleibt)"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M11 3L5 9l6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+    '<span class="mkhead">Klausur Nr. ' + m.seed + '<br><span class="hint">' + (rev ? "Korrektur" : m.minutes + " Min. · " + ex.total + " Punkte") + '</span></span>' +
+    (rev ? '<span class="clock mono" id="mkScore"></span>' : '<span class="clock" id="mkClock" role="timer"></span>') + '</div>';
+  if (!rev) h += '<div class="mkintro"><p>Bearbeite die Klausur <b>auf Papier</b>, wie in der echten Prüfung. Für Aufgabe 1 und die Ausgabe-Aufgabe kannst du deine Antwort hier eintragen, dann wertet die App sie aus. Alles andere vergleichst du nach der Abgabe mit Musterlösung und Checkliste.</p>' +
+    (window.top === window.self ? '<button class="tlink dark" id="mkPrint">Klausur drucken</button>' : '') + '</div>';
+  else h += '<div class="mkintro" id="mkSum"></div>';
+  MOCK.SECS.forEach(function(sec, si){
+    var parts = ex.parts.map(function(p, i){ return { p: p, i: i }; }).filter(function(x){ return x.p.sec === sec.id; });
+    var pts = parts.reduce(function(s, x){ return s + x.p.pts; }, 0);
+    h += '<section class="mksec"><h2>Aufgabe ' + (si + 1) + ': ' + esc(sec.title) + ' <span class="mkpts">' + pts + ' P.</span></h2>' + (sec.intro ? '<p class="hint">' + esc(sec.intro) + '</p>' : '');
+    if (sec.id === "A1") h += '<div class="tflist">' + parts.map(function(x){ return mockTf(x.p, x.i, rev); }).join("") + '</div>';
+    else parts.forEach(function(x){ h += mockPart(x.p, x.i, rev); });
+    h += '</section>';
+  });
+  h += rev ? '<button class="btn" id="mkSave">Ergebnis speichern</button>' : '<button class="btn" id="mkSubmit">Abgeben und korrigieren</button>';
+  render(h);
+  document.getElementById("mkBack").onclick = function(){ clearInterval(mockTimer); S.mode = "exam"; save(); home(); };
+  var pr = document.getElementById("mkPrint"); if (pr) pr.onclick = function(){ window.print(); };
+  if (!rev) {
+    var clk = document.getElementById("mkClock");
+    var upd = function(){ var l = mockLeft(); clk.textContent = fmt(l); clk.classList.toggle("over", l < 0); };
+    upd(); mockTimer = setInterval(upd, 1000);
+    app.querySelectorAll("[data-tf]").forEach(function(b){ b.onclick = function(){
+      var i = b.dataset.tf; m.ans[i] = b.dataset.v; save();
+      app.querySelectorAll('[data-tf="' + i + '"]').forEach(function(x){ x.setAttribute("aria-pressed", x === b); });
+    }; });
+    app.querySelectorAll("[data-ans]").forEach(function(t){ t.addEventListener("input", function(){ m.ans[t.dataset.ans] = t.value; save(); }); });
+    var sb = document.getElementById("mkSubmit");
+    sb.onclick = function(){
+      if (!sb.dataset.armed && mockLeft() > 0) { sb.dataset.armed = 1; sb.textContent = "Wirklich abgeben? Nochmal tippen"; return; }
+      m.phase = "review"; m.used = Math.round((Date.now() - m.start) / 60000); save(); mockView();
+    };
+  } else {
+    app.querySelectorAll("[data-tick]").forEach(function(c){ c.onchange = function(){ var p = c.dataset.tick.split(":"); (m.ticks[p[0]] = m.ticks[p[0]] || [])[+p[1]] = c.checked; save(); mockScore(); }; });
+    app.querySelectorAll("[data-self]").forEach(function(b){ b.onclick = function(){ m.self[b.dataset.self] = +b.dataset.v; save(); app.querySelectorAll('[data-self="' + b.dataset.self + '"]').forEach(function(x){ x.setAttribute("aria-pressed", x === b); }); mockScore(); }; });
+    mockScore();
+    document.getElementById("mkSave").onclick = mockSave;
+  }
+}
+function mockTf(p, i, rev) {
+  var a = S.mock.ans[i], h = '<div class="tfitem"><div class="tfs"><span class="mono hint">' + p.no.split(".")[1] + '</span><span>' + md(p.s) + '</span></div>';
+  if (!rev) return h + '<div class="tfbtns"><button class="dur" data-tf="' + i + '" data-v="1" aria-pressed="' + (a === "1") + '">korrekt</button><button class="dur" data-tf="' + i + '" data-v="0" aria-pressed="' + (a === "0") + '">nicht korrekt</button></div></div>';
+  var ok = a != null && (a === "1") === p.ok;
+  return h + '<div class="tfres ' + (ok ? "ok" : "no") + '"><b>' + (a == null ? "Nicht beantwortet" : ok ? "Richtig" : "Falsch") + ' – ' + (p.ok ? "korrekt" : "nicht korrekt") + '</b> ' + md(p.why) + '</div></div>';
+}
+function mockPart(p, i, rev) {
+  var a = S.mock.ans[i] || "", h = '<article class="mkpart"><div class="mkno"><b>' + p.no + '</b><span class="hint">' + p.pts + ' P.</span></div><div class="mkbody">';
+  if (p.type === "trace") h += '<p>Folgender Code ist gegeben. Geben Sie exakt die produzierte Konsolenausgabe an.</p><pre><code>' + hl(p.code) + '</code></pre>';
+  else h += mockText(p.type === "write" ? p.task : p.q);
+  if (!rev) {
+    if (p.type === "trace") h += '<label class="hint" for="mk' + i + '">Deine Ausgabe (optional, sonst auf Papier)</label><textarea id="mk' + i + '" data-ans="' + i + '" spellcheck="false" autocapitalize="off">' + esc(a) + '</textarea>';
+    else h += '<details class="mktype"' + (a ? " open" : "") + '><summary class="hint">Statt auf Papier hier tippen</summary><textarea data-ans="' + i + '" spellcheck="false" autocapitalize="off"' + (p.type === "write" ? ' style="min-height:180px"' : '') + '>' + esc(a) + '</textarea></details>';
+    return h + '</div></article>';
+  }
+  if (a) h += '<span class="label">Deine Antwort</span><pre class="mine"><code>' + esc(a) + '</code></pre>';
+  if (p.type === "trace") {
+    h += '<span class="label">Erwartete Ausgabe (· = Leerzeichen)</span><pre><code>' + showWs(p.out) + '</code></pre>';
+    if (a.trim()) { var ok = sameOutput(a, p.out); h += '<p class="verdict ' + (ok ? "ok" : "no") + '">' + (ok ? "Stimmt exakt überein." : "Weicht ab – vergleiche Zeile für Zeile.") + '</p>'; }
+    else h += '<p class="hint">Vergleiche deine Papierlösung:</p><div class="tfbtns"><button class="dur" data-self="' + i + '" data-v="1" aria-pressed="' + (S.mock.self[i] === 1) + '">stimmt exakt</button><button class="dur" data-self="' + i + '" data-v="0" aria-pressed="' + (S.mock.self[i] === 0) + '">weicht ab</button></div>';
+    h += '<div class="why ok"><b>Erklärung</b>' + md(p.why) + '</div>';
+  } else {
+    h += '<span class="label">' + (p.type === "write" ? "Musterlösung" : "Lösung") + '</span>' + (p.type === "write" ? '<pre><code>' + hl(p.sol) + '</code></pre>' : '<p class="soltext">' + md(p.sol) + '</p>' + (p.code ? '<pre><code>' + hl(p.code) + '</code></pre>' : ''));
+    var t = S.mock.ticks[i] || [];
+    h += '<span class="label">Abhaken, was du hast – daraus ergeben sich die Punkte</span><ul class="check">' + p.check.map(function(c, k){ return '<li><label><input type="checkbox" data-tick="' + i + ':' + k + '"' + (t[k] ? " checked" : "") + '><span>' + md(c) + '</span></label></li>'; }).join("") + '</ul>';
+  }
+  return h + '<p class="mkgot" id="got' + i + '"></p></div></article>';
+}
+function mockPartScore(p, i) {
+  var m = S.mock, a = m.ans[i];
+  if (p.type === "tf") return a != null && (a === "1") === p.ok ? p.pts : 0;
+  if (p.type === "trace") { if (a && a.trim()) return sameOutput(a, p.out) ? p.pts : 0; return m.self[i] === 1 ? p.pts : 0; }
+  var t = m.ticks[i] || [], n = p.check.filter(function(_, k){ return t[k]; }).length;
+  return Math.round(p.pts * n / p.check.length * 2) / 2;
+}
+function mockScore() {
+  var ex = mockExam(S.mock.seed), sum = 0, per = {};
+  ex.parts.forEach(function(p, i){
+    var s = mockPartScore(p, i); sum += s; per[p.sec] = (per[p.sec] || 0) + s;
+    var g = document.getElementById("got" + i); if (g) g.textContent = s + " von " + p.pts + " Punkten";
+  });
+  var pct = Math.round(100 * sum / ex.total);
+  document.getElementById("mkScore").textContent = pct + " %";
+  document.getElementById("mkSum").innerHTML = '<p class="mkbig"><b>' + String(sum).replace(".", ",") + '</b> von ' + ex.total + ' Punkten</p>' +
+    '<div class="mksecs">' + MOCK.SECS.map(function(s){ var tot = ex.parts.filter(function(p){ return p.sec === s.id; }).reduce(function(a, p){ return a + p.pts; }, 0); return '<div><span class="mono">' + s.id + '</span><span class="mkbar"><i style="width:' + Math.round(100 * (per[s.id] || 0) / tot) + '%"></i></span><span class="mono hint">' + String(per[s.id] || 0).replace(".", ",") + '/' + tot + '</span></div>'; }).join("") + '</div>' +
+    '<p class="hint">A1 und Ausgabe-Aufgaben mit Eingabe wertet die App aus. Für die übrigen Teile hakst du unten ehrlich ab, was deine Lösung enthält. Die Punkte sind Richtwerte, keine offizielle Bewertung.</p>';
+  return { sum: sum, pct: pct };
+}
+function mockSave() {
+  var m = S.mock, ex = mockExam(m.seed), sc = mockScore();
+  ex.parts.forEach(function(p, i){
+    var s = mockPartScore(p, i), ok = s >= p.pts * 0.6;
+    statOnly(p.rel, ok, ok ? null : { q: "Probeklausur " + p.sec + "." + p.no + ": " + (p.s || (p.type === "trace" ? "Ausgabe angeben" : (p.task || p.q).split("\n")[0])), self: true, why: p.why || "" });
+  });
+  S.mockHist = (S.mockHist || []).concat([{ seed: m.seed, date: fmtDate(dayNum()), pts: sc.sum, total: ex.total, used: m.used != null ? m.used : m.minutes }]);
+  if (S.days.indexOf(today()) < 0) S.days.push(today());
+  S.mock = null; S.mode = "exam"; save(); home();
 }
 
 // ---------- Sichern & Laden ----------
