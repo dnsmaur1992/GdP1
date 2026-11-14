@@ -188,6 +188,24 @@ table.tests th { border-top: 0; font-family: var(--f-mono); font-size: 11px; tex
 table.tests code { background: none; padding: 0; white-space: pre; }
 .seg.small button { min-height: 40px; font-size: 14px; }
 .linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; padding: 8px; min-height: 44px; }
+/* Lesetexte, Stolperfallen, Lückencode */
+.read { display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.6; max-width: 68ch; }
+.read p { margin: 0; }
+.read .tlist { gap: 6px; }
+.pit { border-left: 3px solid var(--warn); background: var(--surface-2); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: 15px; }
+.pit b { display: block; font-family: var(--f-display); margin-bottom: 4px; }
+input.gap { font-family: var(--f-mono); font-size: 13px; line-height: 1.3; padding: 1px 4px; margin: 1px 0; border: 0; border-bottom: 2px solid var(--accent); border-radius: 4px 4px 0 0; background: rgba(127,144,168,.22); color: inherit; max-width: 100%; box-sizing: content-box; }
+input.gap:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+input.gap.right { border-bottom-color: var(--ok); background: color-mix(in srgb, var(--ok) 25%, transparent); }
+input.gap.wrong { border-bottom-color: var(--bad); background: color-mix(in srgb, var(--bad) 25%, transparent); }
+.filltext input.gap { font-size: 15px; }
+.filltext { font-size: 16px; line-height: 2; }
+.filltext p { margin: 0; }
+mark.sol { background: color-mix(in srgb, var(--ok) 30%, transparent); color: inherit; border-radius: 3px; padding: 0 2px; }
+.toc { display: flex; flex-direction: column; }
+.tocitem { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 10px 4px; min-height: 48px; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; text-align: left; width: 100%; font-size: 15px; }
+.tick { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-mono); font-size: 12px; background: var(--surface-2); color: var(--muted); }
+.tick.on { background: var(--ok-soft); color: var(--ok); font-weight: 700; }
 @media (prefers-reduced-motion: no-preference) { .card { animation: in .25s ease-out; } @keyframes in { from { transform: translateY(6px); opacity: .6 } } }
 </style>
 
@@ -205,5 +223,6 @@ var PARTNER_LOGO = "";
 
 /*GEN*/
 /*UNITS*/
+/*READ*/
 /*APP*/
 </script>

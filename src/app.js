@@ -18,7 +18,7 @@ var S = { minutes: 20, done: {}, wrong: {}, days: [], answered: 0, correct: 0, m
 try { var raw = localStorage.getItem(KEY); if (raw) Object.assign(S, JSON.parse(raw)); } catch (e) {}
 Object.keys(S.wrong || {}).forEach(function(k){ if (!S.box[k]) S.box[k] = { b: 0, due: 0 }; }); S.wrong = {};
 if (S.mode === "learn") S.mode = "path";
-["prog", "checks", "seen", "box", "stats"].forEach(function(k){ if (!S[k] || typeof S[k] !== "object") S[k] = {}; });
+["prog", "checks", "seen", "box", "stats", "read"].forEach(function(k){ if (!S[k] || typeof S[k] !== "object") S[k] = {}; });
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 // ---------- Hilfen ----------
@@ -46,7 +46,86 @@ function hl(code) {
     return out + (cm ? '<span class="cm">' + esc(cm) + '</span>' : "");
   }).join("\n");
 }
-function est(n) { return 3 + n.quiz.length + (n.task ? 5 : 0); }
+function est(n) { var r = readOf(n); return 3 + n.quiz.length + (n.task ? 5 : 0) + (r ? Math.ceil(readWords(r) / 160) + (r.fill ? 2 : 0) : 0); }
+
+// ---------- Lesetexte und Lückencode ----------
+function readOf(n) { return (typeof READ !== "undefined" && n && READ[n.key]) || null; }
+function readWords(r) { return r.read.map(function(p){ return typeof p === "string" ? p : p.code; }).join(" ").split(/\s+/).length; }
+function readHtml(r) { return '<div class="read">' + r.read.map(function(p){ return typeof p === "string" ? mdBlock(p) : '<pre><code>' + hl(p.code) + '</code></pre>'; }).join("") + '</div>'; }
+function pitHtml(r) { return r && r.pit && r.pit.length ? '<div class="pit"><b>Stolperfallen</b><ul class="tlist">' + r.pit.map(function(x){ return "<li>" + md(x) + "</li>"; }).join("") + '</ul></div>' : ''; }
+function lessonHtml(n) { // Lesetext + Merksätze + Beispiel + Stolperfallen
+  var r = readOf(n);
+  return (r ? readHtml(r) + '<span class="label">Kurz gemerkt</span>' : '') + '<ul class="learn">' + n.learn.map(function(l){ return '<li>' + md(l) + '</li>'; }).join("") + '</ul>' +
+    (n.code ? '<pre><code>' + hl(n.code) + '</code></pre>' : '') + pitHtml(r);
+}
+var GAPM = "\u0001";
+function gapAns(f, i) { return f.gaps[i][0]; }
+function gapInput(f, i) {
+  var w = Math.max(4, gapAns(f, i).length + 2);
+  return '<input class="gap" data-gi="' + i + '" style="width:' + w + 'ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Lücke ' + (i + 1) + '">';
+}
+function gapCode(src, f, sol) {
+  var t = src.replace(/\[\[(\d+)\]\]/g, function(_, i){ return GAPM + i + GAPM; });
+  return hl(t).replace(new RegExp(GAPM + "(\\d+)" + GAPM, "g"), function(_, i){ return sol ? '<mark class="sol">' + esc(gapAns(f, +i)) + '</mark>' : gapInput(f, +i); });
+}
+function gapText(src, f, sol) {
+  var t = src.replace(/\[\[(\d+)\]\]/g, function(_, i){ return GAPM + i + GAPM; });
+  return mdBlock(t).replace(new RegExp(GAPM + "(\\d+)" + GAPM, "g"), function(_, i){ return sol ? '<mark class="sol">' + esc(gapAns(f, +i)) + '</mark>' : gapInput(f, +i); });
+}
+function fillBody(f, sol) {
+  if (f.kind === "text") return '<div class="filltext">' + gapText(f.text, f, sol) + '</div>';
+  var imp = (f.imports || []).map(function(i){ return "import " + i + ";"; }).join("\n");
+  function blk(lbl, src) { return (lbl ? '<span class="label">' + lbl + '</span>' : '') + '<pre class="fillcode"><code>' + gapCode(src, f, sol) + '</code></pre>'; }
+  var h = imp ? '<pre class="fillcode"><code>' + hl(imp) + '</code></pre>' : '';
+  if (f.wrap === "program") return h + blk("", f.code);
+  if (f.wrap === "main") return h + (f.pre ? blk("In der Klasse", f.pre.replace(/\n$/, "")) + blk("In main", f.code) : blk("In main", f.code));
+  return h + blk("Klassen", (f.pre || "") + f.code.replace(/\n$/, "")) + blk("In main", f.run);
+}
+function normJ(s) { // Leerzeichen sind egal – außer in String-Literalen und dort, wo sie Token trennen (z. B. "+ =" ≠ "+=")
+  return String(s).trim().split(/("(?:\\.|[^"\\])*")/).map(function(part, i){
+    if (i % 2) return part;
+    part = part.replace(/\s+/g, " ");
+    return part.replace(/(.) (?=(.))/g, function(m, a, b){ return (/\w/.test(a) && /\w/.test(b)) || (/[-+*\/=<>!&|%^]/.test(a) && /[-+*\/=<>!&|%^]/.test(b)) ? a + " " : a; }).replace(/^ | $/g, "");
+  }).join("");
+}
+function normT(s) { return String(s).trim().replace(/\s+/g, " ").toLowerCase(); }
+function gapOk(f, i, v) { var nm = f.kind === "java" ? normJ : normT; return f.gaps[i].some(function(a){ return nm(a) === nm(v); }); }
+function fillCard(s) {
+  var f = readOf(s.n).fill;
+  return '<article class="card"><span class="label">' + s.n.chap.id + ' · ' + esc(s.n.chap.title) + ' · ' + (f.kind === "java" ? "Lückencode" : "Lückentext") + '</span>' + tagLine(s) +
+    '<h2>' + esc(s.n.t) + '</h2><p class="q">' + md(f.t) + '</p>' + fillBody(f, false) +
+    '<p class="hint">' + (f.kind === "java" ? "Leerzeichen sind egal, Groß-/Kleinschreibung zählt – wie in Java." : "Groß-/Kleinschreibung ist egal.") + ' Mit Enter zur nächsten Lücke.</p>' +
+    '<button class="btn" id="fcheck">Prüfen</button><div id="fb" class="reveal"></div></article>';
+}
+function bindFill(s) {
+  var f = readOf(s.n).fill, ins = [].slice.call(app.querySelectorAll("input.gap")), tries = 0, fb = document.getElementById("fb"), btn = document.getElementById("fcheck");
+  ins.forEach(function(x, i){
+    x.addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); if (ins[i + 1]) ins[i + 1].focus(); else btn.click(); } });
+    x.addEventListener("input", function(){ x.classList.remove("right", "wrong"); });
+  });
+  function solution(ok) {
+    btn.hidden = true; ins.forEach(function(x){ x.disabled = true; });
+    var out = typeof FILLOUT !== "undefined" ? FILLOUT[s.n.key] : null;
+    fb.innerHTML = (ok ? '<p class="verdict ok">Alle Lücken richtig.</p>' : '<span class="label">Lösung</span>' + fillBody(f, true)) +
+      (out != null ? '<span class="label">Ausgabe des fertigen Programms <span style="text-transform:none;letter-spacing:0">(· = Leerzeichen)</span></span><pre><code>' + showWs(out.replace(/\n$/, "")) + '</code></pre>' : '') +
+      (f.gaps.some(function(g){ return g.length > 1; }) ? '<p class="hint">Gleichwertige Schreibweisen werden ebenfalls akzeptiert.</p>' : '') + nextBtn();
+    var nx = document.getElementById("next"); nx.onclick = advance; nx.focus({ preventScroll: true });
+    fb.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  btn.onclick = function(){
+    var right = 0, vals = [];
+    ins.forEach(function(x){ var i = +x.dataset.gi, ok = gapOk(f, i, x.value); vals.push(x.value.trim() || "–"); x.classList.toggle("right", ok); x.classList.toggle("wrong", !ok); if (ok) right++; });
+    var all = right === ins.length;
+    if (tries === 0) { S.answered++; if (all) S.correct++; record("f:" + s.n.key, s.n.key, all, { q: "Lücken: " + f.t, pick: vals.join(" · "), right: f.gaps.map(function(g){ return g[0]; }).join(" · "), why: "Lies den Abschnitt „" + s.n.t + "“ im Skript nach." }); }
+    tries++; S.read[s.n.key] = true; save();
+    if (all) return solution(true);
+    fb.innerHTML = '<p class="verdict no">' + right + ' von ' + ins.length + ' Lücken richtig. Die roten Felder kannst du korrigieren.</p><div class="row"><button class="btn ghost" id="fsol">Lösung zeigen</button><button class="btn" id="fagain">Nochmal prüfen</button></div>';
+    document.getElementById("fsol").onclick = function(){ solution(false); };
+    document.getElementById("fagain").onclick = function(){ btn.click(); };
+    btn.hidden = true;
+    var w = app.querySelector("input.gap.wrong"); if (w) w.focus();
+  };
+}
 function today() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
 function streak() {
   var set = {}; S.days.forEach(function(d){ set[d] = 1; });
@@ -102,15 +181,17 @@ function unitItems(u) { // alles, was zu einer Einheit abgefragt werden kann
   UNIT[u].chap.nibbles.forEach(function(n){ n.quiz.forEach(function(_, i){ it.push({ type: "q", key: n.key + "|" + i, n: n, qi: i }); }); });
   EXAM.forEach(function(e){ if (e.rel.split("-")[0] === u && (e.type === "tf" || e.type === "trace")) it.push({ type: "exam", key: "ex:" + e.id, e: e }); });
   UNIT[u].gens.forEach(function(g){ if (GENS[g] && GENS[g].cat === "trace") it.push({ type: "gen", key: "g:" + g, gen: g }); });
+  UNIT[u].chap.nibbles.forEach(function(n){ var r = readOf(n); if (r && r.fill) it.push({ type: "fill", key: "f:" + n.key, n: n }); });
   return it;
 }
-var COSTQ = { q: 1, exam: 1, gen: 4 };
+var COSTQ = { q: 1, exam: 1, gen: 4, fill: 2 };
 
 // ---------- Sessions planen ----------
 // 1) Fällige Wiederholungen  2) Rückblick auf abgeschlossene Einheiten  3) Arbeit an der gewählten Einheit
 function itemFromKey(k) {
   if (k.indexOf("ex:") === 0) { var e = EXAM.filter(function(x){ return "ex:" + x.id === k; })[0]; return e ? { type: "exam", key: k, e: e } : null; }
   if (k.indexOf("g:") === 0) { var g = k.slice(2); return GENS[g] ? { type: "gen", key: k, gen: g } : null; }
+  if (k.indexOf("f:") === 0) { var fn = byKey(k.slice(2)); return fn && readOf(fn) && readOf(fn).fill ? { type: "fill", key: k, n: fn } : null; }
   var p = k.split("|"), n = byKey(p[0]); return n && n.quiz[+p[1]] ? { type: "q", key: k, n: n, qi: +p[1] } : null;
 }
 function planUnit(u, minutes) {
@@ -135,7 +216,7 @@ function planUnit(u, minutes) {
   var st = unitStage(u).id;
   if (st === "learn") {
     var ns = UNIT[u].chap.nibbles.filter(function(n){ return !S.done[n.key]; });
-    for (var j = 0; j < ns.length; j++) { var m = est(ns[j]); if (used + m > minutes && items.some(function(x){ return x.type === "nibble"; })) break; items.push({ type: "nibble", n: ns[j], key: ns[j].key }); used += m; if (used >= minutes) break; }
+    for (var j = 0; j < ns.length; j++) { var m = est(ns[j]); if (used + m > minutes * 1.15 && items.some(function(x){ return x.type === "nibble"; })) break; items.push({ type: "nibble", n: ns[j], key: ns[j].key }); used += m; if (used >= minutes) break; }
   }
   if (st === "prog" || st === "done" || (st === "learn" && used < minutes - 6 && UNIT[u].gens.length && learnStat(u).done > 0)) {
     var gens = shuffle(UNIT[u].gens);
@@ -230,7 +311,7 @@ function home() {
   bindIO();
   var rs = document.getElementById("reset");
   rs.onclick = function(){
-    if (rs.dataset.armed) { var keep = { minutes: S.minutes, medium: S.medium, examDate: S.examDate }; S = Object.assign({ done: {}, wrong: {}, days: [], answered: 0, correct: 0, mode: "path", exam: {}, efocus: null, box: {}, stats: {}, log: [], unit: null, prog: {}, checks: {}, seen: {} }, keep); save(); home(); }
+    if (rs.dataset.armed) { var keep = { minutes: S.minutes, medium: S.medium, examDate: S.examDate }; S = Object.assign({ done: {}, wrong: {}, days: [], answered: 0, correct: 0, mode: "path", exam: {}, efocus: null, box: {}, stats: {}, log: [], unit: null, prog: {}, checks: {}, seen: {}, read: {} }, keep); save(); home(); }
     else { rs.dataset.armed = 1; rs.textContent = "Wirklich alles zurücksetzen? Nochmal tippen"; }
   };
 }
@@ -242,6 +323,7 @@ function pathHome() {
     '<button class="unitlink" id="openUnit"><span class="code big">' + u + '</span><span><b>' + esc(U.chap.title) + '</b><br><span class="hint">' + st.text + '</span></span><span aria-hidden="true">›</span></button>' +
     timePicker() + '<div class="plan" id="plan">' + planUnitHtml(p) + '</div>' +
     '<button class="btn" id="go">Session starten</button>' +
+    '<button class="btn ghost" id="goRead">Skript lesen: ' + u + '</button>' +
     (U.gens.length ? '<button class="btn ghost" id="goCode">Nur Programmieren: Aufgabe aus ' + u + '</button>' : '') +
     (u !== sug ? '<button class="linkbtn" id="toSug" style="align-self:flex-start">Zurück zum Lehrplan: ' + sug + '</button>' : '') + '</section>';
   h += '<section class="panel stats" aria-label="Fortschritt"><div class="stat"><b>' + doneN + '/' + UNITS.length + '</b><small>Einheiten fertig</small></div>' +
@@ -259,7 +341,7 @@ function planUnitHtml(p) {
   if (rev) h += '<div><span class="tag rev">Wdh.</span><span>' + rev + ' fällige Wiederholung' + (rev > 1 ? "en" : "") + '</span></div>';
   if (back) h += '<div><span class="tag">Rückblick</span><span>' + back + ' Frage' + (back > 1 ? "n" : "") + ' aus abgeschlossenen Einheiten</span></div>';
   p.items.forEach(function(x){
-    if (x.type === "nibble") h += '<div><span class="tag">Lernen</span><span>' + esc(x.n.t) + '</span></div>';
+    if (x.type === "nibble") h += '<div><span class="tag">Lernen</span><span>' + esc(x.n.t) + (readOf(x.n) ? ' <span class="hint">· Lesen, ' + (readOf(x.n).fill ? 'Lücken, ' : '') + 'Quiz</span>' : '') + '</span></div>';
     if (x.type === "task") h += '<div><span class="tag">Code</span><span>' + esc(genTitle(x.gen)) + '</span></div>';
     if (x.type === "check") h += '<div><span class="tag">Check</span><span>Kapitel-Check ' + S.unit + ' (≥ 80 % zum Abschließen)</span></div>';
   });
@@ -271,6 +353,7 @@ function bindPathHome() {
   document.getElementById("openUnit").onclick = function(){ unitView(S.unit); };
   var te = document.getElementById("toExam"); if (te) te.onclick = function(){ S.mode = "exam"; save(); home(); };
   var gc = document.getElementById("goCode"); if (gc) gc.onclick = function(){ startTasks([shuffle(UNIT[S.unit].gens)[0]], S.unit); };
+  document.getElementById("goRead").onclick = function(){ var ns = UNIT[S.unit].chap.nibbles, i = 0; while (i < ns.length - 1 && S.read[ns[i].key]) i++; readerView(S.unit, i); };
   var ts = document.getElementById("toSug"); if (ts) ts.onclick = function(){ S.unit = nextUnit(); save(); home(); };
   app.querySelectorAll("[data-u]").forEach(function(b){ b.onclick = function(){ S.unit = b.dataset.u; save(); unitView(b.dataset.u); }; });
 }
@@ -338,6 +421,9 @@ function unitView(u) {
       '<div class="chips">' + U.gens.map(function(g){ return '<button class="chip" data-g="' + g + '">' + esc(genTitle(g)) + '</button>'; }).join("") + '</div>';
   }
   h += '<div class="stage"><span class="num">' + (p.total ? 3 : 2) + '</span><div><b>Kapitel-Check</b><p class="hint">' + (c.passed ? "Bestanden (" + Math.round(c.best * 100) + " %)" : c.best ? "Bestes Ergebnis " + Math.round(c.best * 100) + " % – 80 % nötig" : "Gemischter Test, 80 % zum Abschließen") + '</p></div><button class="btn small" id="sCheck">Check</button></div></section>';
+  var rd = U.chap.nibbles.filter(function(n){ return S.read[n.key]; }).length;
+  h += '<section class="panel"><h2 style="font-size:20px">Skript</h2><p class="hint">Die ganze Einheit zum Durchlesen – in eigenen Worten nach dem Kursmaterial, ohne Timer. ' + rd + ' von ' + U.chap.nibbles.length + ' Abschnitten gelesen.</p><div class="toc">' +
+    U.chap.nibbles.map(function(n, i){ return '<button class="tocitem" data-r="' + i + '"><span class="tick' + (S.read[n.key] ? " on" : "") + '" aria-hidden="true">' + (S.read[n.key] ? "✓" : i + 1) + '</span><span>' + esc(n.t) + '</span><span aria-hidden="true">›</span></button>'; }).join("") + '</div></section>';
   if (U.esa.length) {
     h += '<section class="panel"><h2 style="font-size:20px">Einsendeaufgaben vorbereiten</h2><p class="hint">Die Original-Aufgaben löst du selbst. Hier trainierst du genau die Bausteine, die sie verlangen – mit eigenen, ähnlichen Übungen.</p>';
     U.esa.forEach(function(e){
@@ -352,6 +438,24 @@ function unitView(u) {
   var sp = document.getElementById("sProg"); if (sp) sp.onclick = function(){ startTasks([shuffle(U.gens)[0]], u); };
   document.getElementById("sCheck").onclick = function(){ startCheck(u); };
   app.querySelectorAll("[data-g]").forEach(function(b){ b.onclick = function(){ startTasks([b.dataset.g], u); }; });
+  app.querySelectorAll("[data-r]").forEach(function(b){ b.onclick = function(){ readerView(u, +b.dataset.r); }; });
+}
+
+// ---------- Skript: Lesen ohne Timer ----------
+function readerView(u, i) {
+  clearInterval(timer); sess = null;
+  var ns = UNIT[u].chap.nibbles, n = ns[i], r = readOf(n);
+  S.read[n.key] = true; save();
+  var h = header() + '<button class="btn ghost back" id="back">← ' + u + '</button>' +
+    '<article class="card"><span class="label">' + u + ' · Skript · Abschnitt ' + (i + 1) + ' von ' + ns.length + '</span><h2>' + esc(n.t) + '</h2>' + lessonHtml(n) +
+    '<div class="row">' + (r && r.fill ? '<button class="btn ghost" id="rFill">' + (r.fill.kind === "java" ? "Lückencode" : "Lückentext") + ' üben</button>' : '') + '<button class="btn ghost" id="rQuiz">Quiz dazu</button></div>' +
+    '<div class="row"><button class="btn ghost" id="rPrev"' + (i ? '' : ' disabled') + '>← Zurück</button><button class="btn" id="rNext">' + (i < ns.length - 1 ? "Weiter →" : "Fertig") + '</button></div></article>';
+  render(h);
+  document.getElementById("back").onclick = function(){ unitView(u); };
+  document.getElementById("rPrev").onclick = function(){ if (i) readerView(u, i - 1); };
+  document.getElementById("rNext").onclick = function(){ if (i < ns.length - 1) readerView(u, i + 1); else unitView(u); };
+  var rf = document.getElementById("rFill"); if (rf) rf.onclick = function(){ newSess([{ k: "fill", n: n }], 5, { unit: u, reader: i }); };
+  document.getElementById("rQuiz").onclick = function(){ newSess(n.quiz.map(function(_, qi){ return { k: "q", n: n, qi: qi }; }), 5, { unit: u, reader: i }); };
 }
 
 // ---------- Sessions starten ----------
@@ -361,13 +465,14 @@ function newSess(steps, mins, extra) {
   save(); clearInterval(timer); timer = setInterval(tick, 1000); step();
 }
 function nibbleSteps(n) {
-  var st = [{ k: "learn", n: n }]; n.quiz.forEach(function(_, i){ st.push({ k: "q", n: n, qi: i }); });
+  var st = [{ k: "learn", n: n }], r = readOf(n); if (r && r.fill) st.push({ k: "fill", n: n }); n.quiz.forEach(function(_, i){ st.push({ k: "q", n: n, qi: i }); });
   if (n.task) st.push({ k: "task", n: n }); st.push({ k: "fin", n: n }); return st;
 }
 function genStep(g, u) { var cat = GENS[g].cat; return { k: "gen", t: GEN.make(cat, seed(), g), unit: u || genUnit(g) }; }
 function itemStep(it) {
   if (it.type === "q") return { k: "q", n: it.n, qi: it.qi, review: it.tag };
   if (it.type === "exam") return { k: "exam", e: it.e, review: it.tag };
+  if (it.type === "fill") return { k: "fill", n: it.n, review: it.tag };
   if (it.type === "gen") { var s = genStep(it.gen); s.review = it.tag; return s; }
   return null;
 }
@@ -394,6 +499,8 @@ function checkSteps(u) {
   shuffle(EXAM.filter(function(e){ return e.rel.split("-")[0] === u && e.type === "tf"; })).slice(0, 2).forEach(function(e){ steps.push({ k: "exam", e: e, check: true }); });
   var tr = UNIT[u].gens.filter(function(g){ return GENS[g].cat === "trace"; });
   if (tr.length) { var s = genStep(shuffle(tr)[0], u); s.check = true; steps.push(s); }
+  var fl = UNIT[u].chap.nibbles.filter(function(n){ var r = readOf(n); return r && r.fill; });
+  if (fl.length) steps.push({ k: "fill", n: shuffle(fl)[0], check: true });
   return steps;
 }
 function startCheck(u) { newSess(checkSteps(u), Math.max(S.minutes, 10), { unit: u, check: u }); }
@@ -440,11 +547,13 @@ function step() {
   var h = sbar(cur, bars.length);
   if (s.k === "exam") h += examCard(s.e, tagLine(s));
   else if (s.k === "gen") h += genCard(s);
+  else if (s.k === "fill") h += fillCard(s);
   else {
     var tag = '<span class="label">' + s.n.chap.id + ' · ' + esc(s.n.chap.title) + '</span>' + tagLine(s);
     if (s.k === "learn") {
-      h += '<article class="card">' + tag + '<h2>' + esc(s.n.t) + '</h2><ul class="learn">' + s.n.learn.map(function(l){ return '<li>' + md(l) + '</li>'; }).join("") + '</ul>' +
-        (s.n.code ? '<pre><code>' + hl(s.n.code) + '</code></pre>' : '') + '<button class="btn" id="next">Verstanden, zum Quiz</button></article>';
+      var rf = readOf(s.n);
+      h += '<article class="card">' + tag + '<h2>' + esc(s.n.t) + '</h2>' + lessonHtml(s.n) + '<button class="btn" id="next">' + (rf && rf.fill ? "Verstanden, zum Lückencode" : "Verstanden, zum Quiz") + '</button></article>';
+      S.read[s.n.key] = true; save();
     } else if (s.k === "q") {
       var q = s.n.quiz[s.qi];
       h += '<article class="card">' + tag + '<p class="q">' + md(q.q) + '</p><div class="answers">' +
@@ -465,6 +574,7 @@ function step() {
   if (s.k === "q") bindQuiz(s);
   if (s.k === "exam") bindExam(s.e);
   if (s.k === "gen") bindGen(s);
+  if (s.k === "fill") bindFill(s);
 }
 function advance() { sess.i++; step(); }
 function nextBtn() { return '<button class="btn" id="next" style="margin-top:14px;width:100%">Weiter</button>'; }
@@ -555,6 +665,35 @@ function testsTable(t) {
   return '<div class="tablewrap"><table class="tests"><thead><tr><th>Test</th><th>erwartet</th></tr></thead><tbody>' +
     t.tests.map(function(x){ return '<tr><td><code>' + esc(x.label) + '</code></td><td><code>' + esc(x.show) + '</code></td></tr>'; }).join("") + '</tbody></table></div>';
 }
+// Lückencode aus der Musterlösung: einige Kernzeilen ausblenden
+function lineGaps(s) {
+  if (s.lgaps) return s.lgaps;
+  var cand = [];
+  s.t.solFiles.forEach(function(f, fi){
+    f.content.split("\n").forEach(function(l, li){
+      var x = l.trim();
+      if (x.length < 6 || /^(\/\/|\/\*|\*|\}|\{|import |package |@)/.test(x)) return;
+      if (/\bclass\b|\binterface\b|\benum\b/.test(x)) return;
+      if (/^(public|private|protected|static)\b.*\)\s*(throws [\w., ]+)?\s*\{$/.test(x)) return; // Methodenköpfe bleiben stehen
+      if (/^(private|protected|public)?\s*(static\s+)?(final\s+)?[\w<>\[\]]+\s+\w+;$/.test(x)) return; // reine Attributdeklarationen
+      cand.push(fi + ":" + li);
+    });
+  });
+  var k = Math.min(cand.length, Math.max(2, Math.min(5, Math.round(cand.length / 4))));
+  s.lgaps = shuffle(cand).slice(0, k);
+  return s.lgaps;
+}
+function lineGapHtml(s) {
+  var gaps = lineGaps(s), h = '', n = 0;
+  s.t.solFiles.forEach(function(f, fi){
+    h += '<p class="mono hint">' + esc(f.name) + '</p><pre class="fillcode"><code>' + f.content.replace(/\n$/, "").split("\n").map(function(l, li){
+      if (gaps.indexOf(fi + ":" + li) < 0) return hl(l);
+      var ind = l.match(/^\s*/)[0], w = Math.max(18, l.trim().length + 4);
+      return esc(ind) + '<input class="gap line" data-lk="' + fi + ":" + li + '" style="width:' + w + 'ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Fehlende Zeile ' + (++n) + '">';
+    }).join("\n") + '</code></pre>';
+  });
+  return h;
+}
 function genCard(s) {
   var t = s.t, U = s.unit ? UNIT[s.unit] : null;
   var head = '<article class="card"><span class="label">' + (U ? s.unit + ' · ' : '') + esc(GEN.CATS.filter(function(c){ return c.id === t.cat; })[0].name) + (t.ref ? ' · angelehnt an ' + esc(t.ref) : '') + '</span>' + tagLine(s) + '<h2>' + esc(t.title) + '</h2>';
@@ -562,9 +701,14 @@ function genCard(s) {
     return head + '<p class="q">Geben Sie exakt die produzierte Konsolenausgabe an.</p><pre><code>' + hl(t.code) + '</code></pre>' +
       '<label class="hint" for="ans-x">Deine Ausgabe</label><textarea id="ans-x" spellcheck="false" autocapitalize="off" placeholder="Zeile für Zeile, wie auf der Konsole"></textarea><button class="btn" id="reveal">Lösung zeigen</button><div id="fb" class="reveal"></div></article>';
   }
-  var pap = S.medium !== "rechner";
-  var h = head + '<div class="seg small" role="group" aria-label="Bearbeitung"><button id="mPap" aria-pressed="' + pap + '">Auf Papier</button><button id="mPc" aria-pressed="' + !pap + '">Am Rechner</button></div>' +
+  var lu = S.medium === "luecke", pap = !lu && S.medium !== "rechner";
+  var h = head + '<div class="seg small three" role="group" aria-label="Bearbeitung"><button id="mPap" aria-pressed="' + pap + '">Auf Papier</button><button id="mPc" aria-pressed="' + (!pap && !lu) + '">Am Rechner</button><button id="mLu" aria-pressed="' + lu + '">Lückencode</button></div>' +
     '<div class="q">' + mdBlock(t.task) + '</div>';
+  if (lu) {
+    (t.givenFiles || []).forEach(function(f, i){ h += fileBlock(f, "gv" + i, "gegeben"); });
+    return h + '<div class="task"><p><b>Lückencode</b> – die Musterlösung mit fehlenden Zeilen. Schreib die Zeilen selbst. Ein guter Einstieg, bevor du die ganze Aufgabe frei löst – zählt aber nicht als Pflichtaufgabe der Einheit.</p></div>' +
+      lineGapHtml(s) + '<button class="btn" id="lcheck">Zeilen prüfen</button><div id="fb" class="reveal"></div><p id="copyMsg" class="hint" role="status"></p></article>';
+  }
   (t.givenFiles || []).forEach(function(f, i){ h += fileBlock(f, "gv" + i, "gegeben"); });
   if (t.kind === "program") h += '<span class="label">Erwartete Ausgabe</span><pre><code>' + esc(t.out) + '</code></pre>';
   else h += '<span class="label">Daran wird geprüft</span>' + testsTable(t);
@@ -589,18 +733,34 @@ function solutionHtml(t) {
 }
 function genDone(s, ok) {
   var t = s.t;
-  record("g:" + t.gen, t.rel, ok, { q: t.title + (t.kind === "trace" ? "" : " (" + (S.medium === "rechner" ? "Rechner" : "Papier") + ")"), self: t.kind !== "trace", why: t.why || "" });
-  if (ok && s.unit && UNIT[s.unit].gens.indexOf(t.gen) >= 0) { S.prog[s.unit] = (S.prog[s.unit] || 0) + 1; sess.tasksOk++; save(); }
+  record("g:" + t.gen, t.rel, ok, { q: t.title + (t.kind === "trace" ? "" : " (" + (S.medium === "rechner" ? "Rechner" : S.medium === "luecke" ? "Lückencode" : "Papier") + ")"), self: t.kind !== "trace", why: t.why || "" });
+  if (ok && s.unit && UNIT[s.unit].gens.indexOf(t.gen) >= 0 && (t.kind === "trace" || S.medium !== "luecke")) { S.prog[s.unit] = (S.prog[s.unit] || 0) + 1; sess.tasksOk++; save(); }
 }
 function bindGen(s) {
   var t = s.t, fb = document.getElementById("fb");
   app.querySelectorAll("[data-copy]").forEach(function(b){ b.onclick = function(){ copyFrom(b.dataset.copy); }; });
   var mp = document.getElementById("mPap"), mc = document.getElementById("mPc");
-  if (mp) { mp.onclick = function(){ S.medium = "papier"; save(); step(); }; mc.onclick = function(){ S.medium = "rechner"; save(); step(); }; }
+  if (mp) { mp.onclick = function(){ S.medium = "papier"; save(); step(); }; mc.onclick = function(){ S.medium = "rechner"; save(); step(); }; document.getElementById("mLu").onclick = function(){ S.medium = "luecke"; save(); step(); }; }
   function finish(pre, extraHtml) {
     fb.innerHTML = (extraHtml || '') + (t.kind === "trace" ? '' : solutionHtml(t)) + rateButtons(pre);
     bindRate(function(v){ genDone(s, v); });
     fb.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  var lc = document.getElementById("lcheck");
+  if (lc) {
+    var ins = [].slice.call(app.querySelectorAll("input.gap.line"));
+    ins.forEach(function(x, i){ x.addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); if (ins[i + 1]) ins[i + 1].focus(); else lc.click(); } }); });
+    lc.onclick = function(){
+      lc.hidden = true; var right = 0, exp = '';
+      ins.forEach(function(x){
+        var p = x.dataset.lk.split(":"), want = t.solFiles[+p[0]].content.split("\n")[+p[1]].trim(), ok = normJ(x.value) === normJ(want);
+        x.classList.add(ok ? "right" : "wrong"); x.disabled = true; if (ok) right++;
+        else exp += '<li><code>' + esc(x.value.trim() || "(leer)") + '</code><br>erwartet: <code>' + esc(want) + '</code></li>';
+      });
+      var all = right === ins.length;
+      finish(all ? 1 : null, '<p class="verdict ' + (all ? "ok" : "no") + '">' + right + ' von ' + ins.length + ' Zeilen wie in der Musterlösung.</p>' +
+        (all ? '' : '<ul class="tlist">' + exp + '</ul><p class="hint">Es gibt oft mehrere richtige Lösungen. Ist deine Zeile gleichwertig, bewerte unten mit „Sitzt“ – im Zweifel am Rechner testen.</p>'));
+    };
   }
   var rv = document.getElementById("reveal");
   if (rv) rv.onclick = function(){
@@ -648,9 +808,12 @@ function summary() {
     '<p class="muted">Was nicht saß, kommt in der nächsten Session wieder. Was saß, wird nach 1, 3, 7, 14 und 30 Tagen erneut geprüft.</p>' + sessionWeak(sess.concepts) +
     (sess.practice ? '<button class="btn ghost" id="more">Noch eine Aufgabe</button>' : '') + '<button class="btn" id="home">Zur Übersicht</button></article>';
   var wasPractice = sess.practice ? { u: sess.unit, g: sess.steps[0] && sess.steps[0].t && sess.steps[0].t.gen } : null;
+  var wasReader = sess.reader != null ? { u: sess.unit, i: sess.reader } : null;
+  if (wasReader) h = h.replace('<button class="btn" id="home">Zur Übersicht</button>', '<button class="btn ghost" id="toReader">Zurück zum Skript</button><button class="btn" id="home">Zur Übersicht</button>');
   sess = null; save(); render(h); bindWeak();
   document.getElementById("home").onclick = home;
   var mo = document.getElementById("more"); if (mo) mo.onclick = function(){ startTasks([wasPractice.g], wasPractice.u); };
+  var tr = document.getElementById("toReader"); if (tr) tr.onclick = function(){ readerView(wasReader.u, wasReader.i); };
 }
 
 // ---------- Programmieren: Startseite ----------
@@ -661,12 +824,12 @@ function reachedGens() { // Übungstypen aller Einheiten bis zur aktuellen
   return g;
 }
 function codeHome() {
-  var pap = S.medium !== "rechner", reached = reachedGens(), solved = 0;
+  var lu = S.medium === "luecke", pap = !lu && S.medium !== "rechner", reached = reachedGens(), solved = 0;
   Object.keys(S.prog).forEach(function(k){ solved += S.prog[k]; });
   var h = '<section class="panel"><span class="label">Programmieren üben</span>' +
     '<p class="hint">Jede Aufgabe wird neu erzeugt – andere Zahlen, Namen, Varianten. So trainierst du Können statt Auswendiglernen.</p>' +
-    '<div class="seg small" role="group" aria-label="Bearbeitung"><button id="cPap" aria-pressed="' + pap + '">Auf Papier</button><button id="cPc" aria-pressed="' + !pap + '">Am Rechner</button></div>' +
-    '<p class="hint">' + (pap ? "Wie in der Klausur: von Hand schreiben, dann mit Musterlösung und Checkliste vergleichen." : "Vorlage und Test.java kopieren, in der IDE programmieren, Tests laufen lassen.") + '</p>' +
+    '<div class="seg small three" role="group" aria-label="Bearbeitung"><button id="cPap" aria-pressed="' + pap + '">Auf Papier</button><button id="cPc" aria-pressed="' + (!pap && !lu) + '">Am Rechner</button><button id="cLu" aria-pressed="' + lu + '">Lückencode</button></div>' +
+    '<p class="hint">' + (lu ? "Einstieg: Die Musterlösung mit fehlenden Kernzeilen – du ergänzt sie. Zählt nicht für die 3 Pflichtaufgaben je Einheit." : pap ? "Wie in der Klausur: von Hand schreiben, dann mit Musterlösung und Checkliste vergleichen." : "Vorlage und Test.java kopieren, in der IDE programmieren, Tests laufen lassen.") + '</p>' +
     '<button class="btn" id="cMix"' + (reached.length ? '' : ' disabled') + '>Gemischte Aufgabe' + (reached.length ? ' (bis ' + reached[reached.length - 1].u + ')' : '') + '</button>' +
     (reached.length ? '' : '<p class="hint">Programmieraufgaben beginnen ab EJP – wähle unten eine Einheit.</p>') +
     '<div class="stats" style="margin-top:4px"><div class="stat"><b>' + solved + '</b><small>Aufgaben gelöst</small></div><div class="stat"><b>' + Object.keys(GENS).length + '</b><small>Aufgabentypen</small></div><div class="stat"><b>∞</b><small>Varianten</small></div></div></section>';
@@ -680,6 +843,7 @@ function codeHome() {
 function bindCodeHome() {
   document.getElementById("cPap").onclick = function(){ S.medium = "papier"; save(); home(); };
   document.getElementById("cPc").onclick = function(){ S.medium = "rechner"; save(); home(); };
+  document.getElementById("cLu").onclick = function(){ S.medium = "luecke"; save(); home(); };
   var mx = document.getElementById("cMix");
   if (mx) mx.onclick = function(){ var r = reachedGens(); if (!r.length) return; var pick = shuffle(r)[0]; startTasks([pick.g], pick.u); };
   app.querySelectorAll("[data-cg]").forEach(function(b){ b.onclick = function(){ startTasks([b.dataset.cg], b.dataset.cu); }; });
