@@ -1,7 +1,7 @@
 // Service Worker: App offline verfügbar machen.
 // Die Seite selbst wird immer zuerst frisch vom Server geholt (am HTTP-Cache vorbei),
 // nur offline kommt sie aus dem Speicher. VERSION bei jeder neuen Version erhöhen.
-const VERSION = "nibble-v8";
+const VERSION = "nibble-v9";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/logo.svg",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png"];
 

@@ -25,7 +25,9 @@ Drei Reiter: **Lernpfad**, **Programmieren**, **Klausur**.
 
 **Lernt mit, wo du Fehler machst:** *Meine Baustellen* zeigt Themen, die gerade haken, mit „Gezielt üben“. Dazu ein Protokoll der letzten Fehler.
 
-**Klausurtraining** im Aufbau der Probeklausur (A1–A5).
+**Probeklausur-Generator** – erzeugt auf Knopfdruck eine komplette Klausur im Aufbau der Probeaufgaben (A1–A5): zehn Aussagen „korrekt oder nicht?“, eine Klasse mit Unterklasse aus einer gemeinsamen Welt (Stadt/Landeshauptstadt, Server/Webserver, Fluss/Nebenfluss, …), Fallunterscheidung mit Exceptions, Ausgabe-Aufgabe, statische Methode, Array- und Matrix-Methode. Mit Timer (60/90/120 Min.), Druckansicht, Korrektur per Musterlösung und Checkliste, Punkte-Richtwerten und Verlauf.
+
+**Klausurtraining** mit festen Einzelaufgaben im Aufbau der Probeklausur (A1–A5).
 
 **Webapp:** installierbar, offline nutzbar, Fortschritt sichern/laden.
 
@@ -37,6 +39,7 @@ Alle Programmieraufgaben werden aus Generatoren erzeugt, die gegen echtes Java g
 node tools/verify.js 200 40   # erzeugt Tausende Varianten, kompiliert sie und vergleicht Ausgaben/Tests
 node tools/mutate.js          # baut typische Fehler in Musterlösungen ein und prüft, ob die Tests sie finden
 node tools/verify_fill.js     # setzt jede Lösung und Alternative in die Lückencodes ein, kompiliert, führt aus → src/fillout.js
+node tools/verify_mock.js 300 # erzeugt 300 Probeklausuren und prüft alle Code-Aussagen und Musterlösungen mit javac/java
 ```
 
 Benötigt Node.js und ein JDK (17+).
@@ -75,7 +78,7 @@ Nach einer Änderung:
 python3 build.py          # baut index.html neu
 ```
 
-Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v8";` hochzählen (z. B. `nibble-v9`), damit installierte Apps die neue Version laden. Danach committen und pushen.
+Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v9";` hochzählen (z. B. `nibble-v10`), damit installierte Apps die neue Version laden. Danach committen und pushen.
 
 ## Farben und Logo
 
