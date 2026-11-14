@@ -10,13 +10,16 @@ Drei Reiter: **Lernpfad**, **Programmieren**, **Klausur**.
 
 **Lernpfad entlang des Lehrplans** – EIP → PUP → PJA → EJP → VAR → STA → OBJ → KLA → VER → ITR → VRB → EXC → ARR → ZKT. Einheit antippen, Zeit einstellen (10–45 Min.), loslegen. Jede Einheit hat Stufen:
 
-1. **Lernen** – kurze Häppchen mit Erklärung, Codebeispiel und Quiz.
+1. **Lernen** – je Häppchen ein ausführlicher Lesetext (in eigenen Worten nach dem Kursmaterial) mit Beispielen und Stolperfallen, dann **Lückencode** bzw. Lückentext zum Selbst-Ergänzen, dann das Quiz.
 2. **Programmieren** – unbegrenzt neue Aufgaben (Zufallsgenerator: jedes Mal andere Zahlen, Namen, Varianten), passend zum Stoff der Einheit:
    Ausgabe vorhersagen, lineare Programme, statische Methoden, Verzweigungen, Schleifen, Arrays, 2D-Arrays, Strings, Klassen, Vererbung, Exceptions – plus Kursprojekte angelehnt an die Übungen der Lerneinheiten.
    - *Auf Papier:* wie in der Klausur, mit Zeitvorgabe, Musterlösung, Korrektur-Checkliste und typischen Klausur-Fallen.
    - *Am Rechner:* Vorlage und fertige `Test.java` kopieren, `javac *.java` und `java Test` – jede Zeile meldet OK oder FEHLER.
+   - *Lückencode:* die Musterlösung mit ausgeblendeten Kernzeilen zum Ergänzen – als Einstieg (zählt nicht als Pflichtaufgabe).
 3. **Kapitel-Check** – gemischter Test, ab 80 % ist die Einheit abgeschlossen.
 4. **Einsendeaufgaben vorbereiten** – für jede Einsendeaufgabe die geforderten Fähigkeiten mit passenden Übungen. Die Original-Aufgaben löst du selbst; die App trainiert die Bausteine mit eigenen, ähnlichen Aufgaben.
+
+**Skript** – jede Einheit lässt sich ohne Timer Abschnitt für Abschnitt lesen, mit Lückencode und Quiz pro Abschnitt. So kannst du mit der App komplett lernen, nicht nur abfragen.
 
 **Nichts vergessen:** Jede Session enthält fällige Wiederholungen (Abstände 1, 3, 7, 14, 30 Tage) und einen Rückblick auf abgeschlossene Einheiten.
 
@@ -33,6 +36,7 @@ Alle Programmieraufgaben werden aus Generatoren erzeugt, die gegen echtes Java g
 ```bash
 node tools/verify.js 200 40   # erzeugt Tausende Varianten, kompiliert sie und vergleicht Ausgaben/Tests
 node tools/mutate.js          # baut typische Fehler in Musterlösungen ein und prüft, ob die Tests sie finden
+node tools/verify_fill.js     # setzt jede Lösung und Alternative in die Lückencodes ein, kompiliert, führt aus → src/fillout.js
 ```
 
 Benötigt Node.js und ein JDK (17+).
@@ -71,7 +75,7 @@ Nach einer Änderung:
 python3 build.py          # baut index.html neu
 ```
 
-Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v6";` hochzählen (z. B. `nibble-v7`), damit installierte Apps die neue Version laden. Danach committen und pushen.
+Vorher am besten `node tools/verify.js` laufen lassen. Dann in `sw.js` die Zeile `const VERSION = "nibble-v7";` hochzählen (z. B. `nibble-v8`), damit installierte Apps die neue Version laden. Danach committen und pushen.
 
 ## Farben und Logo
 

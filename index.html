@@ -208,6 +208,24 @@ table.tests th { border-top: 0; font-family: var(--f-mono); font-size: 11px; tex
 table.tests code { background: none; padding: 0; white-space: pre; }
 .seg.small button { min-height: 40px; font-size: 14px; }
 .linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; padding: 8px; min-height: 44px; }
+/* Lesetexte, Stolperfallen, Lückencode */
+.read { display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.6; max-width: 68ch; }
+.read p { margin: 0; }
+.read .tlist { gap: 6px; }
+.pit { border-left: 3px solid var(--warn); background: var(--surface-2); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: 15px; }
+.pit b { display: block; font-family: var(--f-display); margin-bottom: 4px; }
+input.gap { font-family: var(--f-mono); font-size: 13px; line-height: 1.3; padding: 1px 4px; margin: 1px 0; border: 0; border-bottom: 2px solid var(--accent); border-radius: 4px 4px 0 0; background: rgba(127,144,168,.22); color: inherit; max-width: 100%; box-sizing: content-box; }
+input.gap:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+input.gap.right { border-bottom-color: var(--ok); background: color-mix(in srgb, var(--ok) 25%, transparent); }
+input.gap.wrong { border-bottom-color: var(--bad); background: color-mix(in srgb, var(--bad) 25%, transparent); }
+.filltext input.gap { font-size: 15px; }
+.filltext { font-size: 16px; line-height: 2; }
+.filltext p { margin: 0; }
+mark.sol { background: color-mix(in srgb, var(--ok) 30%, transparent); color: inherit; border-radius: 3px; padding: 0 2px; }
+.toc { display: flex; flex-direction: column; }
+.tocitem { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 10px 4px; min-height: 48px; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; text-align: left; width: 100%; font-size: 15px; }
+.tick { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-mono); font-size: 12px; background: var(--surface-2); color: var(--muted); }
+.tick.on { background: var(--ok-soft); color: var(--ok); font-weight: 700; }
 @media (prefers-reduced-motion: no-preference) { .card { animation: in .25s ease-out; } @keyframes in { from { transform: translateY(6px); opacity: .6 } } }
 </style>
 
@@ -2583,6 +2601,1013 @@ var UNITS = [
     { id: "ZKT-E4", title: "Datum formatieren", skills: ["LocalDate und plusDays", "DateTimeFormatter mit Locale"], gens: ["t-date"] }] }
 ];
 
+// nibble – Lesetexte, Stolperfallen und Lückencode, Teil 1 (EIP, PUP)
+// Eigene Ausarbeitung entlang der Lerneinheiten; keine Originaltexte.
+// read: Absätze (Markdown light) oder {code}  ·  pit: Stolperfallen  ·  fill: Lückentext/-code
+var READ = READ || {};
+
+// ====================== EIP – Einführung in die Programmierung ======================
+READ["EIP-0"] = {
+  read: [
+    "Ein **Computer** ist eine elektronische, programmgesteuerte Maschine zur Verarbeitung von **Daten**. „Computer“ und „Rechner“ meinen dasselbe – das englische *compute* heißt berechnen. Früher sprach man von *EDVA* (elektronische Datenverarbeitungsanlage), heute eher von Computer oder Computersystem.",
+    "Daten sind dabei Informationen in einer Form, die eine Maschine verarbeiten kann. Wichtig für das ganze Studium: Daten und Programme bilden immer nur ein **Modell** der Wirklichkeit ab. Ein Kundendatensatz ist nicht der Kunde, sondern eine Auswahl von Eigenschaften, die für die Aufgabe wichtig sind.",
+    "**Wo Computer überlegen sind:** Sie führen Millionen Arbeitsschritte pro Sekunde aus (*Geschwindigkeit*), wiederholen sie fehlerfrei (*Zuverlässigkeit*) und können riesige Datenmengen speichern und schnell darauf zugreifen (*Speichervolumen*). Nach dem sogenannten Moore'schen Gesetz verdoppelt sich die Transistorzahl – und damit grob die Leistung – etwa alle 18 Monate.",
+    "Die Fehler, die uns im Alltag nerven, sind fast nie Rechenfehler der Maschine. Es sind **Programmierfehler** (falsch formulierte Anweisungen) oder **Eingabefehler**. Der Computer tut genau das, was im Programm steht – auch wenn es falsch ist.",
+    "**Wo es Grenzen gibt:** Manche Probleme lassen sich wegen riesiger Datenmengen oder Rechenzeiten nicht kostengünstig lösen. Bei sehr komplexen Systemen wie dem Wetter sind exakte Vorhersagen nicht möglich. Und es gibt rechtliche und ethische Grenzen: Internetkriminalität, Datenschutz, Urheberrecht – und Entscheidungen, die moralische Urteile verlangen, gehören nicht an eine Maschine."
+  ],
+  pit: ["„Der Computer hat sich verrechnet“ stimmt fast nie – meist steckt ein Programmier- oder Eingabefehler dahinter.", "Daten sind ein Modell, nicht die Wirklichkeit selbst."],
+  fill: { kind: "text", t: "Ergänze die Begriffe.", text: "Ein Computer ist eine elektronische, [[0]] Maschine zur Verarbeitung von [[1]]. Die meisten Fehler im Alltag sind keine Rechenfehler, sondern Programmierfehler oder [[2]].",
+    gaps: [["programmgesteuerte", "programmierbare"], ["Daten"], ["Eingabefehler", "Fehler bei der Eingabe"]] }
+};
+READ["EIP-1"] = {
+  read: [
+    "Egal ob Smartphone, Laptop oder Server – jeder Computer besitzt mindestens ein **Eingabegerät**, eine **Verarbeitungseinheit**, die die Daten nach einer Lösungsvorschrift bearbeitet, und mindestens ein **Ausgabegerät**. Diese Grundstruktur heißt **EVA-Prinzip**: Eingabe → Verarbeitung → Ausgabe. Ein- und Ausgabegeräte sind die Schnittstelle zwischen Mensch und Maschine.",
+    "Auch viele Programme folgen diesem Muster: Eine Suchmaschine liest Suchwörter ein (E), verarbeitet sie (V) und gibt eine Trefferliste aus (A). Deine ersten Java-Programme werden genauso aufgebaut sein: Werte einlesen, rechnen, Ergebnis ausgeben.",
+    "**Von-Neumann-Architektur:** John von Neumann ordnete die Bestandteile eines Computers nach genau diesen Aufgaben. Die **Zentraleinheit** besteht aus **Prozessor** (CPU) und **Arbeitsspeicher**. Über eine **Ein-/Ausgabesteuerung** (Controller) sind die Geräte angebunden. Alles außer Prozessor, Arbeitsspeicher und E/A-Steuerung heißt **Peripherie** – auch wenn es im Gehäuse steckt, wie die Festplatte.",
+    "Entscheidend: **Programm und Daten** müssen zur Ausführung im **Arbeitsspeicher** (RAM) liegen. Der ist schnell, aber **flüchtig** – beim Ausschalten ist sein Inhalt weg. Dauerhaft gespeichert wird auf Medien wie Festplatte (HDD), SSD oder USB-Stick.",
+    "Auf Speicher wird **gelesen** (eine Kopie wird übernommen, das Original bleibt), **geschrieben** (ggf. wird Vorhandenes überschrieben) oder **gelöscht**. Normales Löschen entfernt meist nur den Verweis im Dateisystem – die Daten selbst sind erst nach „sicherem“ Löschen wirklich weg. Für IT-Sicherheit ein wichtiger Punkt!"
+  ],
+  pit: ["Peripherie hängt nicht davon ab, ob ein Gerät innen oder außen sitzt – die Festplatte ist Peripherie.", "Der Arbeitsspeicher ist flüchtig, Festplatte/SSD nicht."],
+  fill: { kind: "text", t: "Ergänze die Begriffe.", text: "Das [[0]]-Prinzip beschreibt Eingabe, Verarbeitung und Ausgabe. Prozessor und [[1]] bilden die Zentraleinheit. Alle übrigen Geräte heißen [[2]]. Der Arbeitsspeicher ist [[3]]: Beim Ausschalten geht sein Inhalt verloren.",
+    gaps: [["EVA"], ["Arbeitsspeicher", "RAM", "Hauptspeicher"], ["Peripherie", "Peripheriegeräte"], ["flüchtig"]] }
+};
+READ["EIP-2"] = {
+  read: [
+    "Hardware allein ist kein funktionierender Computer. Damit beim Druck auf die Taste A auch ein A erscheint, braucht es Programme. **Software** umfasst die verschiedenen Computerprogramme **samt ihrer Daten und Dokumentation**. Ein **Programm** ist eine Folge präziser Anweisungen, die ein Computer ausführen kann.",
+    "Hardware und Software bilden eine Einheit: Zwei baugleiche Smartphones können ganz unterschiedliche Software haben und damit ganz unterschiedlich nutzbar sein. Deshalb versteht man unter einem Computer(system) die **Einheit von Hardware und Software**.",
+    "Im **Schalenmodell** liegt die Hardware innen. Darum liegt die **Systemsoftware**, die eng mit der Hardware zusammenarbeitet: vor allem das **Betriebssystem**, aber auch Treiber sowie Compiler und Interpreter. Außen liegt die **Anwendersoftware** – alles, was für konkrete Anwendungsfälle geschrieben wurde, von der Textverarbeitung bis zum SIEM im SOC.",
+    "Es gibt zwei Rollen: **Anwender** benutzen Programme. **Programmentwickler** entwerfen und implementieren Programme nach den Vorgaben der Anwender. Beim Testen wechseln Entwickler bewusst die Perspektive und betrachten ihr Programm mit den Augen der Anwender."
+  ],
+  pit: ["Dokumentation gehört laut Definition zur Software dazu.", "Compiler und Interpreter zählen zur Systemsoftware, weil sie hardwareabhängig sind."],
+  fill: { kind: "text", t: "Ergänze die Begriffe.", text: "Software umfasst Programme, die zugehörigen Daten und die [[0]]. Das Betriebssystem gehört zur [[1]]. Ein Programm für einen konkreten Anwendungsfall ist [[2]].",
+    gaps: [["Dokumentation", "Dokumentationen"], ["Systemsoftware"], ["Anwendersoftware", "Anwendungssoftware"]] }
+};
+READ["EIP-3"] = {
+  read: [
+    "Menschen verstehen auch ungenaue Anweisungen: „Schließ bitte das Fenster!“ funktioniert, obwohl eigentlich mehrere Schritte nötig sind (hingehen, Griff fassen, Fenster schließen, Griff drehen). Ein Computer ergänzt nichts – er braucht **präzise und vollständige** Anweisungen und tut genau das, was dasteht.",
+    "Ein **Algorithmus** ist eine Folge von Anweisungen, die eine **formale, endliche, eindeutige und wiederholbare** Vorschrift zur Lösung einer Menge **gleichartiger** Aufgaben darstellt. Die einzelnen Anweisungen heißen **Arbeitsschritte**. Bekannte Beispiele: der euklidische Algorithmus für den größten gemeinsamen Teiler, Sortierverfahren, Dijkstra für kürzeste Wege im Navi.",
+    "Einen umgangssprachlich beschriebenen Algorithmus versteht der Computer nicht. Erst wenn er in einer Programmiersprache aufgeschrieben ist, entsteht **Programmcode** (Quellcode, *source code*). Das Schreiben des Programms heißt **Implementierung**. Danach wird übersetzt, damit der Prozessor ihn ausführen kann.",
+    "Für komplexe Aufgaben gibt es die **Methode der schrittweisen Verfeinerung**: Die Aufgabe wird in Teilaufgaben zerlegt, diese wieder in kleinere – bis jeder Schritt eindeutig ist. Dabei achtet man auf Abhängigkeiten (was muss vorher fertig sein?) und erkennt wiederkehrende Schritte. Beim Kaffeekochen ist egal, ob zuerst Wasser oder Pulver eingefüllt wird – beides muss aber vor dem Einschalten passiert sein.",
+    { code: "Kaffee kochen\n  1. Wasser eingießen\n     1.1 Kanne nehmen\n     1.2 Kanne bis zur Markierung füllen\n     1.3 Wasser in den Tank gießen\n  2. Kaffeepulver eingeben\n     2.1 Filter einsetzen\n     2.2 Pulver einfüllen\n  3. Kaffeemaschine starten   (erst nach 1 und 2!)" },
+    "Genau so wirst du später programmieren: erst grob überlegen (welche Methoden brauche ich?), dann jede Methode Schritt für Schritt ausformulieren."
+  ],
+  pit: ["„Endlich“ heißt: Der Algorithmus muss nach endlich vielen Schritten fertig sein (keine Endlosschleife).", "Ein Algorithmus löst eine ganze Klasse gleichartiger Aufgaben, nicht nur einen Einzelfall."],
+  fill: { kind: "text", t: "Ergänze die vier Eigenschaften und den Fachbegriff.", text: "Ein Algorithmus ist eine formale, [[0]], [[1]] und wiederholbare Vorschrift. Das Erstellen eines Programms in einer Programmiersprache nennt man [[2]].",
+    gaps: [["endliche"], ["eindeutige"], ["Implementierung", "Implementieren"]] }
+};
+
+// ====================== PUP – Programmiersprachen und Programmierung ======================
+READ["PUP-0"] = {
+  read: [
+    "Die Hardware eines Computers ist vereinfacht ein riesiges System von Schaltern. Ein Schalter kennt zwei Zustände: geschlossen (Strom fließt, **1**) und offen (kein Strom, **0**). Die kleinste Dateneinheit – ein einzelnes Symbol 0 oder 1 – heißt **Bit** (*binary digit*). 8 Bit sind ein **Byte**, damit lassen sich 2⁸ = 256 verschiedene Werte darstellen.",
+    "**Maschinensprache** ist die Sprache, die ein Prozessor direkt ausführen kann. Jeder Prozessortyp hat seine eigene. Ein Programm in Maschinensprache heißt **Maschinencode** – für Menschen kaum lesbar. Heute schreibt fast niemand mehr direkt Maschinencode, er wird von Übersetzern erzeugt.",
+    "Damit Computer Texte austauschen können, braucht es eine **Zeichenkodierung**: eine Tabelle, die jedem Zeichen eine Zahl zuordnet. **ASCII** (1963) war ursprünglich ein 7-Bit-Code mit 128 Zeichen, später auf 8 Bit erweitert. Ziffern und Buchstaben sind aufsteigend kodiert (`'0' < '9'`, `'A' < 'Z'`, `'a' < 'z'`), Großbuchstaben liegen aber vor den Kleinbuchstaben – ein Vergleich ohne Rücksicht auf Groß-/Kleinschreibung klappt also nicht direkt.",
+    "**Unicode** hat das Ziel, alle Zeichen aller Schriftkulturen zu kodieren. Jedes Zeichen bekommt eine weltweit eindeutige Nummer. Häufige Zeichen werden mit 2 Byte (16 Bit), seltenere mit 4 Byte kodiert. Die Zeichen sind in benannte **Blöcke** gruppiert – die Nummern 0 bis 127 bilden den Block *Basic Latin*, der mit ASCII übereinstimmt. Java verwendet Unicode für `char` und `String`.",
+    "Das erklärt später ein Verhalten, das in Klausuren gern abgefragt wird: Ein `char` ist intern eine Zahl. `'A' + 1` ergibt deshalb 66, und `(char) ('A' + 1)` ist `'B'`."
+  ],
+  pit: ["Bit ≠ Byte: 1 Byte = 8 Bit.", "ASCII-Vergleich: 'Z' < 'a' – Großbuchstaben kommen zuerst."],
+  fill: { kind: "text", t: "Ergänze.", text: "Die kleinste Dateneinheit heißt [[0]]. Ein Byte besteht aus [[1]] Bit und kann [[2]] verschiedene Werte darstellen. Java kodiert Zeichen mit [[3]].",
+    gaps: [["Bit"], ["8", "acht"], ["256"], ["Unicode"]] }
+};
+READ["PUP-1"] = {
+  read: [
+    "„Mein Computer versteht mich nicht!“ – das Grundproblem: Menschliche Sprache ist voller Ungenauigkeiten und Mehrdeutigkeiten, die ein Prozessor nicht auflösen kann. **Programmiersprachen** sind das Bindeglied: für Menschen verständlich, für den Computer eindeutig. Dafür haben sie starre Regeln.",
+    "Eine Programmiersprache ist eine **formale Sprache** zur Formulierung von Computerprogrammen. Wie natürliche Sprachen hat sie eine Grammatik, aber im Unterschied dazu ist diese präzise festgelegt.",
+    "Die **Syntax** legt fest, aus welchen Zeichen und nach welchen Regeln Wörter und „Sätze“ (Anweisungen) gebildet werden. Verletzt man sie – fehlendes Semikolon, falsch geschriebenes Schlüsselwort, offene Klammer –, ist das ein **Syntaxfehler**: Der Compiler kann das Programm gar nicht übersetzen.",
+    "Die **Semantik** beschreibt die Bedeutung syntaktisch korrekter Konstrukte – also was das Programm tatsächlich tut. Ein Programm kann syntaktisch einwandfrei sein und trotzdem Unsinn berechnen oder zur Laufzeit abstürzen.",
+    { code: "int x = 10 / 0;   // Syntax ok – zur Laufzeit: ArithmeticException\nint y = 10 /;     // Syntaxfehler – wird gar nicht erst übersetzt\nint z = 7 / 2;    // Syntax ok, Ergebnis 3 – gewollt? Das ist eine Frage der Semantik" }
+  ],
+  pit: ["Syntaxfehler findet der Compiler, semantische Fehler nicht.", "„Kompiliert“ heißt nicht „funktioniert“."],
+  fill: { kind: "text", t: "Ergänze.", text: "Die [[0]] regelt den formalen Aufbau eines Programms, die [[1]] seine Bedeutung. Ein fehlendes Semikolon ist ein [[2]].",
+    gaps: [["Syntax"], ["Semantik"], ["Syntaxfehler"]] }
+};
+READ["PUP-2"] = {
+  read: [
+    "Die ersten Computer wurden direkt in Maschinensprache programmiert, Bit für Bit über Schalterleisten. Ein vertipptes Bit fiel erst beim Ausführen auf. Darum entstanden **höhere, problemorientierte Programmiersprachen**: an die menschliche Denkweise angepasst und unabhängig vom Prozessor.",
+    "Man unterscheidet drei Konzepte (**Programmier-Paradigmen**):",
+    "**Imperativ** (lat. *imperare*, befehlen): Das Programm besteht aus Anweisungen und Daten, die diese Anweisungen verändern – nah am Algorithmus. Anweisungsfolgen fasst man zu Unterprogrammen (Prozeduren) zusammen, daher auch *prozedural*. Beispiele: C, Pascal, FORTRAN.",
+    "**Objektorientiert:** Daten und die Anweisungen, die sie verändern, bilden eine Einheit – das **Objekt** mit Zustand und Verhalten. Objekte kommunizieren über **Botschaften** (Methodenaufrufe). Ziele: Wiederverwendbarkeit, Beherrschbarkeit komplexer Programme, Erweiterbarkeit und Schutz vor Datenmanipulation. Beispiele: Java, C++, Smalltalk.",
+    "**Deklarativ** (lat. *declarare*, erklären): Beschrieben wird das *Problem*, nicht der Lösungsweg. **Funktionale** Sprachen bilden Eingaben über Funktionen auf Ausgaben ab (z. B. LISP), **logische** Sprachen werten Aussagen nach Regeln der Prädikatenlogik aus (z. B. PROLOG). Einsatz z. B. in der KI und bei wissensbasierten Systemen.",
+    "Viele moderne Sprachen sind **Hybridsprachen** und kombinieren Paradigmen – Scala etwa ist funktional und objektorientiert."
+  ],
+  pit: ["Prozedural = imperativ (synonym).", "Deklarativ beschreibt WAS, imperativ WIE."],
+  fill: { kind: "text", t: "Ordne zu.", text: "Java ist eine [[0]] Sprache. PROLOG ist eine [[1]] Sprache. Bei [[2]] Sprachen wird nur das Problem beschrieben, nicht der Lösungsweg.",
+    gaps: [["objektorientierte"], ["logische", "deklarative"], ["deklarativen"]] }
+};
+READ["PUP-3"] = {
+  read: [
+    "Ein Prozessor kann nur Maschinencode ausführen. Programme in einer höheren Sprache liegen als **Quellcode** vor und müssen übersetzt werden – so, dass der Maschinencode genau das tut, was der Quellcode verlangt (semantisch gleichwertig). Weil Übersetzer prozessorabhängig sind, gehören sie zur Systemsoftware.",
+    "Ein **Compiler** übersetzt den **gesamten** Quellcode vorab in Objektcode. Programmteile aus **Bibliotheken** sind darin nur als Verweis enthalten. Der **Linker** (Binder) fügt sie ein und erzeugt ein ausführbares Programm (unter Windows meist `.exe`).",
+    "Ein **Interpreter** liest **eine Anweisung**, analysiert sie, übersetzt sie und führt sie **sofort** aus – dann die nächste. Er erzeugt kein ausführbares Programm; bei jedem Start wird neu übersetzt.",
+    "**Vergleich:** Kompilierte Programme laufen schneller, sind aber an Prozessor und Betriebssystem gebunden. Interpretierte Programme sind langsamer, laufen aber überall, wo der Interpreter vorhanden ist, und erlauben das Testen von Programmteilen während der Entwicklung.",
+    "**Bibliotheken** sind Dateien mit wiederverwendbaren Programmbausteinen. Heute werden sie meist dynamisch zur Laufzeit eingebunden. In Java sind sie in **Modulen** und **Packages** organisiert.",
+    "**Java nutzt eine Mischform:** `javac` kompiliert den Quellcode in plattformunabhängigen **Bytecode** (`.class`). Die **JVM** (Java Virtual Machine) führt diesen Bytecode auf der jeweiligen Plattform aus. So verbindet Java die Vorteile beider Ansätze."
+  ],
+  pit: ["Der Interpreter erzeugt keine ausführbare Datei.", "Java ist weder rein kompiliert noch rein interpretiert."],
+  fill: { kind: "text", t: "Ergänze.", text: "Ein [[0]] übersetzt das gesamte Programm vorab, ein [[1]] jede Anweisung einzeln zur Laufzeit. Der [[2]] bindet Bibliotheksteile in den Objektcode ein. Java übersetzt in [[3]], der von der JVM ausgeführt wird.",
+    gaps: [["Compiler"], ["Interpreter"], ["Linker", "Binder"], ["Bytecode"]] }
+};
+READ["PUP-4"] = {
+  read: [
+    "**Software-Engineering** beschäftigt sich mit Methoden und Werkzeugen zur systematischen Softwareerstellung, mit dem Ziel guter Qualität. Ausgangspunkt ist immer ein Problem: eine Produktidee, ein Kundenauftrag – oder im Studium die Aufgabenstellung einer Übung.",
+    "**Analyse:** Die Anforderungen werden genau festgelegt (Anforderungsdefinition) und mit dem Kunden abgestimmt. Ergebnis ist das **Pflichtenheft**, oft die Vertragsgrundlage. Im Studium ist die Kursbetreuung dein Kunde und die Aufgabenstellung dein Pflichtenheft.",
+    "**Entwurf:** Vom Grobentwurf (welche Teile gibt es, wie hängen sie zusammen?) zum Feinentwurf (wie genau arbeitet jeder Teil?).",
+    "**Implementierung:** Der Entwurf wird in einer Programmiersprache umgesetzt.",
+    "**Test:** Das Programm wird gegen die Anforderungen geprüft – auch aus Sicht der Anwender. Fehler führen zurück in frühere Phasen.",
+    "Für Einsendeaufgaben und die Klausur heißt das ganz praktisch: Aufgabe genau lesen (Analyse), Methoden und Klassen skizzieren (Entwurf), dann erst schreiben (Implementierung) und mit Grenzwerten prüfen (Test)."
+  ],
+  pit: ["Das Pflichtenheft entsteht in der Analyse, nicht im Entwurf.", "Wer sofort losprogrammiert, überspringt Analyse und Entwurf – und schreibt oft am Problem vorbei."],
+  fill: { kind: "text", t: "Ergänze die Phasen in der richtigen Reihenfolge.", text: "1. [[0]] → 2. [[1]] → 3. Implementierung → 4. [[2]]",
+    gaps: [["Analyse"], ["Entwurf"], ["Test", "Testen"]] }
+};
+
+// ====================== PJA – Die Programmiersprache Java ======================
+READ["PJA-0"] = {
+  read: [
+    "Java ist so verbreitet, weil es vielseitig ist: Desktop-Anwendungen (Standard Edition), Server (Enterprise Edition), Android-Apps und unzählige Frameworks. Entworfen wurde Java für das Internet – nach dem Motto „Das Netz ist der Computer“: Programme sollen auf verschiedensten, vernetzten Rechnern laufen.",
+    "Compiler und virtuelle Maschine gibt es kostenlos. Seit Java 11 (2018) verlangt Oracle für kommerziellen Support Lizenzen; freie Versionen gibt es z. B. von **Adoptium (Eclipse Temurin)** und als **OpenJDK**. Im Kurs wird **Temurin 17** verwendet, eine LTS-Version (Langzeit-Support).",
+    "Die Entwickler beschrieben Java als *einfach, objektorientiert, verteilt, interpretiert, robust, sicher, plattformunabhängig, portabel, leistungsfähig, nebenläufig und dynamisch*. Die wichtigsten Punkte:",
+    "**Einfach:** wenige Sprachkonstrukte, Syntax angelehnt an C++, aber ohne fehleranfällige Konzepte wie Zeigerarithmetik. Die **Garbage Collection** gibt nicht mehr benötigten Speicher automatisch frei. Dazu kommen große, ausgetestete **Bibliotheken**.",
+    "**Plattformunabhängig:** Der Compiler erzeugt **Bytecode**, kein Maschinencode. Die **JVM** – ein Bytecode-Interpreter für das jeweilige Betriebssystem – übersetzt ihn zur Laufzeit in Maschinencode. Bytecode läuft also überall, wo eine JVM installiert ist.",
+    "**Robust und sicher:** Robustheit heißt, dass ein Programm aus Ausnahmesituationen in einen definierten Zustand zurückkehren kann. Dafür gibt es das **Exception-Handling**. Die **strenge Typisierung** verhindert Fehler durch unverträgliche Datentypen schon beim Kompilieren, die Garbage Collection Speicherfehler.",
+    "**Nebenläufig:** Mehrere Aufgaben gleichzeitig, z. B. Musik hören, während eine Datei lädt. Ein **Thread** ist eine sequentielle Arbeitsfolge innerhalb eines Prozesses.",
+    "**Leistungsfähig:** Interpretierter Code ist langsamer als kompilierter. **Just-in-Time-Compiler** merken sich bereits übersetzten Bytecode, **HotSpot**-Compiler optimieren besonders häufig genutzte Stellen. Für die meisten Anwendungen ist Java damit schnell genug."
+  ],
+  pit: ["Die JVM ist ein Interpreter – javac ist der Compiler.", "Plattformunabhängig ist der Bytecode, nicht die JVM (die gibt es je Betriebssystem)."],
+  fill: { kind: "text", t: "Ergänze.", text: "Der Java-Compiler erzeugt [[0]]. Die [[1]] führt ihn auf dem jeweiligen Betriebssystem aus. Nicht mehr benötigter Speicher wird von der [[2]] freigegeben. Ein [[3]]-Compiler beschleunigt die Ausführung, indem er übersetzten Code wiederverwendet.",
+    gaps: [["Bytecode"], ["JVM", "Java Virtual Machine", "virtuelle Maschine", "Java Virtuelle Maschine"], ["Garbage Collection", "Garbage Collector"], ["Just-in-Time", "JIT", "Just in Time"]] }
+};
+READ["PJA-1"] = {
+  read: [
+    "„Everything is an Object!“ – in Java steht das Objekt im Mittelpunkt. Ein typisches Programm erzeugt viele Objekte, die miteinander kommunizieren. Vereinfacht heißt Java-Programmierung: **Klassen definieren, Objekte erzeugen, Methoden aufrufen.**",
+    "Objektorientierung modelliert die reale Welt: Gegenstände (Computer, Uhr), Lebewesen, künstliche Objekte (ein Browserfenster). Objekte bestehen oft wieder aus Objekten – ein Computer aus Tastatur, Bildschirm und Gehäuse mit Motherboard. Wie bei jedem Modell bildet man nur die Merkmale ab, die für die Aufgabe zählen: Beim Fahrrad sind Geschwindigkeit und Fahrtrichtung wichtiger als die Farbe.",
+    "Ein Objekt wird beschrieben durch **Namen** (*identifier*, Identität), **Zustand** (*state*, die Werte seiner **Attribute**) und **Verhalten** (*behavior*, seine **Methoden**). Das Verhalten kann vom Zustand abhängen.",
+    "Eine **Klasse** beschreibt Objekte mit denselben Eigenschaften und demselben Verhalten. Sie ist gekennzeichnet durch **Name, Attribute, Konstruktoren, Methoden** und **Beziehungen** zu anderen Klassen. In Java beginnt sie mit dem Schlüsselwort `class`.",
+    "Anders als in der Realität kommt zuerst die Klasse, dann das Objekt: Die Klasse ist der **Bauplan** bzw. die **Objekt-Fabrik**. Ein Uhrmacher programmiert eine Klasse `Uhr` und erzeugt daraus beliebig viele Uhren. Erzeugt wird mit dem **new-Operator** und einem **Konstruktor** – das nennt man auch instanziieren; die Objekte heißen dann Instanzen.",
+    { code: "Uhr meineUhr = new Uhr();     // Objekt erzeugen (instanziieren)\nmeineUhr.stelleZeit(12, 30);  // Botschaft = Methodenaufruf\nmeineUhr.zeigeZeit();" },
+    "Es geht auch ohne eigene Objekte: **statische Methoden** (Klassenmethoden) ruft man direkt über den Klassennamen auf, z. B. `Math.max(3, 8)`. Und Rechnen mit primitiven Datentypen wie `int` erzeugt keine Objekte."
+  ],
+  pit: ["Klasse = Bauplan, Objekt = konkretes Exemplar.", "Erst die Klasse schreiben, dann Objekte mit new erzeugen."],
+  fill: { kind: "text", t: "Ergänze.", text: "Ein Objekt hat eine Identität, einen [[0]] (die Werte seiner Attribute) und ein [[1]] (seine Methoden). Objekte werden mit dem Operator [[2]] und einem [[3]] erzeugt.",
+    gaps: [["Zustand"], ["Verhalten"], ["new"], ["Konstruktor"]] }
+};
+READ["PJA-2"] = {
+  read: [
+    "**Datenkapselung (encapsulation):** Die Werte der Attribute eines Objekts sollen **nur über Methoden** verändert werden. `meineUhr.stelleZeit(12, 30)` setzt Stunden und Minuten – direkt von außen herankommen soll niemand. Das verhindert unbeabsichtigte Datenänderungen, einen häufigen und schwer zu findenden Fehler in imperativen Programmen. Die Daten sind in den Methoden „eingekapselt“.",
+    "**Vererbung:** Alle Fahrräder haben eine Geschwindigkeit und eine Fahrtrichtung. Ein Rennrad hat zusätzlich eine Gangschaltung (Attribut *aktueller Gang*, Methode *schalten*), ein Hollandrad einen Gepäckträger. Die Klasse `Rennrad` **erweitert** die Klasse `Fahrrad`: Sie besitzt alles von `Fahrrad` und ergänzt Eigenes. Bestehende Klassen lassen sich so wiederverwenden.",
+    "**Polymorphie (Vielgestaltigkeit):** Die Methode `bremsen` funktioniert beim Rennrad anders (Felgenbremse) als beim Hollandrad (Rücktritt). Eine Unterklasse kann geerbte Methoden deshalb neu implementieren – **überschreiben**. So gibt es gleichnamige Methoden in verschiedenen Objekten, die unterschiedlich arbeiten. Welche Variante läuft, entscheidet das Objekt, auf dem sie aufgerufen wird.",
+    { code: "Fahrrad r = new Rennrad();\nFahrrad h = new Hollandrad();\nr.bremsen();   // Bremshebel ziehen\nh.bremsen();   // Rücktritt treten" },
+    "Diese drei Prinzipien – Kapselung, Vererbung, Polymorphie – tauchen in KLA und VRB ausführlich und mit Code wieder auf. Hier geht es erst um die Idee."
+  ],
+  pit: ["Überschreiben (gleiche Signatur in der Unterklasse) ≠ Überladen (gleicher Name, andere Parameter).", "Kapselung schützt den Zustand – zentral auch für sichere Software."],
+  fill: { kind: "text", t: "Ordne die Begriffe zu.", text: "Attribute nur über Methoden ändern: [[0]]. Eine Unterklasse übernimmt Attribute und Methoden: [[1]]. Gleichnamige Methoden verhalten sich je nach Objekt verschieden: [[2]].",
+    gaps: [["Datenkapselung", "Kapselung"], ["Vererbung"], ["Polymorphie"]] }
+};
+READ["PJA-3"] = {
+  read: [
+    "Für Java braucht man zwei Programme: den **Übersetzer** (Quellcode → Bytecode) und den **Interpreter** zum Ausführen. Programmieren besteht aber aus mehr: entwerfen, editieren, implementieren, übersetzen, ausführen, dokumentieren – und viel Fehlersuche. Dafür gibt es Werkzeuge.",
+    "Das **JDK** (Java Development Kit, früher auch SDK genannt) enthält den Compiler `javac`, den Bytecode-Interpreter `java`, das Dokumentationswerkzeug `javadoc`, das Archivwerkzeug `jar` und eine große Menge an Bibliotheken.",
+    "Eine **IDE** (*integrated development environment*) fasst hilfreiche Werkzeuge unter einer Oberfläche zusammen: Projekt- und Klassenübersicht, Editor mit Syntax-Highlighting, Debugger mit verständlichen Fehlermeldungen, Zugriff auf die Dokumentation. Viele sind kostenlos. Einarbeitungszeit braucht man trotzdem.",
+    "Für den **Entwurf** großer Programme gibt es Modellierungswerkzeuge. Standard für objektorientierte Konzepte ist die **UML** (*Unified Modeling Language*) – im Kurs werden UML-Diagramme zum Entwurf verwendet, die Sprache selbst wird aber nicht vertieft. Werkzeuge, die die Softwareerstellung unterstützen, heißen **CASE-Tools**.",
+    "Tipp für die Klausur: Auf Papier hast du keine IDE. Übe deshalb regelmäßig ohne Autovervollständigung – genau dafür gibt es in dieser App den Papier-Modus."
+  ],
+  pit: ["javac = Compiler, java = Interpreter/Starter, javadoc = Doku, jar = Archiv.", "Eine IDE ist bequem, ersetzt aber nicht das Verständnis von javac/java."],
+  fill: { kind: "text", t: "Ordne die Werkzeuge zu.", text: "Quellcode übersetzen: [[0]]. Programm starten: [[1]]. HTML-Dokumentation erzeugen: [[2]]. Dateien zu einem Archiv bündeln: [[3]].",
+    gaps: [["javac"], ["java"], ["javadoc"], ["jar"]] }
+};
+
+// ====================== EJP – Das erste Java-Programm ======================
+READ["EJP-0"] = {
+  read: [
+    "Im Kurs wird das **OpenJDK Eclipse Temurin 17** verwendet (LTS-Version). Neuere Versionen wie 21 funktionieren auch, sprich das aber mit der Kursbetreuung ab. Nach der Installation liegen im Ordner `bin` die Werkzeuge (`javac`, `java`, `javadoc`, `jar`), in `lib` die Bibliotheken.",
+    "Jede Java-Applikation hat einen festen Aufbau. Von oben nach unten:",
+    "1. **Import-Anweisungen** – verweisen auf Klassen aus anderen Paketen (entfallen, wenn keine gebraucht werden).\n2. **Dokumentationskommentar** `/** … */` – optional, in guten Programmen aber immer da.\n3. **Klassenkopf** – Sichtbarkeit (`public`), Schlüsselwort `class`, Klassenname.\n4. **Klassenrumpf** – zwischen `{` und `}`, enthält Methoden und Datenfelder.\n5. **main-Methode** – der definierte Einstiegspunkt der Ausführung.",
+    { code: "/**\n * Gibt eine Begrüßung aus.\n *\n * @author Dein Name\n * @version 1.0, 11.2026\n */\npublic class HalloSOC {\n\n    /**\n     * Einstiegspunkt des Programms.\n     */\n    public static void main(String[] args) {\n        // Ausgabe auf der Konsole\n        System.out.println(\"Hallo SOC!\");\n    }\n}" },
+    "Der Kopf der main-Methode ist immer genau `public static void main(String[] args)`. `public` = von außen aufrufbar, `static` = ohne Objekt aufrufbar, `void` = kein Rückgabewert, `String[] args` = Kommandozeilenargumente.",
+    "**Syntaxregeln** muss man wie Vokabeln lernen. Java ist **case-sensitiv**: `Main` und `main` sind verschiedene Bezeichner, `system.out` statt `System.out` ist ein Fehler. Jede Anweisung endet mit `;`, jede geöffnete Klammer muss geschlossen werden. Zeilennummern wie in Lehrbüchern gehören **nicht** in den Quellcode.",
+    "Zwei Arten von Kommentaren: `//` bis zum Zeilenende und `/* … */` über mehrere Zeilen. `/** … */` ist der Dokumentationskommentar für javadoc."
+  ],
+  pit: ["`System` mit großem S, `main` mit kleinem m.", "Jede `{` braucht eine `}` – auf Papier Klammern direkt paarweise setzen.", "Textverarbeitungsprogramme wie Word sind für Quellcode ungeeignet – nur Texteditoren oder IDE."],
+  fill: { kind: "java", wrap: "program", t: "Vervollständige das Programm, sodass es „Hallo SOC!“ ausgibt.",
+    code: "public [[0]] HalloSOC {\n    public [[1]] void [[2]](String[] args) {\n        System.out.[[3]](\"Hallo SOC!\");\n    }\n}",
+    gaps: [["class"], ["static"], ["main"], ["println"]] }
+};
+READ["EJP-1"] = {
+  read: [
+    "Quellcode schreibst du in einem **Texteditor** (z. B. Notepad++, vi, Sublime) oder einer IDE. Textverarbeitungen wie Word speichern Formatierungen mit, die der Compiler nicht versteht. Der Editor sollte Syntax-Highlighting haben – das erleichtert die Arbeit enorm.",
+    "Gespeichert wird als **.java**-Datei. Wichtig: Enthält die Datei eine `public class HalloSOC`, muss sie **HalloSOC.java** heißen – Groß- und Kleinschreibung inklusive.",
+    "**Kompilieren:** Im Terminal (Eingabeaufforderung) in den Ordner wechseln, in dem die Datei liegt (`cd`), dann `javac HalloSOC.java`. Der Compiler sucht die Datei im aktuellen Verzeichnis. Unter macOS/Linux zeigt `pwd`, wo du gerade bist. Ohne Fehler entsteht daneben **HalloSOC.class** – der Bytecode. Diese Datei ist kein Text; im Editor ist sie unlesbar.",
+    "**Ausführen:** `java HalloSOC` – **ohne** Endung `.class`. Der Interpreter übersetzt den Bytecode in die Maschinensprache des Rechners, der Prozessor führt ihn aus.",
+    { code: "$ cd ~/gp1/ejp\n$ javac HalloSOC.java     # erzeugt HalloSOC.class\n$ java HalloSOC           # ohne .class!\nHallo SOC!" },
+    "**Fehlermeldungen lesen lernen:** javac nennt Datei und Zeile, z. B. `HalloSOC.java:3: error: ';' expected`. Korrigieren, speichern, neu kompilieren. Programmieren lernt man auch durch Experimentieren: Ändere bewusst etwas, kompiliere und beobachte, was passiert.",
+    "Eine gute Gewohnheit aus dem Kurs: Leg dir eine **Schablone** an – eine leere Klasse mit Dokumentationskopf und leerer main-Methode – und kopiere sie für jede neue Übung."
+  ],
+  pit: ["`java HalloSOC.class` ist falsch – ohne Endung starten.", "Dateiname ≠ Klassenname → Compilerfehler.", "javac im falschen Ordner → „file not found“."],
+  fill: { kind: "text", t: "Ergänze die Befehle für die Klasse Begruessung.", text: "Datei: [[0]] · Kompilieren: [[1]] · Ausführen: [[2]]",
+    gaps: [["Begruessung.java"], ["javac Begruessung.java"], ["java Begruessung"]] }
+};
+READ["EJP-2"] = {
+  read: [
+    "Größere Programme bestehen aus vielen Dateien. Eine **JAR-Datei** (*Java Archive*) bündelt alle zu einer Anwendung gehörenden Dateien – Class-Dateien, Bilder, weitere Ressourcen – in einer einzigen, komprimierten Datei.",
+    "JAR-Dateien haben die Endung **.jar**, sind vollständig **ZIP-kompatibel** und enthalten eine **Manifest-Datei** `manifest.mf` mit Zusatzinformationen, z. B. welche Klasse die main-Methode enthält. Die Java-Laufzeitumgebung kann Klassen direkt aus der JAR laden.",
+    { code: "jar cf programm.jar *.class   # Archiv erstellen (c = create, f = file)\njar tf programm.jar           # Inhalt anzeigen (t = table)\njar xf programm.jar           # entpacken (x = extract)\njava -jar programm.jar        # ausführbares JAR starten (Hauptklasse aus dem Manifest)" },
+    "Die Buchstaben merkst du dir am besten so: **c**reate, **t**able of contents, e**x**tract – und **f** heißt, dass danach der Dateiname kommt."
+  ],
+  pit: ["Starten mit `java -jar`, nicht `java programm.jar`.", "Damit `java -jar` funktioniert, muss im Manifest die Hauptklasse stehen."],
+  fill: { kind: "text", t: "Ergänze die Befehle.", text: "Archiv app.jar aus allen Class-Dateien erstellen: jar [[0]] app.jar *.class · Inhalt anzeigen: jar [[1]] app.jar · Ausführbares JAR starten: java [[2]] app.jar",
+    gaps: [["cf"], ["tf"], ["-jar"]] }
+};
+READ["EJP-3"] = {
+  read: [
+    "Kommentare schreibst du für zwei Zielgruppen. **Kommentare in Methoden** (`//`, `/* */`) erklären den Ablauf – für dich und andere Entwickler. **Dokumentationskommentare** (`/** */`) stehen vor der Klasse und vor jeder öffentlichen Methode und beschreiben, *was* sie tut und *wie* man sie aufruft. Nutzer deiner Klasse interessiert nicht, wie sie programmiert ist, sondern wie man sie benutzt.",
+    "Ein **Dokumentationskopf** steht nach den Import-Anweisungen vor der Klasse und enthält mindestens: Name des Autors (mit E-Mail), kurze Beschreibung, Versionsnummer mit Datum.",
+    "Das Werkzeug **javadoc** erzeugt daraus eine **HTML-Dokumentation**. Es wertet nur Kommentare aus, die mit `/**` beginnen und vor einer Klasse oder Methode stehen. `/* */` und `//` werden ignoriert.",
+    "Wichtige **Tags:** `@author` (Autor), `@version` (Version), `@param name Beschreibung` (je Parameter), `@return` (Rückgabewert), `@throws`/`@exception` (ausgelöste Ausnahmen), `@see` (Verweis), `@deprecated` (veraltet), `{@link …}` (Link im Text).",
+    { code: "/**\n * Berechnet den Mittelwert zweier Zahlen.\n *\n * @param a die erste Zahl\n * @param b die zweite Zahl\n * @return der Mittelwert von a und b\n */\npublic static double mittelwert(int a, int b) {\n    return (a + b) / 2.0;\n}" },
+    "Aufruf: `javadoc -d doku MeineKlasse.java` erzeugt die Doku im Ordner `doku`; `javadoc -d doku *.java` für alle Dateien im Ordner. Unter Windows wird der Pfad mit `\\` geschrieben, unter Linux/macOS mit `/`. Öffne danach `doku/index.html` im Browser."
+  ],
+  pit: ["`/*` statt `/**` → javadoc ignoriert den Kommentar.", "Für jeden Parameter ein eigenes @param."],
+  fill: { kind: "java", wrap: "main", t: "Vervollständige den javadoc-Kommentar und die Methode.",
+    pre: "[[0]]\n * Berechnet das Quadrat einer Zahl.\n *\n * [[1]] x die Zahl\n * [[2]] x * x\n */\nstatic int quadrat(int x) {\n    [[3]] x * x;\n}\n",
+    code: "System.out.println(quadrat(7));",
+    gaps: [["/**"], ["@param"], ["@return"], ["return"]] }
+};
+// nibble – Lesetexte, Stolperfallen und Lückencode, Teil 2 (VAR, STA, OBJ, KLA)
+var READ = READ || {};
+
+// ====================== VAR – Variablen und primitive Datentypen ======================
+READ["VAR-0"] = {
+  read: [
+    "Ein sinnvolles Programm folgt dem **EVA-Prinzip**: Werte einlesen, verarbeiten, Ergebnis ausgeben. Für alles Weitere brauchst du einen Ort, an dem Werte gespeichert werden: **Variablen**. Vorerst steht dein ganzer Code zwischen den geschweiften Klammern der main-Methode – nur dort wird er ausgeführt.",
+    "**Deklaration:** Bevor du eine Variable benutzt, legst du sie mit Datentyp und Bezeichner an: `int zahl1;` Mehrere auf einmal (`int a, b, c;`) sind erlaubt, gelten aber als unübersichtlich – besser einzeln.",
+    "**Regeln für Bezeichner:** Buchstaben, Ziffern und Unterstrich sind erlaubt (Java erlaubt zusätzlich `$`); **keine** Leerzeichen, Bindestriche oder Punkte. Ein Bezeichner darf **nicht mit einer Ziffer beginnen** und kein Schlüsselwort sein (`int`, `class`, `new` …). Konvention: Variablen in **camelCase** – `anzahlLogins`, nicht `Anzahl_logins`.",
+    "**Zuweisung:** `variable = ausdruck;` Ein Ausdruck ist eine Regel zur Berechnung eines Werts – eine Zahl, eine Rechnung, ein Text. Das `=` ist **keine Gleichung**: Es gilt „rechts vor links“. Erst wird rechts ausgerechnet, dann landet das Ergebnis links. Deshalb ist `zaehler = zaehler + 1;` völlig sinnvoll. Ein neuer Wert überschreibt den alten – der ist dann weg.",
+    { code: "int zahl1;          // Deklaration\nzahl1 = 7;          // Zuweisung\nzahl1 = 99;         // 7 wird überschrieben\nzahl1 = zahl1 + 1;  // rechts: 99 + 1 → links: 100\nint zahl2 = 5;      // Deklaration + Zuweisung = Initialisierung" },
+    "**Initialisierung** heißt: Deklaration und erste Zuweisung in einem Schritt. Eine lokale Variable, die noch keinen Wert hat, darfst du nicht lesen – der Compiler meldet *variable might not have been initialized*."
+  ],
+  pit: ["`=` weist zu, `==` vergleicht.", "Lokale Variablen haben keinen Standardwert – vor dem Lesen initialisieren.", "`2te` ist kein gültiger Name, `zweite` schon."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze die Datentypen und den Wert, sodass „Gesamt: 7.5“ ausgegeben wird.",
+    code: "[[0]] anzahl = 3;\ndouble preis;\npreis = [[1]];\n[[2]] gesamt = anzahl * preis;\nSystem.out.println(\"Gesamt: \" + gesamt);",
+    gaps: [["int"], ["2.5", "2.50"], ["double"]] }
+};
+READ["VAR-1"] = {
+  read: [
+    "Java hat acht **primitive Datentypen**. Für ganze Zahlen (*Integers*) gibt es vier, die sich im Speicherbedarf und damit im **Wertebereich** unterscheiden:",
+    { code: "Typ     Speicher   Wertebereich\nbyte    1 Byte     -128 … 127\nshort   2 Byte     -32 768 … 32 767\nint     4 Byte     ca. -2,1 Mrd. … 2,1 Mrd.\nlong    8 Byte     ca. ±9,2 · 10^18" },
+    "Ganzzahl-Literale sind automatisch `int`. Für größere Werte hängst du ein `L` an: `long l = 3000000000L;` Weist du einer `byte`-Variable 128 zu, meldet der Compiler einen Fehler (*possible lossy conversion*).",
+    "**Fließkommazahlen** (Gleitkomma): `float` (4 Byte) und `double` (8 Byte). `double` hat nicht nur den größeren Bereich, sondern vor allem die **höhere Genauigkeit** – deshalb ist es der Standard. Fließkomma-Literale sind automatisch `double`, für `float` brauchst du ein `F`: `float f = 3.5F;` Achtung: Dezimaltrenner ist der **Punkt**.",
+    "`char` speichert **ein einzelnes Zeichen** in einfachen Hochkommas: `'A'`. Intern ist es eine Zahl aus der Unicode-Tabelle (2 Byte, 0 bis 65535) – `char c = 65;` ist ebenfalls `'A'`. Sonderzeichen schreibt man mit **Escape-Sequenzen**: `'\\n'` (neue Zeile), `'\\t'` (Tabulator), `'\\''` (Hochkomma), `'\\\\'` (Backslash).",
+    "`boolean` hat nur die Werte `true` und `false` (benannt nach George Boole). Man merkt sich damit, ob etwas eingetreten ist: Ist die Karte gesperrt? Ist die Zahl gerade? Eine **Bedingung** ist ein Ausdruck vom Typ `boolean`.",
+    "Und `String`? Der ist **kein** primitiver Typ, sondern eine Klasse – Text steht in doppelten Anführungszeichen: `\"Hallo\"`. Mehr dazu in OBJ und ZKT."
+  ],
+  pit: ["`char c = \"A\";` ist falsch – char braucht einfache Hochkommas.", "`double d = 1,5;` ist falsch – Punkt statt Komma.", "`float f = 2.5;` ist falsch – es fehlt das F."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze Datentypen und Literale, sodass „3000000000 1.25 J true“ ausgegeben wird.",
+    code: "[[0]] grosseZahl = 3000000000L;\n[[1]] kurs = 1.25F;\nchar initial = [[2]];\nboolean aktiv = [[3]];\nSystem.out.println(grosseZahl + \" \" + kurs + \" \" + initial + \" \" + aktiv);",
+    gaps: [["long"], ["float"], ["'J'"], ["true"]] }
+};
+READ["VAR-2"] = {
+  read: [
+    "Die **arithmetischen Operatoren** kennst du aus der Schule: `+`, `-`, `*`, `/` und das negative Vorzeichen. Es gilt **Punkt vor Strich**, Klammern verändern die Reihenfolge.",
+    "**Die Ganzzahl-Falle:** Stehen links und rechts von `/` zwei ganze Zahlen, ist das Ergebnis wieder ganzzahlig – die Nachkommastellen werden **abgeschnitten** (nicht gerundet!). `7 / 2` ergibt `3`. Sobald einer der beiden Operanden eine Fließkommazahl ist, wird mit Komma gerechnet: `7 / 2.0` ergibt `3.5`.",
+    "Der **Modulo-Operator** `%` liefert den Rest der Ganzzahldivision: `7 % 2` ergibt `1`. Super nützlich: `n % 2 == 0` prüft, ob n gerade ist; `n % 10` liefert die letzte Ziffer; `/` und `%` zusammen zerlegen Sekunden in Stunden, Minuten und Sekunden.",
+    "**Kombinierte Zuweisungsoperatoren:** `x += 5` heißt `x = x + 5`, entsprechend `-=`, `*=`, `/=`, `%=`. **Inkrement/Dekrement:** `x++` bzw. `x--` erhöht bzw. verringert um 1.",
+    "Feiner Unterschied: **Präfix** `++x` erhöht **vor** der Verwendung, **Postfix** `x++` **danach**. Alleine in einer Zeile ist das egal; in einem Ausdruck nicht:",
+    { code: "int i = 5;\nint a = i++;   // a = 5, danach i = 6\nint b = ++i;   // i = 7, dann b = 7\n\nint sekunden = 3725;\nint h = sekunden / 3600;          // 1\nint m = (sekunden % 3600) / 60;   // 2\nint s = sekunden % 60;            // 5" },
+    "Operatoren gleicher Stufe werden **von links nach rechts** ausgewertet: `20 % 5 / 10 % 2` ist `((20 % 5) / 10) % 2` = 0."
+  ],
+  pit: ["`7 / 2` = 3, nicht 3.5.", "`i++` in einem Ausdruck liefert den alten Wert.", "Gleiche Stufe: links nach rechts – `*`, `/`, `%` sind gleichrangig."],
+  fill: { kind: "java", wrap: "main", t: "Zerlege 3725 Sekunden. Ausgabe: „1h 2m 5s“.",
+    code: "int sekunden = 3725;\nint h = sekunden [[0]] 3600;\nint m = (sekunden % 3600) [[1]] 60;\nint s = sekunden [[2]] 60;\nSystem.out.println(h + \"h \" + m + \"m \" + s + \"s\");",
+    gaps: [["/"], ["/"], ["%"]] }
+};
+READ["VAR-3"] = {
+  read: [
+    "Java ist **streng typisiert**: Jeder Wert hat einen Typ, und nicht jeder Wert passt in jede Variable. Wenn Typen nicht zusammenpassen, braucht es eine **Typumwandlung** (*Type Casting*).",
+    "**Implizit (erweiternd):** In einen größeren Typ passt der Wert immer – das macht Java automatisch: `byte → short → int → long → float → double` (und `char → int`). `double d = 5;` ist also kein Problem.",
+    "**Explizit (einschränkend):** In einen kleineren Typ geht eventuell Information verloren. Das musst du mit dem **Cast-Operator** ausdrücklich verlangen: `(zieltyp) wert`. Nach `int` werden Nachkommastellen **abgeschnitten**, nicht gerundet: `(int) 3.9` ist `3`.",
+    "Der klassische Anwendungsfall ist die Ganzzahl-Falle: Zwei `int`-Werte sollen mit Komma geteilt werden. Wichtig ist, **wo** der Cast steht:",
+    { code: "int punkte = 47, maximal = 60;\ndouble a = punkte / maximal;            // 0.0  (erst int-Division, dann umgewandelt)\ndouble b = (double) punkte / maximal;   // 0.7833…  (Cast bindet stärker als /)\ndouble c = (double) (punkte / maximal); // 0.0  (Klammer: erst int-Division!)" },
+    "Noch eine Falle: Rechnungen mit `byte` und `short` ergeben immer **int**. `byte c = a + b;` kompiliert deshalb nicht, auch wenn a und b bytes sind – du brauchst `byte c = (byte) (a + b);`.",
+    "Bei `%` mit Fließkommazahlen kommt der Rest beim Teilen ohne Nachkommastellen heraus – selten sinnvoll und wegen Rundungsfehlern ungenau."
+  ],
+  pit: ["`(double) (a / b)` rettet nichts mehr – die int-Division ist schon passiert.", "Cast nach int rundet nicht, er schneidet ab.", "byte + byte = int."],
+  fill: { kind: "java", wrap: "main", t: "Berechne den Prozentwert mit Kommastellen und eine abgeschnittene Ganzzahl. Ausgabe: „78.33333333333333 78“.",
+    code: "int punkte = 47;\nint maximal = 60;\ndouble prozent = [[0]] punkte / maximal * 100;\nint ganz = [[1]] prozent;\nSystem.out.println(prozent + \" \" + ganz);",
+    gaps: [["(double)"], ["(int)"]] }
+};
+READ["VAR-4"] = {
+  read: [
+    "**Vergleichsoperatoren** liefern einen `boolean`: `<`, `<=`, `>`, `>=`, `==` (gleich), `!=` (ungleich). Ein Ausdruck vom Typ `boolean` heißt **Bedingung**.",
+    "**Logische Operatoren** verknüpfen Bedingungen:\n- `&&` (und): nur true, wenn **beide** true sind\n- `||` (oder): true, wenn **mindestens eine** true ist\n- `!` (nicht): kehrt den Wert um\n- `^` (exklusiv oder): true, wenn **genau eine** true ist",
+    { code: "a      b      a && b   a || b   a ^ b\ntrue   true   true     true     false\ntrue   false  false    true     true\nfalse  true   false    true     true\nfalse  false  false    false    false" },
+    "**Kurzschlussauswertung:** `&&` und `||` werten die rechte Seite gar nicht erst aus, wenn das Ergebnis schon feststeht. Bei `x != 0 && 10 / x > 1` wird für x = 0 nicht geteilt – das schützt vor einem Absturz. Die Reihenfolge der Bedingungen ist also wichtig.",
+    "**Rangfolge:** `!` bindet am stärksten, dann Vergleiche, dann `&&`, dann `||`. Im Zweifel Klammern setzen – das macht den Code auch lesbarer.",
+    { code: "int versuche = 4;\nboolean istAdmin = false;\nboolean gesperrt = versuche >= 3 && !istAdmin;   // true\nboolean gerade = versuche % 2 == 0;              // true" }
+  ],
+  pit: ["`if (x = 5)` ist ein Fehler – Vergleich ist `==`.", "Mathematische Schreibweise `1 < x < 10` geht nicht – richtig: `x > 1 && x < 10`.", "`true ^ true` ist false."],
+  fill: { kind: "java", wrap: "main", t: "Ein Konto wird ab 3 Fehlversuchen gesperrt, außer bei Admins. Ausgabe: „true“.",
+    code: "int versuche = 4;\nboolean istAdmin = false;\nboolean gesperrt = versuche [[0]] 3 [[1]] [[2]]istAdmin;\nSystem.out.println(gesperrt);",
+    gaps: [[">="], ["&&"], ["!"]] }
+};
+READ["VAR-5"] = {
+  read: [
+    "**Konstanten** haben einen Namen, aber ihr Wert ändert sich während des Programmlaufs nie – etwa der Mehrwertsteuersatz. Deklaration und Initialisierung in einem: `final double MWST = 19;` Das Schlüsselwort `final` verhindert jede spätere Zuweisung. Konvention: **GROSSBUCHSTABEN**, Wörter mit Unterstrich: `MAX_VERSUCHE`.",
+    "Warum Konstanten? Der Code wird lesbarer (`MWST` statt einer magischen 19) und Änderungen passieren an genau einer Stelle.",
+    "**Ausgabe:** `System.out.println(...)` gibt aus und beginnt danach eine neue Zeile, `System.out.print(...)` ohne Zeilenumbruch. Mit `+` verknüpfst du Text und Werte: `\"Summe: \" + summe`.",
+    "**Eingabe:** Dafür brauchst du ein **Scanner**-Objekt aus dem Paket `java.util`. Ganz oben steht `import java.util.Scanner;` – damit darfst du den langen Namen `java.util.Scanner` zu `Scanner` abkürzen. Dann erzeugst du das Objekt und liest Werte:",
+    { code: "import java.util.Scanner;\n\npublic class Mehrwertsteuer {\n    public static void main(String[] args) {\n        final double MWST = 19;\n        Scanner tastatur = new Scanner(System.in);\n        System.out.print(\"Nettobetrag: \");\n        double netto = tastatur.nextDouble();\n        double steuer = netto * MWST / 100;\n        System.out.println(\"Steuer: \" + steuer);\n        System.out.println(\"Brutto: \" + (netto + steuer));\n    }\n}" },
+    "Wichtige Scanner-Methoden: `nextInt()`, `nextDouble()`, `next()` (ein Wort), `nextLine()` (ganze Zeile). Gibt jemand Text ein, wo eine Zahl erwartet wird, bricht `nextInt()` mit einer `InputMismatchException` ab – wie man das abfängt, lernst du in EXC.",
+    "Achtung bei der Klammer in der letzten Zeile: Ohne sie würde `\"Brutto: \" + netto + steuer` zuerst Text und dann die Zahlen **anhängen** statt zu addieren."
+  ],
+  pit: ["Ohne `import java.util.Scanner;` kennt der Compiler Scanner nicht.", "`\"Summe: \" + a + b` hängt an, `\"Summe: \" + (a + b)` rechnet.", "Konstante später ändern → Compilerfehler."],
+  fill: { kind: "java", wrap: "main", imports: ["java.util.Scanner"], t: "Ergänze Konstante, Einlesen und Ausgabe. (Zum Testen liest der Scanner hier aus einem Text statt von der Tastatur.) Ausgabe: „Brutto: 297.5“.",
+    code: "[[0]] double MWST = 19;\nScanner sc = new Scanner(\"250\");   // im echten Programm: new Scanner(System.in)\ndouble netto = sc.[[1]]();\ndouble brutto = netto + netto * MWST / 100;\nSystem.out.[[2]](\"Brutto: \" + brutto);",
+    gaps: [["final"], ["nextDouble"], ["println"]] }
+};
+
+// ====================== STA – Statische Methoden und Konstanten ======================
+READ["STA-0"] = {
+  read: [
+    "Für Wurzel, Potenz, Sinus oder Logarithmus gibt es keine Operatoren. Diese Berechnungen haben die Java-Entwickler als **Methoden** programmiert. Wie aufwendig das intern ist, muss dich nicht kümmern – du rufst sie einfach auf.",
+    "In Java ist **jede Methode Teil einer Klasse**. Die Wurzelmethode heißt `sqrt` und steht in der Klasse `Math`. Um eine **statische Methode** (Klassenmethode) aufzurufen, brauchst du vier Informationen – sie stehen in der Dokumentation der Standardbibliothek:\n- die **Klasse**, in der sie steht\n- ihren **Namen**\n- welche **Parameter** (Werte und Datentypen) sie braucht\n- den **Datentyp des Ergebnisses**",
+    { code: "// In der Doku:  class Math:  public static double sqrt(double a)\ndouble zahl = 2.0;\ndouble wurzel = Math.sqrt(zahl);       // Klassenname.methode(argument)\ndouble potenz = Math.pow(2, 10);       // 1024.0\nint groesser = Math.max(3, 8);         // 8\nint betrag = Math.abs(-5);             // 5" },
+    "Allgemein: Steht in der Doku `public static Datentyp methode(Typ1 p1, Typ2 p2)`, dann rufst du sie so auf: `Datentyp ergebnis = Klassenname.methode(wert1, wert2);` Die Werte müssen zu den Parametertypen passen.",
+    "**Methoden ohne Rückgabewert** erkennst du an `void`. Sie erledigen eine Aufgabe (etwas ausgeben, warten, eine Datei schließen), liefern aber nichts zurück. Deshalb gibt es beim Aufruf auch **keine Zuweisung**: `Klassenname.methode(wert);`",
+    "**Statische Konstanten** gibt es auch in der Bibliothek, etwa `Math.PI` und `Math.E`. In der Doku steht `public static final double PI` – `static` = gehört zur Klasse, `final` = unveränderlich. Anders als lokale Konstanten aus VAR sind sie in jedem Programm nutzbar."
+  ],
+  pit: ["`double x = System.out.println(...)` geht nicht – println ist void.", "Math.pow liefert immer double, auch bei ganzen Zahlen.", "`sqrt(2)` ohne `Math.` kennt der Compiler nicht."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze die Aufrufe der Klassenmethoden. Ausgabe: „1.4142135623730951 1024.0“.",
+    code: "double zahl = 2.0;\ndouble wurzel = [[0]].[[1]](zahl);\ndouble hoch = Math.[[2]](zahl, 10);\nSystem.out.println(wurzel + \" \" + hoch);",
+    gaps: [["Math"], ["sqrt"], ["pow"]] }
+};
+READ["STA-1"] = {
+  read: [
+    "Eigene statische Methoden lohnen sich, wenn ein Problem mehrfach zu lösen ist, wenn ein Programm übersichtlicher werden soll oder wenn du die Lösung später wiederverwenden willst. Jede Methode steht **innerhalb der Klasse** (zwischen ihren geschweiften Klammern), aber **außerhalb** anderer Methoden.",
+    "Eine Methode besteht aus **Methodenkopf** und **Methodenrumpf**:",
+    { code: "/**\n * Berechnet die Hypotenuse eines rechtwinkligen Dreiecks.\n * @param a erste Kathete\n * @param b zweite Kathete\n * @return Länge der Hypotenuse\n */\npublic static double hypotenuse(double a, double b) {   // Kopf\n    double c = Math.sqrt(a * a + b * b);                // Rumpf\n    return c;\n}" },
+    "**Kopf:** Sichtbarkeit (`public`), `static`, **Rückgabetyp** (oder `void`), **Name** (Verb, camelCase) und die **formalen Parameter** in Klammern – jeder mit Typ und Name, durch Komma getrennt. Leere Klammern, wenn es keine gibt.",
+    "**Rumpf:** ein Block `{ … }` mit Anweisungen und lokalen Variablen. `return wert;` beendet die Methode und gibt den Wert an die Aufrufstelle zurück – sein Typ muss zum Rückgabetyp passen. Bei `void` fehlt `return` oder steht ohne Wert.",
+    "Beim Aufruf werden die **aktuellen Parameter** (die konkreten Werte) der Reihe nach in die formalen Parameter kopiert: `hypotenuse(3, 4)` → `a = 3`, `b = 4`. Innerhalb derselben Klasse darf der Klassenname beim Aufruf entfallen.",
+    "Trenne sprachlich sauber: **Zurückgeben** (`return`) heißt, einen Wert an die aufrufende Stelle weiterreichen. **Ausgeben** (`System.out.println`) heißt, ihn für einen Menschen auf die Konsole schreiben. Eine Methode, die etwas *berechnen* soll, gibt in der Regel zurück und gibt nicht selbst aus.",
+    "Jeder Datentyp ist als Rückgabetyp erlaubt, z. B. `boolean`: Eine Methode `istDreieck(a, b, c)` kann prüfen, ob drei Längen ein Dreieck bilden können."
+  ],
+  pit: ["Methode in einer anderen Methode deklarieren → Compilerfehler.", "Rückgabetyp double, aber kein return → Compilerfehler „missing return statement“.", "Ausgeben statt zurückgeben, obwohl die Aufgabe „gibt zurück“ sagt."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze Rückgabetypen und return. Ausgabe: drei Zeilen „----------“, „5.0“, „----------“.",
+    pre: "public static [[0]] hypotenuse(double a, double b) {\n    [[1]] Math.sqrt(a * a + b * b);\n}\n\npublic static [[2]] schreibeLinie() {\n    System.out.println(\"----------\");\n}\n",
+    code: "schreibeLinie();\nSystem.out.println(hypotenuse(3, 4));\nschreibeLinie();",
+    gaps: [["double"], ["return"], ["void"]] }
+};
+READ["STA-2"] = {
+  read: [
+    "In der Klasse `Math` gibt es `max` mehrfach: für `int`, `long`, `float` und `double`. Mehrere Methoden **gleichen Namens** in einer Klasse sind erlaubt, wenn sich ihre **Parameterlisten** unterscheiden – in der **Anzahl** oder in den **Datentypen** der Parameter. Das heißt **Überladen**.",
+    "Die **Signatur** einer Methode besteht aus ihrem Namen und den Typen ihrer Parameter. Der **Rückgabetyp gehört nicht dazu** – zwei Methoden, die sich nur im Rückgabetyp unterscheiden, sind verboten.",
+    { code: "public static void javaMethode(String text) {\n    System.out.println(\"Das ist Ihr Text: \" + text);\n}\n\npublic static void javaMethode(String text, int i) {\n    System.out.println(text + \" \" + i);\n}\n\njavaMethode(\"Hallo\");      // erste Variante\njavaMethode(\"Hallo\", 3);   // zweite Variante" },
+    "Der Compiler wählt anhand der **Argumente** beim Aufruf, welche Variante passt. Gibt es keine exakt passende, versucht er es mit erweiternden Umwandlungen (z. B. `int` → `double`).",
+    "Ein typisches Muster: Die Variante mit weniger Parametern ruft die allgemeinere auf und setzt einen Standardwert ein. So steht die eigentliche Logik nur an einer Stelle."
+  ],
+  pit: ["`int f(int x)` und `double f(int x)` zusammen → Compilerfehler.", "Parameternamen zählen nicht zur Signatur, nur die Typen."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze die überladenen Methoden. Ausgabe: „9 11 2.5“.",
+    pre: "public static int groesste(int a, int b) {\n    return Math.max(a, b);\n}\n\npublic static int groesste(int a, int b, [[0]] c) {\n    return groesste(groesste(a, b), [[1]]);\n}\n\npublic static [[2]] groesste(double a, double b) {\n    return Math.max(a, b);\n}\n",
+    code: "System.out.println(groesste(3, 9) + \" \" + groesste(4, 11, 7) + \" \" + groesste(2.5, 1.5));",
+    gaps: [["int"], ["c"], ["double"]] }
+};
+READ["STA-3"] = {
+  read: [
+    "**Sichtbarkeit lokaler Variablen:** Eine lokale Variable ist nur in dem **Block** sichtbar, in dem sie deklariert wurde. Ein Block ist ein zusammengehöriges Paar geschweifter Klammern. Ihre Lebensdauer beginnt mit der Deklaration und endet beim Verlassen des Blocks – Name und Wert werden dann „vergessen“.",
+    "Folge: Jede Methode hat ihre **eigenen** lokalen Variablen. Gleiche Namen in verschiedenen Methoden sind erlaubt und haben nichts miteinander zu tun – sie können sogar verschiedene Datentypen haben. Auch **Parameter** sind lokale Variablen ihrer Methode.",
+    { code: "public static void a() {\n    int x = 5;       // x von a\n}\npublic static void b() {\n    int x = 99;      // ein ganz anderes x\n    // a() kann das x von b nicht sehen und umgekehrt\n}" },
+    "**Eigene statische Konstanten** legst du auf Klassenebene an – außerhalb aller Methoden: `public static final double WINKELSUMME = 180.0;` Statt `public` ginge auch `private` oder keine Angabe (Bedeutung in KLA). Konvention: **komplett in Großbuchstaben**.",
+    "Zugriff von außen über den Klassennamen: `Dreieck.WINKELSUMME` – genau wie bei `Math.PI`. Innerhalb der eigenen Klasse reicht der Name allein."
+  ],
+  pit: ["Variable in Methode a deklariert, in Methode b benutzt → „cannot find symbol“.", "Statische Konstante innerhalb von main deklariert – dann ist sie nur lokal.", "Konstante ohne `final` ist keine Konstante."],
+  fill: { kind: "java", wrap: "class", t: "Ergänze die statische Konstante und die Zugriffe. Ausgabe: „60.0“ und „true“.",
+    code: "public class Dreieck {\n    /** Summe der Innenwinkel eines Dreiecks */\n    public [[0]] final double WINKELSUMME = 180.0;\n}",
+    run: "double alpha = 90;\ndouble beta = 30;\ndouble gamma = [[1]].WINKELSUMME - alpha - beta;\nSystem.out.println(gamma);\nSystem.out.println(Math.[[2]] > 3);",
+    gaps: [["static"], ["Dreieck"], ["PI"]] }
+};
+READ["STA-4"] = {
+  read: [
+    "Methoden schreibt man, damit andere sie benutzen. Darum musst du sie **testen**: aufrufen und die Ergebnisse überprüfen – Rückgabewerte und sonstige Wirkungen. Ein einziger Aufruf reicht nie.",
+    "Wichtig: Durch Testen kann man die **Abwesenheit von Fehlern nicht beweisen**, nur die Wahrscheinlichkeit von Fehlern senken. Deshalb wählt man die Testwerte mit System:",
+    "- **typische Werte** aus der Mitte des erlaubten Bereichs\n- **Grenzwerte**: der kleinste und der größte erlaubte Wert\n- **knapp daneben**: einen Schritt unter bzw. über der Grenze\n- **Sonderfälle**: 0, negative Zahlen, leere Eingaben",
+    { code: "// Test für eine Rundungsmethode\ndouble b;\nb = Dreieck.rundeDouble(Math.PI, 1);\nSystem.out.println(\"pi, 1 Stelle: \" + b + \" (erwartet 3.1)\");\nb = Dreieck.rundeDouble(Math.PI, 0);\nSystem.out.println(\"pi, 0 Stellen: \" + b + \" (erwartet 3.0)\");" },
+    "Schreib dir zu jedem Testaufruf den **erwarteten Wert** dazu – sonst siehst du nicht, ob das Ergebnis stimmt. Genau so arbeiten die Test.java-Dateien in dieser App: Sie rufen deine Methode auf und vergleichen mit dem erwarteten Wert.",
+    "Grenzwerttests sind in der IT-Sicherheit besonders wertvoll: Viele Schwachstellen stecken genau an den Rändern – ein Index zu viel, eine Länge zu groß, ein negativer Wert, mit dem niemand gerechnet hat."
+  ],
+  pit: ["Nur mit „schönen“ Werten testen.", "Ergebnis ausgeben, aber nicht mit dem erwarteten Wert vergleichen."],
+  fill: { kind: "java", wrap: "main", t: "Teste die Portprüfung an den Grenzen. Ausgabe: „true“, „true“, „false“, „false“.",
+    pre: "public static boolean istGueltigerPort(int port) {\n    return port >= 0 && port <= 65535;\n}\n",
+    code: "System.out.println(istGueltigerPort([[0]]));   // kleinster gültiger Port\nSystem.out.println(istGueltigerPort([[1]]));   // größter gültiger Port\nSystem.out.println(istGueltigerPort([[2]]));   // knapp über der Grenze\nSystem.out.println(istGueltigerPort(-1));      // knapp unter der Grenze",
+    gaps: [["0"], ["65535"], ["65536"]] }
+};
+
+// ====================== OBJ – Objekte ======================
+READ["OBJ-0"] = {
+  read: [
+    "Bisher hast du mit einfachen Zahlen gearbeitet. Ein typisches Java-Programm erzeugt dagegen viele **Objekte** – Zusammenfassungen vieler einzelner Daten mit eigener Funktionalität –, die miteinander kommunizieren. Auch eine Benutzeroberfläche besteht aus Objekten: Buttons, Textfelder, Schieberegler.",
+    "**Klassen sind Datentypen.** Sie legen fest, welche Werte (Objekte) gespeichert werden können und welche Operationen (Methoden) damit möglich sind. Das konkrete Exemplar ist die **Instanz**. Die Uhr auf deinem Schreibtisch ist eine Instanz des Konzepts „Uhr“; ihre Attributwerte (Uhrzeit, Farbe) unterscheiden sie von anderen Uhren.",
+    "Die Standardbibliothek hat Tausende Klassen. Niemand kennt sie alle – wichtig ist die **allgemeine Syntax**, dann kannst du jede nutzen. Beispiel aus dem Kurs: `BigInteger` für ganze Zahlen fast beliebiger Größe, weit über `long` hinaus.",
+    "**1. Variable deklarieren** – der Klassenname ist der Typ: `BigInteger zahl1;`",
+    "**2. Importieren** – Klassen liegen in **Paketen**. `BigInteger` heißt vollständig `java.math.BigInteger` (*qualifizierter Name*). Ohne Import meldet der Compiler *cannot find symbol*. Mit `import java.math.BigInteger;` ganz oben darfst du den kurzen Namen verwenden. Ausnahme: Klassen aus `java.lang` (`String`, `Math`, `System`) sind automatisch bekannt.",
+    "**3. Objekt erzeugen** – Objekte lassen sich nicht einfach zuweisen wie Zahlen. Man braucht einen **Konstruktoraufruf** mit `new`. Der Konstruktor heißt immer wie die Klasse und kann Parameter haben. Er reserviert Speicher für das Objekt und setzt Startwerte in alle Attribute.",
+    { code: "import java.math.BigInteger;\n...\nBigInteger zahl1 = new BigInteger(\"012345678901234567890\");\nBigInteger zahl2 = new BigInteger(\"98765432109876543210\");\nBigInteger summe = zahl1.add(zahl2);   // Instanzmethode\nSystem.out.println(summe);" },
+    "**4. Methoden aufrufen** – mit der **Punktnotation** auf dem Objekt: `zahl1.add(zahl2)`. Welche Methoden es gibt, steht in der Dokumentation der Klasse."
+  ],
+  pit: ["`BigInteger x = 123;` geht nicht – Objekte brauchen new.", "import vergessen → „cannot find symbol“.", "Konstruktor heißt wie die Klasse – inklusive Großschreibung."],
+  fill: { kind: "java", wrap: "main", imports: ["java.math.BigInteger"], t: "Ergänze Objekterzeugung und Methodenaufruf. Ausgabe: „123456789012345678901234567891“.",
+    code: "BigInteger a = [[0]] BigInteger(\"123456789012345678901234567890\");\nBigInteger b = new BigInteger(\"1\");\nBigInteger summe = a.[[1]](b);\nSystem.out.println(summe);",
+    gaps: [["new"], ["add"]] }
+};
+READ["OBJ-1"] = {
+  read: [
+    "Objekte speichern nicht nur Werte, sie bringen vor allem **Operationen** mit, die mit diesen Werten arbeiten: **Instanzmethoden**. Sie werden immer **auf einem Objekt** aufgerufen: `objekt.methode(…)`. Das Ergebnis hängt vom Zustand genau dieses Objekts ab.",
+    "**Klassenmethoden** (statisch) gehören dagegen zur Klasse und brauchen kein Objekt: `Klassenname.methode(…)`. Du kennst sie aus STA (`Math.sqrt`).",
+    { code: "String s = \"Firewall\";\nint n = s.length();               // Instanzmethode: Länge DIESES Strings → 8\nString t = String.valueOf(42);    // Klassenmethode: \"42\"\n\nScanner tastatur = new Scanner(System.in);  // Objekt erzeugen\nint zahl = tastatur.nextInt();              // Instanzmethode des Scanners" },
+    "In der Dokumentation erkennst du den Unterschied am Wort `static`. Bei Instanzmethoden steht der Rückgabetyp direkt vor dem Namen: `public BigInteger add(BigInteger val)` – sie liefert also ein **neues** BigInteger-Objekt. Das ursprüngliche Objekt bleibt unverändert.",
+    "Viele Klassenmethoden liefern übrigens selbst ein Objekt, ohne dass du `new` schreibst: `LocalDate.now()` gibt ein Datumsobjekt für heute zurück, `LocalDate.of(2027, 1, 28)` eins für deinen Klausurtag. Auch das ist eine Form der Objekterzeugung.",
+    "Methodenaufrufe kann man **verketten**, wenn eine Methode ein Objekt zurückgibt: `s.toUpperCase().charAt(0)` – zuerst entsteht ein neuer String in Großbuchstaben, darauf wird `charAt` aufgerufen."
+  ],
+  pit: ["`String.length()` geht nicht – length ist eine Instanzmethode, man braucht einen konkreten String.", "`summe.add(b)` ohne Zuweisung ändert summe NICHT – das Ergebnis geht verloren."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze die Methodenaufrufe. Ausgabe: „8 42 FIREWALL“.",
+    code: "String s = \"Firewall\";\nint n = s.[[0]]();\nString t = [[1]].valueOf(42);\nSystem.out.println(n + \" \" + t + \" \" + s.[[2]]());",
+    gaps: [["length"], ["String"], ["toUpperCase"]] }
+};
+READ["OBJ-2"] = {
+  read: [
+    "Wie werden Objekte gespeichert? Bei **primitiven Typen** steht der Wert direkt im Speicherplatz der Variable. `zwei = eins;` kopiert den Wert – danach gibt es ihn zweimal, und beide sind völlig unabhängig.",
+    "Bei **Klassentypen** ist das anders: Das Objekt liegt an einer eigenen Stelle im Speicher. Die Variable enthält nur einen **Verweis** darauf – eine **Referenz**. `b = a;` kopiert deshalb **nur die Referenz**. Danach zeigen beide Variablen auf **dasselbe Objekt**:",
+    { code: "StringBuilder a = new StringBuilder(\"log\");\nStringBuilder b = a;          // Referenz kopiert, kein neues Objekt\nb.append(\"-1\");\nSystem.out.println(a);        // log-1  – die Änderung über b sieht man über a!\n\nStringBuilder c = new StringBuilder(\"log\");   // eigenes Objekt\nc.append(\"-2\");\nSystem.out.println(a);        // weiterhin log-1" },
+    "Bei `String` und `BigInteger` merkt man davon meist nichts, weil diese Objekte **unveränderlich** sind – ihre Methoden liefern immer neue Objekte. Bei veränderbaren Objekten wie `StringBuilder` oder später deinen eigenen Klassen ist es entscheidend.",
+    "**null:** Eine Referenzvariable, die auf kein Objekt verweist, hat den Wert `null`. Ruft man auf `null` eine Methode auf, gibt es zur Laufzeit eine **NullPointerException** – einer der häufigsten Fehler überhaupt.",
+    "Objekte, auf die keine Referenz mehr zeigt, räumt die **Garbage Collection** automatisch weg."
+  ],
+  pit: ["`b = a` erzeugt kein neues Objekt.", "Methodenaufruf auf null → NullPointerException.", "Änderung über eine Referenz ist über alle Referenzen auf dasselbe Objekt sichtbar."],
+  fill: { kind: "java", wrap: "main", t: "b soll auf dasselbe Objekt zeigen wie a, c auf ein eigenes. Ausgabe: „log-1 log“.",
+    code: "StringBuilder a = new StringBuilder(\"log\");\nStringBuilder b = [[0]];\nb.append(\"-1\");\nStringBuilder c = [[1]] StringBuilder(\"log\");\nSystem.out.println(a + \" \" + c);",
+    gaps: [["a"], ["new"]] }
+};
+READ["OBJ-3"] = {
+  read: [
+    "Beim Vergleich zweier Objekte muss man an die Referenzen denken. Bei `int x = 7, y = 7;` ist `x == y` natürlich `true` – der Operator prüft, ob die **Inhalte der Variablen** gleich sind.",
+    "Bei Objekten sind die Inhalte der Variablen aber **Referenzen**. Zwei Konstruktoraufrufe erzeugen zwei Objekte an zwei Speicherstellen – also zwei verschiedene Referenzen:",
+    { code: "BigInteger x = new BigInteger(\"7\");\nBigInteger y = new BigInteger(\"7\");\nSystem.out.println(x == y);        // false – zwei verschiedene Objekte\nSystem.out.println(x.equals(y));   // true  – gleicher Inhalt\nBigInteger z = x;\nSystem.out.println(z == x);        // true  – dieselbe Referenz" },
+    "`==` prüft bei Objekten also **Identität** (dasselbe Objekt?). Für **inhaltliche Gleichheit** gibt es die Methode `equals`. Jede Klasse erbt sie von `Object`; Klassen wie `String` und `BigInteger` haben sie so überschrieben, dass sie die Inhalte vergleicht. Für eigene Klassen schreibst du `equals` selbst (KLA/VRB).",
+    "**Merksatz für Strings:** Niemals mit `==` vergleichen, immer mit `equals`. Manchmal liefert `==` zufällig `true` (wenn Java gleiche String-Literale intern wiederverwendet) – darauf darfst du dich nie verlassen. Gerade bei Eingaben von Nutzern („ist der Benutzername root?“) wäre das ein echter Fehler.",
+    "Bei primitiven Typen vergleicht `==` immer die Werte – dort ist es richtig."
+  ],
+  pit: ["`name == \"root\"` ist ein Fehler – `name.equals(\"root\")`.", "`equals` auf null aufrufen → NullPointerException; sicherer: `\"root\".equals(name)`."],
+  fill: { kind: "java", wrap: "main", imports: ["java.math.BigInteger"], t: "Ergänze die Vergleiche. Ausgabe: „false“, „true“, „true“.",
+    code: "BigInteger x = new BigInteger(\"7\");\nBigInteger y = new BigInteger(\"7\");\nSystem.out.println(x [[0]] y);     // Identität\nSystem.out.println(x.[[1]](y));    // Inhalt\nBigInteger z = x;\nSystem.out.println(z [[2]] x);     // dieselbe Referenz?",
+    gaps: [["=="], ["equals"], ["=="]] }
+};
+
+// ====================== KLA – Eigene Klassen programmieren ======================
+READ["KLA-0"] = {
+  read: [
+    "Jetzt schreibst du eigene Baupläne. Das Beispiel im Kurs ist ein **Bankkonto** – aus dem Alltag bekannt, also kannst du dein Wissen über die Realität für Entwurfsentscheidungen nutzen. So eine Klasse könnte die Grundlage eines echten Bankprogramms sein.",
+    "**Klasse anlegen:** `public class Konto { … }` in der Datei `Konto.java`. Klassennamen beginnen mit einem **Großbuchstaben** und sind ein **Substantiv in der Einzahl** (`Konto`, nicht `Konten`) – du hast es im Code immer mit einem Objekt auf einmal zu tun. Eine solche Klasse braucht **keine** main-Methode; die steht in einem separaten Hauptprogramm.",
+    "**Paket:** Gehört die Klasse zu einem Paket, steht als **allererste Anweisung** `package bankprogramm;` – vor allen import-Anweisungen. Die Datei muss dann in einem Ordner liegen, der so heißt wie das Paket. Der qualifizierte Name lautet `bankprogramm.Konto`. Paketnamen beginnen klein; mehrteilige Namen werden mit Punkten getrennt.",
+    "**Attribute** (auch Eigenschaften, Felder oder Instanzvariablen) speichern die Daten jedes Objekts: Welche Nummer hat das Konto, wem gehört es, wie hoch ist der Stand? Deklariert werden sie **in der Klasse, außerhalb aller Methoden**, mit einem javadoc-Kommentar zur Bedeutung:",
+    { code: "package bankprogramm;\n\n/**\n * Ein Konto bei einer Bank.\n */\npublic class Konto {\n    /** die Kontonummer, eindeutig */\n    private long kontonummer;\n    /** der aktuelle Kontostand in Euro */\n    private double kontostand;\n    /** Name des Inhabers, nicht leer */\n    private String inhaber;\n}" },
+    "Attributnamen beginnen klein. Guter Stil: oben die Attribute, darunter Konstruktoren und Methoden.",
+    "**Impliziter Defaultkonstruktor:** Schon jetzt kannst du `new Konto()` schreiben. Hat eine Klasse keinen eigenen Konstruktor, stellt Java einen bereit. Er reserviert Speicher und setzt alle Attribute auf Standardwerte: **0** (ganzzahlig), **0.0** (Fließkomma), **false** (boolean), **null** (Klassentypen). Anders als lokale Variablen haben Attribute also immer einen Wert."
+  ],
+  pit: ["package muss die erste Zeile sein.", "Attribute innerhalb einer Methode deklariert sind keine Attribute, sondern lokale Variablen.", "String-Attribute starten mit null, nicht mit \"\"."],
+  fill: { kind: "java", wrap: "class", t: "Ergänze Sichtbarkeit, Getter und den Konstruktoraufruf. Die Ausgabe zeigt die Standardwerte: „0.0 null“.",
+    code: "public class Konto {\n    [[0]] long kontonummer;\n    private double kontostand;\n    private String inhaber;\n\n    public double getKontostand() {\n        return this.kontostand;\n    }\n\n    public String getInhaber() {\n        return this.[[1]];\n    }\n}",
+    run: "Konto k = new [[2]]();   // impliziter Defaultkonstruktor\nSystem.out.println(k.getKontostand() + \" \" + k.getInhaber());",
+    gaps: [["private"], ["inhaber"], ["Konto"]] }
+};
+READ["KLA-1"] = {
+  read: [
+    "`private`, `protected` und `public` heißen **Sichtbarkeitsmodifizierer**. Sie legen fest, wo im Code auf ein Element (Attribut, Methode, Konstruktor) zugegriffen werden darf:",
+    { code: "public       überall im gesamten Programm\nprotected    im gleichen Paket und in allen erbenden Klassen\n(ohne)       im gleichen Paket (Default-Sichtbarkeit)\nprivate      ausschließlich in der eigenen Klasse" },
+    "Die Default-Sichtbarkeit (Modifizierer weggelassen) gilt für jede Klasse im selben Verzeichnis. Dafür gibt es selten einen guten Grund – in der Praxis kommt sie kaum vor. `protected` wird in VRB wichtig.",
+    "**Faustregel:** Attribute `private`, Methoden, die andere benutzen sollen, `public`. Das ist **Datenkapselung**: Niemand von außen kann den Zustand eines Objekts unkontrolliert ändern. Ein Kontostand lässt sich nicht einfach auf eine Million setzen – nur über Methoden wie `einzahlen`, die prüfen, ob der Betrag sinnvoll ist.",
+    { code: "// in einer anderen Klasse:\nKonto k = new Konto();\nk.kontostand = 1000000;    // Compilerfehler: kontostand has private access\nk.einzahlen(50);           // erlaubt – und die Methode kann prüfen" },
+    "Weiterer Vorteil: Die interne Darstellung kann sich später ändern (z. B. Kontostand in Cent als `long`), ohne dass Code außerhalb der Klasse angepasst werden muss – solange die öffentlichen Methoden gleich bleiben."
+  ],
+  pit: ["private gilt pro Klasse, nicht pro Objekt: Ein Konto-Objekt darf auf private Attribute eines anderen Konto-Objekts zugreifen.", "Ohne Modifizierer ≠ public."],
+  fill: { kind: "text", t: "Ergänze die Sichtbarkeiten.", text: "private: nur in der [[0]] Klasse · ohne Modifizierer: im gleichen [[1]] · protected: im gleichen Paket und in allen [[2]] Klassen · public: [[3]]",
+    gaps: [["eigenen"], ["Paket"], ["erbenden", "abgeleiteten"], ["überall", "überall im Programm"]] }
+};
+READ["KLA-2"] = {
+  read: [
+    "Private Attribute allein nützen wenig – man braucht Methoden, die sie lesen und schreiben. **Getter** liefern den Wert eines Attributs zurück: kein Parameter, Rückgabetyp = Typ des Attributs, Name `get` + Attributname (bei boolean auch `is…`).",
+    "**Setter** schreiben einen neuen Wert: ein Parameter, Rückgabetyp `void`, Name `set` + Attributname. Ihr großer Vorteil: Sie können den Wert **prüfen**, bevor sie ihn übernehmen.",
+    { code: "public String getInhaber() {\n    return this.inhaber;\n}\n\npublic void setInhaber(String inhaber) {\n    boolean inOrdnung = inhaber != null && !inhaber.equals(\"\");\n    if (inOrdnung) {\n        this.inhaber = inhaber;     // nur gültige Werte übernehmen\n    }\n}" },
+    "**this** ist eine Referenz auf das aktuelle Objekt – das, auf dem die Methode gerade aufgerufen wurde. Heißt der Parameter wie das Attribut, unterscheidet `this.inhaber` (Attribut) von `inhaber` (Parameter). Ohne `this.` würdest du den Parameter sich selbst zuweisen – das Attribut bliebe unverändert.",
+    "**Weitere Instanzmethoden** bilden die Operationen der realen Welt ab: `einzahlen(double betrag)`, `abheben(double betrag)`. Sie arbeiten über `this.attribut` mit den Daten des Objekts.",
+    "**toString:** Alle Klassen erben von `Object` – auch deine. Damit haben sie automatisch eine Methode `toString()`, die eine Textdarstellung liefert, standardmäßig aber nur so etwas wie `Konto@1b6d3586`. Überschreibst du sie, liefert sie lesbaren Text mit den Attributwerten. `System.out.println(k)` ruft automatisch `k.toString()` auf, ebenso `\"Text\" + k`.",
+    { code: "@Override\npublic String toString() {\n    return \"Konto \" + kontonummer + \" von \" + inhaber + \": \" + kontostand + \" Euro\";\n}" },
+    "`@Override` zeigt dem Compiler an, dass du eine geerbte Methode überschreibst – vertippst du dich (`tostring`), meldet er einen Fehler."
+  ],
+  pit: ["`inhaber = inhaber;` im Setter ändert nichts – `this.inhaber = inhaber;`.", "toString gibt zurück (return), nicht aus (println).", "Getter mit void → kann nichts zurückgeben."],
+  fill: { kind: "java", wrap: "class", t: "Ergänze Getter, Setter, einzahlen und toString. Ausgabe: „unbekannt: 50.0 Euro“ und „Otto“.",
+    code: "public class Konto {\n    private String inhaber = \"unbekannt\";\n    private double kontostand;\n\n    public String getInhaber() {\n        [[0]] this.inhaber;\n    }\n\n    public void setInhaber(String inhaber) {\n        if (inhaber != null && !inhaber.equals(\"\")) {\n            [[1]].inhaber = inhaber;\n        }\n    }\n\n    public void einzahlen(double betrag) {\n        if (betrag > 0) {\n            this.kontostand [[2]] betrag;\n        }\n    }\n\n    @Override\n    public String [[3]]() {\n        return inhaber + \": \" + kontostand + \" Euro\";\n    }\n}",
+    run: "Konto k = new Konto();\nk.setInhaber(\"\");      // ungültig, wird ignoriert\nk.einzahlen(50);\nk.einzahlen(-20);       // ungültig, wird ignoriert\nSystem.out.println(k);\nk.setInhaber(\"Otto\");\nSystem.out.println(k.getInhaber());",
+    gaps: [["return"], ["this"], ["+="], ["toString"]] }
+};
+READ["KLA-3"] = {
+  read: [
+    "Konstruktoren haben zwei Aufgaben: **Speicher bereitstellen** (das macht die Laufzeitumgebung automatisch) und **alle Attribute mit sinnvollen Werten** belegen (das ist dein Job). Der implizite Defaultkonstruktor schafft das nicht – Kontonummer 0 und Inhaber null sind nicht sinnvoll.",
+    "Ein Konstruktor **heißt exakt wie die Klasse** und hat **keinen Rückgabetyp** – auch nicht `void`. Er kann Parameter haben:",
+    { code: "/**\n * Erstellt ein Konto für den angegebenen Inhaber mit Stand 0.\n * @param inhaber Name des Inhabers\n */\npublic Konto(String inhaber) {\n    this.inhaber = inhaber;\n    this.kontostand = 0.0;\n    this.kontonummer = Konto.holeNeueNummer();\n}" },
+    "**Wichtig:** Sobald du selbst **irgendeinen** Konstruktor schreibst, gibt es den impliziten Defaultkonstruktor **nicht mehr**. Willst du `new Konto()` weiterhin erlauben, musst du einen parameterlosen Konstruktor selbst schreiben.",
+    "**Überladen:** Wie Methoden kann es mehrere Konstruktoren mit verschiedenen Parameterlisten geben. Damit kein Code doppelt dasteht (Copy & Paste vermeiden!), ruft ein Konstruktor einen anderen mit **this(…)** auf. Das muss die **erste Anweisung** sein:",
+    { code: "public Konto(String inhaber, double anfangsstand) {\n    // die eigentliche Arbeit steht nur hier\n}\n\npublic Konto(String inhaber) {\n    this(inhaber, 0.0);      // erste Anweisung!\n}\n\npublic Konto() {\n    this(\"unbekannt\");\n}" },
+    "**Finale Attribute:** Eine Kontonummer ändert sich nie. Mit `private final long kontonummer;` bildest du das ab: Einem `final`-Attribut darf **genau einmal** ein Wert zugewiesen werden – entweder direkt bei der Deklaration oder im Konstruktor. Jeder Konstruktor muss es setzen, sonst meldet der Compiler einen Fehler. Und natürlich bekommt es keinen Setter."
+  ],
+  pit: ["`public void Konto()` ist kein Konstruktor, sondern eine Methode, die zufällig so heißt.", "Eigener Konstruktor → impliziter Defaultkonstruktor entfällt.", "`this(...)` nicht als erste Anweisung → Compilerfehler."],
+  fill: { kind: "java", wrap: "class", t: "Ergänze das finale Attribut und den zweiten Konstruktor, der den ersten aufruft. Ausgabe: „1001 Hans 50.5“ und „1002 Otto 0.0“.",
+    code: "public class Konto {\n    private [[0]] long kontonummer;\n    private String inhaber;\n    private double kontostand;\n\n    public Konto(long kontonummer, String inhaber, double kontostand) {\n        this.kontonummer = kontonummer;\n        this.inhaber = inhaber;\n        this.kontostand = kontostand;\n    }\n\n    public [[1]](long kontonummer, String inhaber) {\n        [[2]](kontonummer, inhaber, 0.0);\n    }\n\n    @Override\n    public String toString() {\n        return kontonummer + \" \" + inhaber + \" \" + kontostand;\n    }\n}",
+    run: "System.out.println(new Konto(1001, \"Hans\", 50.5));\nSystem.out.println(new Konto(1002, \"Otto\"));",
+    gaps: [["final"], ["Konto"], ["this"]] }
+};
+READ["KLA-4"] = {
+  read: [
+    "Woher bekommt jedes neue Konto eine **neue Kontonummer**? Man muss sich merken, welche Nummer zuletzt vergeben wurde – und zwar **nicht pro Konto**, sondern **einmal für das ganze Programm**.",
+    "Genau dafür gibt es **statische Attribute** (Klassenvariablen): `private static long letzteNummer = 1000;` Ein statisches Attribut gehört zur **Klasse**, nicht zu einem Objekt. Es existiert genau einmal, egal wie viele Objekte es gibt – alle teilen sich diesen einen Wert.",
+    "Eine **statische Methode** arbeitet mit diesem Wert:",
+    { code: "private static long letzteNummer = 1000;\nprivate final long kontonummer;\n\nprivate static long holeNeueNummer() {\n    letzteNummer++;\n    return letzteNummer;\n}\n\npublic Konto() {\n    this.kontonummer = Konto.holeNeueNummer();   // 1001, 1002, 1003, …\n}" },
+    "Statische Methoden haben **kein `this`** – sie laufen ohne Bezug zu einem bestimmten Objekt. Deshalb dürfen sie nicht direkt auf Instanzattribute oder Instanzmethoden zugreifen. Umgekehrt dürfen Instanzmethoden und Konstruktoren problemlos statische Attribute und Methoden benutzen.",
+    "Aufruf von außen über den Klassennamen: `Konto.getAnzahl()`. Eine statische Methode kann `private` sein, wenn sie nur intern gebraucht wird – wie `holeNeueNummer` hier.",
+    "Vergleiche: **Instanzattribut** = jedes Objekt hat sein eigenes (jedes Konto seinen Kontostand). **Statisches Attribut** = einmal für alle (die zuletzt vergebene Nummer)."
+  ],
+  pit: ["Statische Methode greift auf `this.kontostand` zu → Compilerfehler.", "Zähler als Instanzattribut → jedes Objekt zählt für sich, alle bekommen dieselbe Nummer."],
+  fill: { kind: "java", wrap: "class", t: "Ergänze den Klassenzähler. Ausgabe: „1001 1002 1002“.",
+    code: "public class Konto {\n    private [[0]] long letzteNummer = 1000;\n    private final long kontonummer;\n\n    public Konto() {\n        this.kontonummer = Konto.holeNeueNummer();\n    }\n\n    private static long holeNeueNummer() {\n        letzteNummer[[1]];\n        return letzteNummer;\n    }\n\n    public long getKontonummer() {\n        return kontonummer;\n    }\n\n    public [[2]] long getLetzteNummer() {\n        return letzteNummer;\n    }\n}",
+    run: "Konto a = new Konto();\nKonto b = new Konto();\nSystem.out.println(a.getKontonummer() + \" \" + b.getKontonummer() + \" \" + Konto.getLetzteNummer());",
+    gaps: [["static"], ["++", "+= 1"], ["static"]] }
+};
+READ["KLA-5"] = {
+  read: [
+    "Von `Konto` kann es beliebig viele Objekte geben. Manche Dinge haben aber eine **feste, abgeschlossene Menge** von Möglichkeiten: Es gibt genau zwölf Monate, ein dreizehnter ergibt keinen Sinn. Dafür gibt es **Enums**: spezielle Klassen mit einer abgeschlossenen Sammlung **konstanter Objekte**.",
+    "Die Standardbibliothek hat z. B. `java.time.Month` mit `JANUARY` bis `DECEMBER`. Benutzt werden die Konstanten über den Enum-Namen: `Month m = Month.MARCH;`",
+    "**Eigene Enum:** Sinnvoll, wenn es eine nicht allzu große Sammlung fester Objekte gibt, die sich voraussichtlich nicht ändert – im Kurs die fünf Währungen mit festem Euro-Wechselkurs. Ganz vorne steht die **Konstantenliste**, durch Kommas getrennt, abgeschlossen mit **Semikolon**. Erst **danach** dürfen Attribute, Konstruktoren und Methoden folgen:",
+    { code: "public enum Waehrung {\n    KAP_VERDE_ESCUDO(0.00907), DOBRA(0.0408), CFA_FRANC(0.00152);  // Kurse gerundet\n\n    private final double wechselkurs;\n\n    Waehrung(double wechselkurs) {       // Konstruktor – immer private\n        this.wechselkurs = wechselkurs;\n    }\n\n    public double inEuroUmrechnen(double betrag) {\n        return Math.round(betrag * this.wechselkurs * 100.0) / 100.0;\n    }\n}" },
+    "Der Konstruktor einer Enum ist immer **private** (auch ohne Angabe) – niemand außer der Enum selbst kann neue Konstanten erzeugen. Die Werte in Klammern hinter den Konstanten sind die Konstruktor-Argumente. Attribute einer Enum sind meist `final`.",
+    "**Automatisch vorhandene Methoden:** `name()` (Name der Konstante als String), `toString()` (standardmäßig ebenfalls der Name), `ordinal()` (Position ab 0) und die statischen Methoden `values()` (Array aller Konstanten) und `valueOf(String)` (Konstante zum Namen – wirft eine `IllegalArgumentException`, wenn der Name nicht exakt passt, auch bei falscher Groß-/Kleinschreibung).",
+    "Enums arbeiten gut mit anderen Klassen zusammen: Eine überladene Methode `abheben(double betrag, Waehrung w)` im Konto kann die Umrechnung an die Währung delegieren. Jede Klasse kümmert sich um ihre eigene Aufgabe."
+  ],
+  pit: ["Semikolon nach der Konstantenliste vergessen, wenn danach noch etwas kommt.", "`valueOf(\"dobra\")` → IllegalArgumentException (Groß-/Kleinschreibung!).", "`new Waehrung(...)` ist verboten."],
+  fill: { kind: "java", wrap: "class", t: "Ergänze die Enum und die Nutzung. Ausgabe: „DOBRA 1 40.8“ und „2“.",
+    code: "public enum Waehrung {\n    KAP_VERDE_ESCUDO(0.00907), DOBRA(0.0408)[[0]]\n\n    private final double wechselkurs;\n\n    [[1]](double wechselkurs) {\n        this.wechselkurs = wechselkurs;\n    }\n\n    public double inEuroUmrechnen(double betrag) {\n        return Math.round(betrag * this.wechselkurs * 100.0) / 100.0;\n    }\n}",
+    run: "Waehrung w = Waehrung.[[2]](\"DOBRA\");\nSystem.out.println(w + \" \" + w.ordinal() + \" \" + w.inEuroUmrechnen(1000));\nSystem.out.println(Waehrung.[[3]]().length);",
+    gaps: [[";"], ["Waehrung", "private Waehrung"], ["valueOf"], ["values"]] }
+};
+// nibble – Lesetexte, Stolperfallen und Lückencode, Teil 3 (VER, ITR, VRB, EXC, ARR, ZKT)
+var READ = READ || {};
+
+// ====================== VER – Einfach- und Mehrfachverzweigungen ======================
+READ["VER-0"] = {
+  read: [
+    "Bisher liefen deine Programme **linear**: Anweisung für Anweisung von oben nach unten. Das heißt **Sequenz**: Zu jedem Zeitpunkt läuft genau eine Anweisung, jede genau einmal, in der aufgeschriebenen Reihenfolge. Ein Methodenaufruf zählt dabei als eine Anweisung.",
+    "Oft soll etwas aber nur **unter einer Bedingung** passieren – abheben nur, wenn genug Geld da ist. Dafür gibt es **Kontrollstrukturen**: Sequenz, **Selektion** (Verzweigung) und **Iteration** (Schleife). Java kennt zwei Verzweigungen: `if` und `switch`.",
+    "Das Kursbeispiel ist ein **Blumenladen**: Der Kunde gibt die Anzahl Blumen ein (2,50 € pro Stück), das Programm berechnet den Gesamtbetrag – aber nur bei einer positiven Anzahl.",
+    { code: "if (anzahl > 0) {\n    double gesamt = umDieEcke.gesamtbetrag(anzahl);\n    System.out.println(\"Die Blumen kosten \" + gesamt + \" Euro\");\n} else {\n    System.out.println(\"Bitte eine positive Anzahl eingeben\");\n}" },
+    "**Unvollständige Alternative:** nur `if` – ist die Bedingung falsch, passiert nichts. **Vollständige Alternative:** `if` + `else` (ansonsten) – genau einer der beiden Blöcke läuft.",
+    "Die **Bedingung** in den runden Klammern muss vom Typ `boolean` sein: ein Vergleich, eine boolesche Variable oder ein Methodenaufruf, der boolean liefert (`if (konto.kannAbheben(50))`). Statt `if (inOrdnung == true)` reicht `if (inOrdnung)`.",
+    "Besteht ein Block aus nur **einer** Anweisung, dürfen die geschweiften Klammern entfallen. Besser trotzdem setzen – sonst passiert schnell das hier:",
+    { code: "if (anzahl > 0)\n    System.out.println(\"ok\");\n    gesamt = anzahl * 2.5;   // gehört NICHT mehr zum if – läuft immer!" }
+  ],
+  pit: ["`if (x = 5)` – Zuweisung statt Vergleich.", "Semikolon direkt nach `if (...)` beendet das if: `if (x > 0);` macht nichts.", "Einrückung bestimmt nicht, was zum Block gehört – nur die Klammern."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze Bedingung und Alternative. Ausgabe: „Die Blumen kosten 32.5 Euro“.",
+    code: "int anzahl = 13;\ndouble preis = 2.5;\nif ([[0]]) {\n    System.out.println(\"Die Blumen kosten \" + anzahl * preis + \" Euro\");\n} [[1]] {\n    System.out.println(\"Bitte eine positive Anzahl eingeben\");\n}",
+    gaps: [["anzahl > 0", "anzahl >= 1", "0 < anzahl"], ["else"]] }
+};
+READ["VER-1"] = {
+  read: [
+    "**Mehrere Bedingungen** verknüpfst du mit den logischen Operatoren aus VAR. Im Blumenladen sollen nicht zu viele Blumen auf einmal verkauft werden: `if (anzahl > 0 && anzahl < 100)`.",
+    "**Verschachtelung:** In den Blöcken hinter `if` und `else` darf jede Anweisung stehen – auch weitere `if`s. Der abergläubische Blumenhändler schenkt bei genau 13 Blumen eine 14. dazu – aber nur, wenn die Anzahl überhaupt gültig ist:",
+    { code: "if (anzahl > 0 && anzahl < 100) {\n    if (anzahl == 13) {\n        anzahl = 14;      // eine Blume gratis\n    }\n    gesamt = umDieEcke.gesamtbetrag(anzahl);\n}" },
+    "Ein `else` gehört immer zum **nächstgelegenen vorangehenden** `if`, das noch kein `else` hat – egal wie eingerückt ist. Mit geschweiften Klammern bist du auf der sicheren Seite.",
+    "**if – else if – else:** Für mehrere sich ausschließende Fälle. Die Bedingungen werden **von oben nach unten** geprüft, der **erste** zutreffende Zweig läuft, alle anderen werden übersprungen. Rabatte im Blumenladen: bis 10 Blumen 0 %, bis 20 Blumen 2 %, bis 50 Blumen 3 %, sonst 5 %.",
+    "**Der klassische Denkfehler** aus dem Kurs: mehrere *unabhängige* `if`s statt einer Kette. Dann werden bei 5 Blumen alle Bedingungen nacheinander geprüft – und die letzte zutreffende überschreibt die vorherigen:",
+    { code: "// FALSCH – bei anzahl = 5 ist rabatt am Ende 0.03\nif (anzahl <= 10) { rabatt = 0; }\nif (anzahl <= 20) { rabatt = 0.02; }\nif (anzahl <= 50) { rabatt = 0.03; } else { rabatt = 0.05; }\n\n// RICHTIG\nif (anzahl <= 10) {\n    rabatt = 0;\n} else if (anzahl <= 20) {\n    rabatt = 0.02;\n} else if (anzahl <= 50) {\n    rabatt = 0.03;\n} else {\n    rabatt = 0.05;\n}" },
+    "Weil in der Kette die vorherigen Bedingungen schon falsch waren, musst du sie nicht wiederholen: Im Zweig `anzahl <= 20` ist bereits klar, dass `anzahl > 10` gilt."
+  ],
+  pit: ["Mehrere unabhängige ifs statt else-if-Kette → die letzte gewinnt.", "Reihenfolge der Kette: von der engsten zur weitesten Bedingung (bei <=) bzw. umgekehrt bei >=.", "Grenzen genau lesen: „bis 10“ heißt <= 10."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze die Rabatt-Kette. Ausgabe: „0.0 0.02 0.03 0.05“.",
+    pre: "static double rabatt(int anzahl) {\n    double rabatt;\n    if (anzahl <= 10) {\n        rabatt = 0;\n    } [[0]] (anzahl <= 20) {\n        rabatt = 0.02;\n    } else if (anzahl [[1]] 50) {\n        rabatt = 0.03;\n    } [[2]] {\n        rabatt = 0.05;\n    }\n    return rabatt;\n}\n",
+    code: "System.out.println(rabatt(5) + \" \" + rabatt(15) + \" \" + rabatt(50) + \" \" + rabatt(80));",
+    gaps: [["else if"], ["<="], ["else"]] }
+};
+READ["VER-2"] = {
+  read: [
+    "Die **Mehrfachverzweigung** `switch` wählt wie eine if-else-if-Kette einen von mehreren Zweigen aus. Der Unterschied: Es wird **keine komplexe Bedingung** ausgewertet, sondern nur der **Wert eines einzelnen Ausdrucks** mit festen Werten verglichen. Das macht den Code oft übersichtlicher.",
+    "**Pfeil-Syntax** (seit Java 14):",
+    { code: "switch (waehrung) {\n    case \"DKK\" -> kurs = 7.4604;\n    case \"CHF\", \"CHW\" -> {          // mehrere Werte mit Komma\n        kurs = berechneKurs(waehrung);\n        System.out.println(\"Kurs berechnet\");\n    }\n    default -> kurs = 1.0;            // kein Treffer\n}" },
+    "Regeln: Der Ausdruck darf vom Typ `byte`, `short`, `int`, `char` (und deren Wrapper-Klassen), `String` oder eine **Enum** sein. Die Werte hinter `case` müssen **Konstanten** sein – keine Variablen oder Berechnungen – und dürfen nicht doppelt vorkommen. Mehrere Anweisungen kommen in einen Block `{ }`. `default` ist optional und greift, wenn kein case passt. Mit der Pfeil-Syntax läuft **nur** der passende Zweig.",
+    "**Doppelpunkt-Syntax** (die ältere Form, in Klausuren beliebt): Hier springt die Ausführung zum passenden `case` und läuft dann **weiter in alle folgenden Fälle** (*fall-through*), bis ein `break` kommt oder der switch endet:",
+    { code: "switch (x) {\n    case 1: System.out.print(\"A\");\n    case 2: System.out.print(\"B\"); break;\n    default: System.out.print(\"D\");\n}\n// x = 1 → AB    x = 2 → B    x = 7 → D" },
+    "**switch als Ausdruck:** Mit Pfeil-Syntax kann ein switch auch direkt einen Wert liefern: `String name = switch (tag) { case 1 -> \"Montag\"; … default -> \"?\"; };` – Semikolon am Ende nicht vergessen.",
+    "Wann was? `switch`, wenn eine Variable mit mehreren festen Werten verglichen wird (Menüauswahl, Währungscode, Wochentag). `if`, wenn Bereiche (`anzahl <= 20`) oder verknüpfte Bedingungen gebraucht werden."
+  ],
+  pit: ["Doppelpunkt-Syntax ohne break → fall-through in die nächsten Fälle.", "`long` ist im switch nicht erlaubt (mit Java 17 und 21 geprüft) – auch wenn es manchmal anders zu lesen ist.", "`case x:` mit einer Variablen x → Compilerfehler, nur Konstanten."],
+  fill: { kind: "java", wrap: "main", t: "Ergänze beide switch-Varianten. Ausgabe: „SSH Web unbekannt“ und „AB B D“.",
+    pre: "static String dienst(int port) {\n    String name;\n    [[0]] (port) {\n        case 22 -> name = \"SSH\";\n        case 80, 443 -> name = \"Web\";\n        [[1]] -> name = \"unbekannt\";\n    }\n    return name;\n}\n\nstatic String alt(int x) {\n    String s = \"\";\n    switch (x) {\n        case 1: s += \"A\";\n        case 2: s += \"B\"; [[2]];\n        default: s += \"D\";\n    }\n    return s;\n}\n",
+    code: "System.out.println(dienst(22) + \" \" + dienst(443) + \" \" + dienst(3389));\nSystem.out.println(alt(1) + \" \" + alt(2) + \" \" + alt(3));",
+    gaps: [["switch"], ["default"], ["break"]] }
+};
+
+// ====================== ITR – Iteration ======================
+READ["ITR-0"] = {
+  read: [
+    "Mit **Schleifen** (Iterationen) werden Anweisungen kontrolliert wiederholt. Jede Schleife hat eine **Bedingung** und einen **Rumpf**: Solange die Bedingung wahr ist, läuft der Rumpf erneut. Java hat drei Arten: die **kopfgesteuerte** (`while`), die **fußgesteuerte** (`do-while`) und die **Zählschleife** (`for`).",
+    "Die `while`-Schleife prüft die Bedingung **vor** jedem Durchlauf. Ist sie gleich zu Beginn falsch, läuft der Rumpf **kein einziges Mal** – man nennt sie deshalb auch **abweisend**.",
+    "Kursbeispiel **Quersumme**: Die Summe aller Ziffern einer Zahl (65432 → 2 + 3 + 4 + 5 + 6 = 20). Wie viele Additionen nötig sind, hängt von der Zahl ab – das geht nur mit einer Schleife: *Solange noch eine Ziffer übrig ist, addiere sie.*",
+    { code: "int n = 65432;\nint summe = 0;\nwhile (n > 0) {\n    summe += n % 10;   // letzte Ziffer addieren\n    n = n / 10;        // letzte Ziffer abschneiden\n}\n// summe = 20" },
+    "Spiel den Ablauf auf Papier durch – genau das wird in der Klausur verlangt. Eine **Wertetabelle** hilft: pro Durchlauf eine Zeile mit allen Variablen.",
+    { code: "Durchlauf   n       n % 10   summe\nvorher      65432            0\n1           6543    2        2\n2           654     3        5\n3           65      4        9\n4           6       5        14\n5           0       6        20   → n > 0 falsch, Ende" },
+    "**Endlosschleife:** Wird die Bedingung durch einen Fehler nie falsch, läuft der Rumpf ewig – das Programm „hängt“. Typische Ursache: Die Variable aus der Bedingung wird im Rumpf nicht verändert, oder ein Semikolon direkt hinter `while (…)` macht eine leere Schleife daraus. Abbrechen mit Strg+C im Terminal."
+  ],
+  pit: ["`while (n > 0);` – das Semikolon ist der (leere) Rumpf → Endlosschleife.", "Ohne Klammern gehört nur die erste Anweisung zur Schleife.", "Summenvariable vor der Schleife auf 0 setzen."],
+  fill: { kind: "java", wrap: "main", t: "Berechne die Quersumme von 65432. Ausgabe: „20“.",
+    code: "int n = 65432;\nint summe = 0;\n[[0]] (n > 0) {\n    summe [[1]] n % 10;\n    n = n [[2]] 10;\n}\nSystem.out.println(summe);",
+    gaps: [["while"], ["+="], ["/"]] }
+};
+READ["ITR-1"] = {
+  read: [
+    "Soll der Rumpf **mindestens einmal** laufen, kommt die Prüfung ans Ende: die **fußgesteuerte** (nachprüfende, nicht abweisende) Schleife.",
+    { code: "do {\n    // zu wiederholende Anweisungen\n} while (Bedingung);     // Semikolon nicht vergessen!" },
+    "Wann `while`, wann `do-while`? Manchmal ist es egal (die Zahlen 1 bis 10 ausgeben). Meistens entscheidet die Frage: **Muss der Rumpf mindestens einmal laufen?**",
+    "Der typische Fall ist eine **Eingabe**: Erst muss gefragt werden, dann kann man prüfen, ob die Antwort gültig ist. Ebenso das Wiederholen eines ganzen Programms, gesteuert durch eine Benutzerantwort – dann musst du es nicht jedes Mal neu starten:",
+    { code: "Scanner tastatur = new Scanner(System.in);\nint zahl;\ndo {\n    System.out.print(\"Positive Zahl: \");\n    zahl = tastatur.nextInt();\n} while (zahl <= 0);\n\nchar antwort;\ndo {\n    // ... Programm ...\n    System.out.print(\"Nochmal (j/n)? \");\n    antwort = tastatur.next().charAt(0);\n} while (antwort == 'j' || antwort == 'J');" },
+    "**Schleifen und Verzweigungen kombinieren:** Im Rumpf einer Schleife dürfen Verzweigungen stehen und umgekehrt. Wichtig ist nur, dass jede Kontrollstruktur **komplett** innerhalb des umschließenden Blocks steht. Und: **Einrücken!** Anweisungen im Rumpf stehen weiter rechts als die umgebende Ebene. Je komplexer der Code, desto wichtiger – auch auf Papier.",
+    "Jede Schleifenart lässt sich durch die anderen ersetzen – manchmal braucht man dafür aber zusätzliche Verzweigungen."
+  ],
+  pit: ["Semikolon nach `while (...)` bei do-while ist Pflicht.", "Eine Variable, die in der Bedingung steht, muss außerhalb des do-Blocks deklariert sein.", "Fortsetzen bei 'j' oder 'J': `||`, nicht `&&`."],
+  fill: { kind: "java", wrap: "main", imports: ["java.util.Scanner"], t: "Lies so lange, bis eine positive Zahl kommt. (Der Scanner liest hier aus einem Text.) Ausgabe: drei Zeilen „gelesen: …“, dann „gültig: 42“.",
+    code: "Scanner sc = new Scanner(\"-5 0 42\");\nint zahl;\n[[0]] {\n    zahl = sc.nextInt();\n    System.out.println(\"gelesen: \" + zahl);\n} while (zahl [[1]] 0)[[2]]\nSystem.out.println(\"gültig: \" + zahl);",
+    gaps: [["do"], ["<="], [";"]] }
+};
+READ["ITR-2"] = {
+  read: [
+    "Viele Algorithmen haben einen **Zähler**: eine Variable, die sich bei jedem Durchlauf gleich verändert, meist um 1. Dafür ist die **Zählschleife** `for` gemacht – besonders geeignet, wenn die **Anzahl der Wiederholungen feststeht**.",
+    { code: "for (int i = 1; i <= 10; i++) {\n    System.out.println(i);\n}" },
+    "Der Kopf hat drei Teile, durch Semikolons getrennt:\n- **Initialisierung** (`int i = 1`) – läuft genau einmal zu Beginn\n- **Bedingung** (`i <= 10`) – wird **vor** jedem Durchlauf geprüft (die for-Schleife ist also vorprüfend)\n- **Aktualisierung** (`i++`) – läuft **nach** jedem Durchlauf",
+    "**Äquivalenz zur while-Schleife:** Jede for-Schleife lässt sich direkt als while-Schleife schreiben. Einziger echter Unterschied: Eine im Kopf deklarierte Variable existiert nur innerhalb der Schleife.",
+    { code: "int i = 1;                 // Initialisierung\nwhile (i <= 10) {          // Bedingung\n    System.out.println(i);\n    i++;                   // Aktualisierung\n}" },
+    "**Verschachtelte Schleifen:** Für ein Quadrat aus n · n Sternchen läuft eine äußere Schleife über die Zeilen, eine innere über die Spalten. Die innere Schleife läuft **pro Durchlauf der äußeren komplett durch**. Hängt die Grenze der inneren von der äußeren ab (`spalte <= zeile`), entsteht ein Dreieck.",
+    "**Optional:** Initialisierung und Aktualisierung dürfen mehrere Anweisungen enthalten, durch Komma getrennt: `for (int i = 1, potenz = 2; i <= 10; i++, potenz *= 2)` gibt die Zweierpotenzen bis 1024 aus."
+  ],
+  pit: ["Zählt man von 0 bis `< n` oder von 1 bis `<= n`? Beides n Durchläufe – nicht mischen.", "`for (int i = 0; i < 10; i++);` – Semikolon = leerer Rumpf.", "Im Kopf stehen Semikolons, keine Kommas zwischen den drei Teilen."],
+  fill: { kind: "java", wrap: "main", t: "Zeichne ein Quadrat aus 3 · 3 Sternchen. Ausgabe: dreimal „***“.",
+    pre: "static void quadrat(int n) {\n    for (int zeile = 1; zeile [[0]] n; zeile[[1]]) {\n        for (int spalte = 1; spalte <= n; spalte++) {\n            System.out.print(\"*\");\n        }\n        System.out.[[2]]();\n    }\n}\n",
+    code: "quadrat(3);",
+    gaps: [["<="], ["++", "+= 1"], ["println"]] }
+};
+READ["ITR-3"] = {
+  read: [
+    "Zwei einfache Anweisungen steuern Schleifen von innen:\n- `break` **beendet die umgebende Schleife vollständig** und springt hinter ihr Ende.\n- `continue` **beendet nur den aktuellen Durchlauf** – es springt zur schließenden Klammer des Rumpfs. Danach geht es normal weiter: Bei `for` läuft die Aktualisierung, dann wird die Bedingung erneut geprüft.",
+    "Beide beziehen sich immer auf die **innerste** umgebende Schleife und stehen in der Regel in einer `if`-Anweisung.",
+    "Kursbeispiel **Wurfparabel**: Die Höhe eines Wurfs wird für immer größere Weiten x berechnet. Rechnerisch würde die Formel irgendwann negative Höhen liefern – real ist der Ball dann am Boden. Also: Sobald h < 0, Schleife abbrechen.",
+    { code: "for (double x = 0; x <= 100; x += 0.5) {\n    double h = berechneHoehe(x);\n    if (h < 0) {\n        break;               // Ball ist gelandet\n    }\n    zeichnePunkt(x, h);\n}" },
+    "`continue` überspringt Fälle, die nicht verarbeitet werden sollen – zum Beispiel leere Zeilen beim Auswerten eines Logs:",
+    { code: "for (int i = 1; i <= 10; i++) {\n    if (i % 3 == 0) {\n        continue;   // 3, 6, 9 überspringen\n    }\n    System.out.print(i + \" \");\n}\n// 1 2 4 5 7 8 10" },
+    "Setze beide sparsam ein. Oft lässt sich die Schleifenbedingung so formulieren, dass man sie nicht braucht – das ist meist besser lesbar."
+  ],
+  pit: ["break in einer inneren Schleife beendet nur die innere.", "continue in einer while-Schleife: Aktualisierung vor dem continue erledigen, sonst Endlosschleife.", "break außerhalb einer Schleife oder eines switch → Compilerfehler."],
+  fill: { kind: "java", wrap: "main", t: "Durch 3 teilbare Zahlen überspringen, ab 8 abbrechen. Ausgabe: „1 2 4 5 7 “.",
+    code: "for (int i = 1; i <= 10; i++) {\n    if (i % 3 == 0) {\n        [[0]];\n    }\n    if (i > 7) {\n        [[1]];\n    }\n    System.out.print(i + \" \");\n}",
+    gaps: [["continue"], ["break"]] }
+};
+
+// ====================== VRB – Vererbung und Polymorphie ======================
+READ["VRB-0"] = {
+  read: [
+    "Programmierer wollen möglichst wenig doppelt schreiben. Die OOP bietet dafür **Vererbung** (*inheritance*): Eine Klasse A übernimmt **alle Attribute und Methoden** einer bestehenden Klasse B. Objekte von A dürfen dann überall stehen, wo ein B erwartet wird – eine **ist-ein-Beziehung**: Ein Girokonto *ist ein* Konto.",
+    "Die vererbende Klasse heißt **Superklasse** (Oberklasse), die erbende **Subklasse** (Unterklasse). Zeichnet man die erbenden Klassen unter die vererbenden, entsteht eine **Klassenhierarchie**. Eine Klasse kann dabei gleichzeitig Sub- und Superklasse sein.",
+    "Es gibt **Einfachvererbung** (eine direkte Superklasse) und **Mehrfachvererbung** (mehrere). Der Kurs nennt den studentischen Mitarbeiter, der eigentlich Student *und* Angestellter ist. **Java erlaubt nur Einfachvererbung** – jede Klasse hat genau eine direkte Superklasse.",
+    "Die Syntax ist kurz: `extends` im Klassenkopf.",
+    { code: "public class Girokonto extends Konto {\n    private double dispobetrag;          // zusätzliches Attribut\n\n    public double getDispobetrag() {     // zusätzliche Methode\n        return dispobetrag;\n    }\n}" },
+    "Ein `Girokonto`-Objekt hat jetzt Kontonummer, Kontostand, `einzahlen()`, `abheben()` … aus `Konto` **plus** den Dispo. Zusätzliche Attribute und Methoden schreibst du ganz normal – die Syntax ändert sich nicht.",
+    "**Object ist die Wurzel:** Schreibst du kein `extends`, ergänzt der Compiler intern `extends Object`. Jede Java-Klasse erbt also direkt oder indirekt von `java.lang.Object` – daher kommen Methoden wie `toString()` und `equals()`, die jedes Objekt hat.",
+    "Vererbt werden die **nicht-statischen** Attribute und Methoden. `private` Attribute sind zwar im Objekt vorhanden, aber die Subklasse kann **nicht direkt** darauf zugreifen – nur über Getter/Setter (oder `protected`, siehe nächster Abschnitt)."
+  ],
+  pit: ["`class A extends B, C` → Compilerfehler, nur eine Superklasse.", "Richtung beachten: Ein Girokonto ist ein Konto – nicht umgekehrt.", "Private Attribute der Superklasse sind in der Subklasse nicht direkt sichtbar."],
+  fill: { kind: "java", wrap: "class", t: "Lass Girokonto von Konto erben. Ausgabe: „150.0 / 500.0“.",
+    pre: "class Konto {\n    private double kontostand;\n    public void einzahlen(double betrag) { kontostand += betrag; }\n    public double getKontostand() { return kontostand; }\n}\n",
+    code: "class Girokonto [[0]] [[1]] {\n    private double dispobetrag = 500;\n    public double getDispobetrag() { return dispobetrag; }\n}\n",
+    run: "Girokonto g = new Girokonto();\ng.einzahlen(150);\nSystem.out.println(g.getKontostand() + \" / \" + g.getDispobetrag());",
+    gaps: [["extends"], ["Konto"]] }
+};
+READ["VRB-1"] = {
+  read: [
+    "Das neue Attribut `dispobetrag` braucht einen Startwert – dafür sind **Konstruktoren** da. Aber: **Konstruktoren werden in Java nicht vererbt.** Jede Klasse schreibt ihre eigenen und kümmert sich dabei vor allem um ihre **eigenen** Attribute.",
+    "Die geerbten Attribute initialisiert weiterhin die Superklasse. Ihren Konstruktor rufst du mit `super(...)` auf – und zwar als **allererste Anweisung**:",
+    { code: "public Girokonto(String inhaber, double dispo) {\n    super(inhaber);              // Konstruktor von Konto\n    this.dispobetrag = dispo;    // eigenes Attribut\n}" },
+    "Fehlt der `super`-Aufruf, fügt der Compiler automatisch `super()` **ohne Parameter** ein. Hat die Superklasse keinen parameterlosen Konstruktor, gibt es dann einen Compilerfehler.",
+    "Zur Erinnerung aus KLA: `this(...)` ruft einen **anderen Konstruktor derselben Klasse** auf – ebenfalls nur als erste Anweisung. `super(...)` und `this(...)` zusammen in einem Konstruktor geht deshalb nicht.",
+    "**protected:** Für `ueberweisen()` möchte Girokonto direkt auf `kontostand` zugreifen – das ist aber `private` in Konto. Die Lösung ist der Sichtbarkeitsmodifizierer `protected`: Das Element ist dann **in Subklassen** (und im selben Paket) sichtbar, für alle anderen Klassen aber weiter verborgen.",
+    { code: "Sichtbarkeit   eigene Klasse   Paket   Subklasse   überall\nprivate        ja              nein    nein        nein\n(ohne)         ja              ja      nein*       nein\nprotected      ja              ja      ja          nein\npublic         ja              ja      ja          ja\n* außer die Subklasse liegt im selben Paket" },
+    "Oft ist ein **protected Setter** eleganter als ein protected Attribut: Die Superklasse behält die Kontrolle darüber, wie der Wert geändert wird."
+  ],
+  pit: ["`super(...)` nicht als erste Anweisung → Compilerfehler.", "Superklasse ohne Standardkonstruktor und kein expliziter super-Aufruf → Compilerfehler.", "protected ist mehr als „nur Subklasse“: Das ganze Paket sieht es auch."],
+  fill: { kind: "java", wrap: "class", t: "Ergänze den Konstruktor-Aufruf der Superklasse und die Sichtbarkeit. Ausgabe: „Alex 500.0 -200.0“.",
+    pre: "class Konto {\n    private String inhaber;\n    [[0]] double kontostand;\n    public Konto(String inhaber) { this.inhaber = inhaber; }\n    public String getInhaber() { return inhaber; }\n}\n",
+    code: "class Girokonto extends Konto {\n    private double dispobetrag;\n    public Girokonto(String inhaber, double dispo) {\n        [[1]](inhaber);\n        this.dispobetrag = dispo;\n    }\n    public void belasten(double betrag) {\n        this.kontostand -= betrag;   // direkter Zugriff\n    }\n    public double getDispobetrag() { return dispobetrag; }\n}\n",
+    run: "Girokonto g = new Girokonto(\"Alex\", 500);\ng.belasten(200);\nSystem.out.println(g.getInhaber() + \" \" + g.getDispobetrag() + \" \" + g.kontostand);",
+    gaps: [["protected"], ["super"]] }
+};
+READ["VRB-2"] = {
+  read: [
+    "Ein Girokonto darf überzogen werden – das geerbte `abheben()` passt also nicht. Lösung: Die Methode in der Subklasse **überschreiben** (*override*), also mit **gleicher Signatur** neu schreiben. Die Annotation `@Override` lässt den Compiler prüfen, dass es wirklich eine geerbte Methode gibt – ein Tippfehler im Namen fällt sofort auf.",
+    { code: "public class Girokonto extends Konto {\n    @Override\n    public boolean abheben(double betrag) {\n        boolean gedeckt = getKontostand() + dispobetrag >= betrag;\n        if (betrag > 0 && gedeckt) {\n            setKontostand(getKontostand() - betrag);\n            return true;\n        }\n        return false;\n    }\n}" },
+    "**Überschreiben ≠ Überladen:** Überladen = gleicher Name, **andere Parameterliste**, beide Methoden existieren nebeneinander. Überschreiben = **gleiche Signatur** in der Subklasse, die alte Implementierung wird für Objekte der Subklasse **ersetzt**. Die Sichtbarkeit darf beim Überschreiben nicht eingeschränkt werden (aus public wird nicht private).",
+    "Mit `super.methode()` kannst du in der überschreibenden Methode die Version der Superklasse trotzdem aufrufen – praktisch, wenn du sie nur ergänzen willst, z. B. bei `toString()`.",
+    "**Zuweisungskompatibilität:** Weil ein Girokonto ein Konto ist, darf eine Variable vom Typ `Konto` ein `Girokonto`-Objekt speichern: `Konto k = new Girokonto(\"Alex\", 500);`",
+    "**Polymorphie** (Vielgestaltigkeit): Wird jetzt `k.abheben(100)` aufgerufen, entscheidet **das Objekt** zur Laufzeit, welche Implementierung läuft – nicht der Typ der Variablen. Ein Girokonto-Objekt führt die Girokonto-Version aus, ein Sparbuch die Sparbuch-Version. Das gilt auch für Aufrufe **innerhalb** der Klasse über `this`: Ruft `toString()` in Konto `this.getBezeichnung()` auf, läuft bei einem Girokonto dessen überschriebene `getBezeichnung()`.",
+    "Merkregel für die Klausur: **Der Variablentyp bestimmt, *welche* Methoden aufrufbar sind (Compiler). Das Objekt bestimmt, *welche Implementierung* läuft (Laufzeit).**"
+  ],
+  pit: ["Andere Parameterliste = Überladen, nicht Überschreiben – @Override meldet dann einen Fehler.", "Variable vom Typ Konto mit Girokonto-Objekt → trotzdem läuft die Girokonto-Methode.", "static-Methoden werden nicht polymorph aufgerufen."],
+  fill: { kind: "java", wrap: "class", t: "Überschreibe getBezeichnung. Ausgabe: „Allgemeines Konto“ und „Girokonto“.",
+    pre: "class Konto {\n    public String getBezeichnung() { return \"Allgemeines Konto\"; }\n    @Override\n    public String toString() { return this.getBezeichnung(); }\n}\n",
+    code: "class Girokonto extends Konto {\n    [[0]]\n    public String [[1]]() {\n        return \"Girokonto\";\n    }\n}\n",
+    run: "Konto a = new Konto();\n[[2]] b = new Girokonto();   // Variablentyp: Superklasse\nSystem.out.println(a);\nSystem.out.println(b);",
+    gaps: [["@Override"], ["getBezeichnung"], ["Konto", "Object"]] }
+};
+READ["VRB-3"] = {
+  read: [
+    "Steht ein Girokonto in einer Variablen vom Typ `Konto`, kann man abheben, einzahlen, den Kontostand abfragen – aber **nicht überweisen**. Der Compiler verweigert `einKonto.ueberweisen(…)`, denn er kennt nur den **Variablentyp** `Konto`, und der hat keine solche Methode. Was zur Laufzeit wirklich drinsteht, weiß er nicht.",
+    "Die Lösung ist ein **expliziter Cast** (Typumwandlung) in die Subklasse – wie bei primitiven Typen mit dem Zieltyp in Klammern:",
+    { code: "Girokonto giro = (Girokonto) einKonto;\ngiro.ueberweisen(50, ziel);\n\n// oder direkt – Klammern beachten:\n((Girokonto) einKonto).ueberweisen(50, ziel);" },
+    "Ein Cast ändert **nicht das Objekt**, sondern nur, als was der Compiler es betrachtet. Steckt in der Variablen in Wahrheit ein `Sparbuch`, schlägt der Cast zur Laufzeit fehl: **ClassCastException**.",
+    "Deshalb vorher mit `instanceof` prüfen. Der Operator liefert `true`, wenn das Objekt zur angegebenen Klasse **oder einer ihrer Subklassen** gehört:",
+    { code: "if (einKonto instanceof Girokonto) {\n    Girokonto giro = (Girokonto) einKonto;\n    giro.ueberweisen(50, ziel);\n} else {\n    System.out.println(\"Überweisen nur mit Girokonto\");\n}" },
+    "Die umgekehrte Richtung – Subklasse in eine Superklassen-Variable – braucht **keinen** Cast (impliziter Upcast), siehe Zuweisungskompatibilität.",
+    "Hinweis: Seit Java 16 gibt es die Kurzform `if (einKonto instanceof Girokonto giro)`, die Prüfen und Casten verbindet. Die ausführliche Form oben funktioniert überall und ist auf Papier eindeutiger."
+  ],
+  pit: ["`(Girokonto) k.ueberweisen(...)` castet das Ergebnis, nicht k – Klammern setzen!", "instanceof ist auch für Subklassen true (ein Girokonto ist instanceof Konto).", "Cast ohne Prüfung → ClassCastException zur Laufzeit, nicht beim Compilieren."],
+  fill: { kind: "java", wrap: "class", t: "Prüfe den Typ und caste. Ausgabe: „Dispo 500.0“ und „kein Girokonto“.",
+    pre: "class Konto { }\nclass Sparbuch extends Konto { }\nclass Girokonto extends Konto {\n    public double getDispo() { return 500; }\n}\n",
+    code: "class Bank {\n    static void zeigeDispo(Konto k) {\n        if (k [[0]] Girokonto) {\n            Girokonto g = ([[1]]) k;\n            System.out.println(\"Dispo \" + g.getDispo());\n        } else {\n            System.out.println(\"kein Girokonto\");\n        }\n    }\n}\n",
+    run: "Bank.zeigeDispo(new Girokonto());\nBank.zeigeDispo(new Sparbuch());",
+    gaps: [["instanceof"], ["Girokonto"]] }
+};
+READ["VRB-4"] = {
+  read: [
+    "Je weiter oben in der Hierarchie, desto allgemeiner werden die Klassen. Ein „allgemeines Konto“ gibt es in der Realität eigentlich nicht – bei der Bank musst du dich für eine **Kontoart** entscheiden. Im Programm soll `new Konto()` also gar nicht möglich sein.",
+    "Dafür kennzeichnest du die Klasse mit `abstract`. Von einer **abstrakten Klasse** lassen sich **keine Objekte** erzeugen; sie ist zum Erben da. Variablen vom Typ `Konto` sind aber weiterhin erlaubt – sie speichern eben Objekte der Subklassen.",
+    "Eine **abstrakte Methode** hat **keinen Rumpf** – nur den Kopf mit Semikolon. Jede **konkrete** (nicht abstrakte) Subklasse **muss** sie überschreiben. Enthält eine Klasse mindestens eine abstrakte Methode, muss die Klasse selbst abstrakt sein.",
+    { code: "public abstract class Konto {\n    // normale Attribute, Konstruktoren und Methoden sind erlaubt\n    public abstract String getBezeichnung();   // kein Rumpf!\n}\n\npublic class Sparbuch extends Konto {\n    @Override\n    public String getBezeichnung() {\n        return \"Sparbuch\";\n    }\n}" },
+    "So erzwingt die Superklasse, dass jede Kontoart eine Bezeichnung liefert – und `toString()` in Konto kann sie schon aufrufen, obwohl Konto selbst keine Implementierung hat (Polymorphie).",
+    "**final** ist das Gegenstück: Eine `final`-**Klasse** kann **nicht beerbt** werden – Beispiele aus der API: `String`, `Math`, `System`, `Integer`, `Double`. So kann niemand ihr Verhalten durch Überschreiben verändern. Eine `final`-**Methode** kann nicht überschrieben werden, die Klasse selbst darf aber Subklassen haben.",
+    "Zur Erinnerung: Ein `final`-**Attribut** oder eine `final`-**Variable** ist eine Konstante – nur einmal zuweisbar. Dasselbe Schlüsselwort, drei Bedeutungen.",
+    "`abstract` und `final` zusammen an einer Klasse oder Methode ergeben keinen Sinn und sind verboten."
+  ],
+  pit: ["`new Konto()` bei abstrakter Klasse → Compilerfehler.", "Abstrakte Methode mit `{ }` → Compilerfehler, sie endet mit `;`.", "Konkrete Subklasse vergisst eine abstrakte Methode → Compilerfehler."],
+  fill: { kind: "java", wrap: "class", t: "Mach Konto abstrakt, deklariere die abstrakte Methode und verhindere, dass jemand von Sparbuch erbt. Ausgabe: „Sparbuch: 100.0“.",
+    pre: "[[0]] class Konto {\n    protected double kontostand = 100;\n    public [[1]] String getBezeichnung()[[2]]\n    @Override\n    public String toString() { return getBezeichnung() + \": \" + kontostand; }\n}\n",
+    code: "[[3]] class Sparbuch extends Konto {\n    @Override\n    public String getBezeichnung() { return \"Sparbuch\"; }\n}\n",
+    run: "Konto k = new Sparbuch();\nSystem.out.println(k);",
+    gaps: [["abstract"], ["abstract"], [";"], ["final"]] }
+};
+
+// ====================== EXC – Ausnahmebehandlung ======================
+READ["EXC-0"] = {
+  read: [
+    "Eine **Exception** (Ausnahme) ist ein abnormales Ereignis, das die normale Ausführung eines Programms unterbricht. Ursachen gibt es viele: Buchstaben statt einer Zahl eingegeben, Division durch 0 bei ganzen Zahlen, eine Datei existiert nicht, ein Cast schlägt fehl, ein Parameter hat einen unsinnigen Wert. Was genau als Ausnahme gilt, legt der Programmierer einer Methode fest.",
+    "Tritt eine Ausnahme auf, wird ein **Exception-Objekt** erzeugt, das Informationen über den Fehler enthält, und **geworfen**. Die laufende Methode bricht **sofort** ab.",
+    "**Der Aufruf-Stack:** Jede aufgerufene Methode wird oben auf einen Stapel gelegt; ist sie fertig, wird sie wieder entfernt. `main` liegt ganz unten. Wird eine Exception geworfen und nicht behandelt, wandert sie den Stack **hinunter zum Aufrufer**, dann zu dessen Aufrufer … bis zu `main`. Fängt sie auch dort niemand, bricht das Programm mit einem **Stacktrace** ab:",
+    { code: "Exception in thread \"main\" java.util.InputMismatchException\n    at java.base/java.util.Scanner.nextInt(Scanner.java:2217)\n    at EinAusgabe.eingabeGanzeZahl(EinAusgabe.java:85)\n    at Summe.main(Summe.java:15)" },
+    "Lies den Stacktrace **von oben nach unten**: Oben steht die Exception-Klasse, darunter die Methode, in der sie entstand, ganz unten `main`. Die erste Zeile mit **deiner eigenen Klasse** ist meist die interessante.",
+    "**Behandeln mit try-catch:** Code, der eine Exception werfen kann, kommt in den `try`-Block. Tritt die Exception auf, springt die Ausführung **sofort** in den passenden `catch`-Block; der Rest des try-Blocks wird übersprungen. Danach läuft das Programm **hinter** try-catch normal weiter.",
+    { code: "try {\n    int zahl = Integer.parseInt(eingabe);\n    System.out.println(\"Doppelt: \" + 2 * zahl);\n} catch (NumberFormatException e) {\n    System.out.println(\"Keine Zahl: \" + e.getMessage());\n}" },
+    "Mehrere Exception-Arten fängst du mit mehreren catch-Blöcken oder mit `|` in einem: `catch (NumberFormatException | ArithmeticException e)`. Den Namen (`e`, `ex`) wählst du frei.",
+    "**finally** (optional): Ein dritter Block, der **in jedem Fall** läuft – ob eine Exception auftrat oder nicht, sogar wenn im try ein `return` steht. Typisch zum Aufräumen, etwa zum Schließen einer Datei."
+  ],
+  pit: ["Nach dem catch geht es hinter try-catch weiter – nicht zurück in den try-Block.", "Ein catch für eine Superklasse (Exception) vor einem für eine Subklasse → Compilerfehler (unerreichbar).", "Leerer catch-Block verschluckt Fehler unsichtbar."],
+  fill: { kind: "java", wrap: "main", t: "Fange die fehlerhafte Umwandlung ab. Ausgabe: „21“, „Keine Zahl: abc“, „fertig“.",
+    code: "String[] eingaben = {\"21\", \"abc\"};\nfor (String s : eingaben) {\n    [[0]] {\n        int zahl = Integer.parseInt(s);\n        System.out.println(zahl);\n    } [[1]] (NumberFormatException e) {\n        System.out.println(\"Keine Zahl: \" + s);\n    }\n}\nSystem.out.println(\"fertig\");",
+    gaps: [["try"], ["catch"]] }
+};
+READ["EXC-1"] = {
+  read: [
+    "Nicht jede Methode kann einen Fehler sinnvoll behandeln. Dann gibt sie die Exception an ihren Aufrufer weiter – das passiert ohnehin automatisch. Um es deutlich zu machen, nennt man die Exception mit **throws** im Methodenkopf und beschreibt sie mit **@throws** im javadoc:",
+    { code: "/**\n * rechnet x hoch y aus\n * @param x Basis\n * @param y Exponent, nicht negativ\n * @return x hoch y\n * @throws IllegalArgumentException wenn y negativ ist\n */\npublic static double positivPotenzieren(double x, int y)\n        throws IllegalArgumentException {\n    if (y < 0) {\n        throw new IllegalArgumentException(\"Exponent negativ: \" + y);\n    }\n    double ergebnis = 1;\n    for (int i = 1; i <= y; i++) {\n        ergebnis = ergebnis * x;\n    }\n    return ergebnis;\n}" },
+    "Mehrere Exceptions hinter `throws` werden durch **Komma** getrennt, im javadoc steht dann pro Exception ein `@throws`.",
+    "**Selbst auslösen mit throw:** Wenn du eine Methode entwirfst, gibt es oft Situationen, in denen sie ihre Aufgabe nicht korrekt erfüllen kann – etwa ein negativer Exponent. Dann erzeugst du ein Exception-Objekt mit `new` und wirfst es mit `throw`. Die Methode endet sofort, `return` wird nicht erreicht.",
+    "Für **logisch falsche Parameterwerte** ist die `IllegalArgumentException` gedacht. Gib im Konstruktor eine aussagekräftige Meldung mit – sie ist später über `getMessage()` abrufbar.",
+    "**Achtung Verwechslungsgefahr:** `throws` (mit s) steht im **Methodenkopf** und kündigt an. `throw` (ohne s) steht im **Rumpf** und wirft tatsächlich.",
+    "**Behandeln oder weitergeben?** Eine grobe Faustregel aus dem Kurs: Exceptions **möglichst früh** behandeln – also dort, wo eine sinnvolle Reaktion möglich ist (z. B. die Eingabe wiederholen). Und: Entweder behandeln **oder** weitergeben. Fängst du einen Exception-Typ mit try-catch, gehört er **nicht** zusätzlich in `throws` und `@throws`."
+  ],
+  pit: ["`throw IllegalArgumentException(...)` ohne `new` → Compilerfehler.", "throws/throw verwechselt.", "Exception fangen und gleichzeitig mit throws ankündigen – im Kurs nicht vorgesehen."],
+  fill: { kind: "java", wrap: "main", t: "Wirf bei negativem Exponenten eine Exception. Ausgabe: „8.0“ und „Fehler: Exponent negativ“.",
+    pre: "static double potenz(double x, int y) [[0]] IllegalArgumentException {\n    if (y < 0) {\n        [[1]] [[2]] IllegalArgumentException(\"Exponent negativ\");\n    }\n    double ergebnis = 1;\n    for (int i = 1; i <= y; i++) {\n        ergebnis *= x;\n    }\n    return ergebnis;\n}\n",
+    code: "System.out.println(potenz(2, 3));\ntry {\n    System.out.println(potenz(2, -1));\n} catch (IllegalArgumentException e) {\n    System.out.println(\"Fehler: \" + e.[[3]]());\n}",
+    gaps: [["throws"], ["throw"], ["new"], ["getMessage"]] }
+};
+READ["EXC-2"] = {
+  read: [
+    "Exceptions sind Objekte – und ihre Klassen bilden eine **Hierarchie** (Vererbung!). Ein Ausschnitt:",
+    { code: "Object\n └─ Throwable                  alles, was geworfen werden kann\n     ├─ Error                   schwere JVM-Fehler (z. B. OutOfMemoryError)\n     └─ Exception               behandelbare Ausnahmen\n         ├─ IOException         (checked)\n         │   └─ FileNotFoundException\n         └─ RuntimeException    (unchecked)\n             ├─ ArithmeticException\n             ├─ NullPointerException\n             ├─ ClassCastException\n             ├─ IllegalArgumentException\n             │   └─ NumberFormatException\n             └─ IndexOutOfBoundsException\n                 └─ ArrayIndexOutOfBoundsException" },
+    "`Throwable` ist die Oberklasse aller Ausnahme- und Fehlerobjekte; nur deren Instanzen kann die JVM werfen. `Error` steht für schwere Probleme, auf die ein Programm normalerweise nicht reagieren kann.",
+    "**Checked Exceptions** erben von `Exception`, aber **nicht** von `RuntimeException` (z. B. `IOException`). Für sie gilt die **catch-or-specify-Regel**: Der Compiler **zwingt** dich, sie mit try-catch zu behandeln **oder** mit `throws` weiterzugeben. Sonst compiliert das Programm nicht.",
+    "**Unchecked Exceptions** erben von `RuntimeException`. Sie entstehen meist durch Programmierfehler (null-Referenz, falscher Index, Division durch 0) und könnten fast überall auftreten. Der Compiler **stellt frei**, ob du sie behandelst – `throws` darf entfallen.",
+    "Weil ein catch-Block auch **alle Subklassen** fängt, ist die **Reihenfolge** mehrerer catch-Blöcke wichtig: erst die speziellen, dann die allgemeinen. `catch (Exception e)` als erster Block würde alle folgenden unerreichbar machen – Compilerfehler.",
+    "Für die Klausur: Kannst du zu einer Exception sagen, ob sie checked oder unchecked ist? Faustregel – steht `RuntimeException` in der Ahnenreihe, ist sie unchecked."
+  ],
+  pit: ["NumberFormatException ist unchecked (sie erbt über IllegalArgumentException von RuntimeException).", "Checked Exception weder gefangen noch mit throws deklariert → Compilerfehler „unreported exception“.", "catch(Exception) vor catch(IOException) → unerreichbarer Code."],
+  fill: { kind: "java", wrap: "main", t: "Eine checked Exception muss angekündigt werden. Ordne außerdem die catch-Blöcke. Ausgabe: „speziell: x ist 0“ und „Ende“.",
+    pre: "static void pruefe(int x) [[0]] Exception {\n    if (x == 0) {\n        throw new Exception(\"x ist 0\");\n    }\n}\n",
+    code: "try {\n    pruefe(0);\n} catch ([[1]] e) {\n    System.out.println(\"speziell: \" + e.getMessage());\n} catch ([[2]] e) {\n    System.out.println(\"allgemein\");\n}\nSystem.out.println(\"Ende\");",
+    gaps: [["throws"], ["Exception"], ["Throwable"]] }
+};
+READ["EXC-3"] = {
+  read: [
+    "Manchmal passt keine Exception der Standardbibliothek. Der Kurs nennt die Berechnung von 0⁰, die mathematisch nicht definiert ist. Eine `IllegalArgumentException` wäre unpassend, denn nicht **ein** Parameter ist falsch, sondern die **Kombination** zweier Werte. Also schreibt man eine **eigene Exception-Klasse**.",
+    "Das ist überraschend einfach: Eine Klasse, die von `Exception` (checked) oder `RuntimeException` (unchecked) **erbt**. Wichtig ist vor allem ein **aussagekräftiger Name**, der auf **…Exception** endet. Einen Konstruktor mit Meldung reichst du per `super` weiter:",
+    { code: "public class NullHochNullException extends Exception {\n    public NullHochNullException() {\n        super(\"0 hoch 0 ist nicht definiert\");\n    }\n}\n\n// Verwendung\nif (x == 0 && y == 0) {\n    throw new NullHochNullException();\n}" },
+    "So kann der Aufrufer auf verschiedene Fehler **unterschiedlich reagieren**, obwohl sie aus demselben Methodenaufruf kommen – mit einem catch-Block pro Exception-Klasse.",
+    "**Exceptions von vornherein vermeiden:** Viele Ausnahmen lassen sich mit einer einfachen Prüfung vorher verhindern – das ist meist besser lesbar als try-catch:\n- Divisor auf 0 prüfen, bevor geteilt wird\n- `if (objekt != null)` vor einem Methodenaufruf\n- Index gegen `array.length` prüfen\n- `instanceof` vor einem Cast",
+    "**Eingabewiederholung:** Die typische Kombination ist eine Schleife um try-catch: Solange die Eingabe nicht gültig ist, erneut fragen. Erst wenn keine Exception kam, wird die Schleife verlassen.",
+    { code: "boolean gueltig = false;\ndouble zahl = 0;\nwhile (!gueltig) {\n    try {\n        System.out.print(\"Zahl: \");\n        zahl = Double.parseDouble(tastatur.nextLine());\n        gueltig = true;\n    } catch (NumberFormatException e) {\n        System.out.println(\"Bitte eine Zahl eingeben.\");\n    }\n}" },
+    "Mögliche Fehlerbehandlungen reichen vom bewussten Ignorieren über einen Standardwert (im javadoc dokumentieren!) bis zur Wiederholung – was richtig ist, entscheidest du im Einzelfall."
+  ],
+  pit: ["Eigene Exception, die von RuntimeException erbt, ist unchecked – der Compiler erzwingt dann nichts.", "Name ohne „Exception“-Endung ist erlaubt, aber schlechter Stil.", "Bei der Eingabewiederholung die Variable vor der Schleife deklarieren."],
+  fill: { kind: "java", wrap: "class", t: "Schreibe die eigene Exception-Klasse. Ausgabe: „0 hoch 0 ist nicht definiert“.",
+    pre: "class NullHochNullException [[0]] Exception {\n    public NullHochNullException() {\n        [[1]](\"0 hoch 0 ist nicht definiert\");\n    }\n}\n",
+    code: "class Mathe {\n    static double potenz(double x, int y) throws NullHochNullException {\n        if (x == 0 && y == 0) {\n            throw [[2]] NullHochNullException();\n        }\n        return Math.pow(x, y);\n    }\n}\n",
+    run: "try {\n    Mathe.potenz(0, 0);\n} catch ([[3]] e) {\n    System.out.println(e.getMessage());\n}",
+    gaps: [["extends"], ["super"], ["new"], ["NullHochNullException", "Exception"]] }
+};
+
+// ====================== ARR – Arrays ======================
+READ["ARR-0"] = {
+  read: [
+    "Oft müssen **mehrere gleichartige, zusammengehörige Werte** gespeichert werden – im Kurs die Temperaturen einer Wetterstation, eine Messung pro Tag. Sieben einzelne Variablen `temp1` bis `temp7` wären unhandlich, und bei 365 Messungen unmöglich. Die Lösung ist ein **Array** (deutsch: Feld, Reihung).",
+    "Ein Array speichert Werte **eines Typs** unter **einem gemeinsamen Namen** in einer festen Reihenfolge. Auf die einzelnen **Arrayelemente** greifst du über einen numerischen **Index** zu.",
+    "**Arrays sind Objekte** (Referenztyp, Unterklasse von Object) – haben aber keine eigene Klasse mit Namen. Deshalb eine eigene Syntax für die **Deklaration**: Datentyp der Elemente, dann eckige Klammern.",
+    { code: "double[] temperaturen;      // Deklaration – noch kein Array-Objekt!\ntemperaturen = new double[7];   // Erzeugung mit new[]: 7 Elemente\n\nint[] ports = {22, 80, 443};    // Erzeugung durch Initialisierung" },
+    "**Mit new[]** gibst du die Anzahl der Elemente an. Alle Elemente bekommen automatisch einen **Standardwert**: 0 bei Zahlen, `0.0` bei double, `false` bei boolean, `'\\u0000'` bei char und `null` bei Referenztypen.",
+    "**Durch Initialisierung** listest du die Werte in geschweiften Klammern auf; die Länge ergibt sich aus der Anzahl. Diese Kurzform geht nur direkt bei der Deklaration. Später brauchst du `ports = new int[] {22, 80};`.",
+    "Die **Länge** eines Arrays ist nach dem Erzeugen **fest** und steht im Attribut `length` – **ohne Klammern**, anders als `length()` bei Strings. Ein „größeres“ Array bedeutet immer: ein neues Array erzeugen und die Werte umkopieren.",
+    "Die Klammern dürfen auch hinter dem Namen stehen (`int ports[]`), üblich und empfohlen ist aber `int[] ports` – der Typ ist „int-Array“."
+  ],
+  pit: ["`array.length()` → Compilerfehler, bei Arrays ist length ein Attribut.", "`int[] a; a[0] = 5;` → a ist noch nicht erzeugt.", "`a = {1, 2};` nach der Deklaration geht nicht – nur mit `new int[] {1, 2}`."],
+  fill: { kind: "java", wrap: "main", t: "Deklariere und erzeuge die Arrays. Ausgabe: „7 0.0“ und „3 443“.",
+    code: "double[] temperaturen = [[0]] double[[[1]]];\nSystem.out.println(temperaturen.[[2]] + \" \" + temperaturen[0]);\nint[] ports = [[3]]22, 80, 443};\nSystem.out.println(ports.length + \" \" + ports[2]);",
+    gaps: [["new"], ["7"], ["length"], ["{"]] }
+};
+READ["ARR-1"] = {
+  read: [
+    "Zugriff auf ein Element: Arrayname und Index in eckigen Klammern. Der **Index beginnt bei 0**, der höchste ist also **length − 1**. Ein Array mit 7 Elementen hat die Indizes 0 bis 6.",
+    { code: "temperaturen[0] = 12.5;        // erstes Element\ntemperaturen[6] = 14.0;        // letztes Element (bei length 7)\ndouble d = temperaturen[3];\ntemperaturen[7] = 1.0;         // ArrayIndexOutOfBoundsException!" },
+    "Ein ungültiger Index fällt nicht dem Compiler auf, sondern erst **zur Laufzeit**: `ArrayIndexOutOfBoundsException`.",
+    "`System.out.println(temperaturen)` gibt **nicht** die Werte aus, sondern etwas wie `[D@1b6d3586` – den Typ und eine Kennung der Referenz. Für die Inhalte brauchst du eine Schleife (oder `Arrays.toString`, nächster Abschnitt).",
+    "Ihre Stärke zeigen Arrays erst mit **Schleifen**. Die `for`-Schleife liefert die Zählvariable als Index:",
+    { code: "// Alle Werte von Celsius nach Fahrenheit umrechnen\nfor (int i = 0; i < temperaturen.length; i++) {\n    temperaturen[i] = temperaturen[i] * 1.8 + 32;\n}" },
+    "Schreibe die Grenze immer mit `i < array.length` statt einer festen Zahl – dann funktioniert der Code für jede Länge.",
+    "**Erweiterte for-Schleife (foreach):** Wenn du nur **lesen** willst, geht es ohne Index:",
+    { code: "double summe = 0;\nfor (double t : temperaturen) {   // „für jedes t in temperaturen“\n    summe += t;\n}\ndouble mittel = summe / temperaturen.length;" },
+    "foreach erlaubt **nur lesenden Zugriff**: Eine Zuweisung an `t` ändert nur die Schleifenvariable, nicht das Array. Zum Verändern und wenn du den Index brauchst (z. B. „an welcher Stelle?“), nimm die normale for-Schleife.",
+    "Typische Aufgabe: Maximum suchen. Starte mit dem **ersten Element** (nicht mit 0 – alle Werte könnten negativ sein) und vergleiche ab Index 1."
+  ],
+  pit: ["`i <= a.length` → ein Durchlauf zu viel, Exception am Ende.", "foreach ändert das Array nicht.", "Maximum mit 0 initialisiert → falsch bei nur negativen Werten."],
+  fill: { kind: "java", wrap: "main", t: "Finde das Maximum und bilde die Summe. Ausgabe: „max 31 summe 52“.",
+    code: "int[] werte = {-4, 17, 31, 8};\nint max = werte[[[0]]];\nfor (int i = 1; i < werte.[[1]]; i++) {\n    if (werte[i] > max) {\n        max = werte[[[2]]];\n    }\n}\nint summe = 0;\nfor (int w [[3]] werte) {\n    summe += w;\n}\nSystem.out.println(\"max \" + max + \" summe \" + summe);",
+    gaps: [["0"], ["length"], ["i"], [":"]] }
+};
+READ["ARR-2"] = {
+  read: [
+    "Manche Aufgaben tauchen bei Arrays immer wieder auf: ausgeben, sortieren, vergleichen, kopieren. Die Klasse **Arrays** aus `java.util` bietet dafür fertige **statische** Methoden. Import nicht vergessen: `import java.util.Arrays;`",
+    { code: "int[] z = {5, 3, 9, 1};\nSystem.out.println(Arrays.toString(z));   // [5, 3, 9, 1]\nArrays.sort(z);                            // sortiert z selbst (aufsteigend)\nSystem.out.println(Arrays.toString(z));   // [1, 3, 5, 9]\nint[] g = Arrays.copyOf(z, 6);             // neues Array, Länge 6\nSystem.out.println(Arrays.toString(g));   // [1, 3, 5, 9, 0, 0]\nArrays.fill(g, 7);                         // alle Elemente = 7" },
+    "- `Arrays.toString(a)` – lesbare Darstellung mit eckigen Klammern und Kommas\n- `Arrays.sort(a)` – sortiert **das übergebene Array** (kein Rückgabewert!)\n- `Arrays.copyOf(a, n)` – **neues** Array der Länge n; fehlende Stellen bekommen den Standardwert, überzählige werden abgeschnitten. Damit „vergrößert“ man ein Array.\n- `Arrays.equals(a, b)` – gleiche Länge und gleiche Elemente an gleicher Stelle?\n- `Arrays.fill(a, wert)` – alle Elemente auf einen Wert setzen",
+    "**Warum nicht `a == b`?** Weil Arrays Objekte sind, vergleicht `==` nur die **Referenzen** – also ob beide Variablen auf **dasselbe** Array-Objekt zeigen. Zwei verschiedene Arrays mit gleichem Inhalt sind damit nicht gleich. Für den Inhalt: `Arrays.equals`.",
+    "Aus demselben Grund kopiert `int[] b = a;` **kein** Array: Danach zeigen a und b auf dasselbe Objekt, eine Änderung über b ist auch über a sichtbar. Eine echte Kopie liefert `Arrays.copyOf(a, a.length)`.",
+    "Das gilt auch für Methoden: Übergibst du ein Array als Parameter, bekommt die Methode die **Referenz** – sie kann die Elemente des Originals ändern."
+  ],
+  pit: ["`z = Arrays.sort(z);` → Compilerfehler, sort liefert void.", "`a == b` vergleicht Referenzen, nicht Inhalte.", "`int[] b = a;` ist keine Kopie."],
+  fill: { kind: "java", wrap: "main", imports: ["java.util.Arrays"], t: "Sortiere, kopiere, vergleiche. Ausgabe: „[1, 3, 5, 9]“, „false true“, „[1, 3, 5, 9, 0]“.",
+    code: "int[] z = {5, 3, 9, 1};\nArrays.[[0]](z);\nSystem.out.println(Arrays.[[1]](z));\nint[] k = Arrays.copyOf(z, z.length);\nSystem.out.println((k == z) + \" \" + Arrays.[[2]](k, z));\nint[] g = Arrays.copyOf(z, [[3]]);\nSystem.out.println(Arrays.toString(g));",
+    gaps: [["sort"], ["toString"], ["equals"], ["5", "z.length + 1"]] }
+};
+READ["ARR-3"] = {
+  read: [
+    "Arrays können auch **Referenztypen** speichern. Das Kursbeispiel ist eine **Autovermietung**, die ihre Autos in einem Array verwaltet. Weil es Autos und Cabrios gibt (Cabrio erbt von Auto), wählt man den **Superklassen-Typ**: `Auto[] autos` kann dank Zuweisungskompatibilität beide speichern.",
+    { code: "Auto[] autos = new Auto[10];        // 10 Plätze – noch KEIN Auto!\nautos[0] = new Auto(\"BRB-TH 1\");\nautos[1] = new Cabrio(\"BRB-TH 2\");" },
+    "**Wichtig:** `new Auto[10]` erzeugt nur das Array mit 10 Referenzen, die alle `null` sind – wie 10 leere Garagen. Die Auto-Objekte musst du einzeln mit `new` erzeugen. Rufst du eine Methode auf einem leeren Platz auf, gibt es eine `NullPointerException`. Deshalb vor dem Zugriff prüfen:",
+    { code: "for (Auto a : autos) {\n    if (a != null && !a.istVermietet()) {\n        a.mieten();\n        break;           // erstes freies Auto gefunden\n    }\n}" },
+    "**Akkumulieren:** Eine Variable vor der Schleife anlegen, in der Schleife Wert für Wert aufsammeln – Summe (`gesamt += a.getKilometerstand()`), Zähler (`if (…) anzahl++`) oder Maximum. Das Muster kommt in Klausuren ständig vor.",
+    "**Neues Element aufnehmen:** Ist das Array voll, musst du ein **größeres** erzeugen und die alten Referenzen umkopieren (z. B. mit `Arrays.copyOf`) – dann ist am Ende ein Platz frei. Die Objekte selbst werden dabei nicht kopiert, nur die Referenzen.",
+    "**Kommandozeilenparameter:** Ein Array von Objekten kennst du schon lange: `String[] args` in `main`. Startest du ein Programm mit `java Rechner 3 4`, steht in `args[0]` der String \"3\" und in `args[1]` \"4\". Es sind immer **Strings** – Zahlen musst du umwandeln, z. B. mit `Integer.parseInt(args[0])`. Ohne Parameter ist `args.length` gleich 0."
+  ],
+  pit: ["`new Auto[10]` erzeugt keine Autos, nur 10 × null.", "Methode auf null-Element → NullPointerException.", "args-Werte sind Strings: `args[0] + args[1]` ergibt \"34\", nicht 7."],
+  fill: { kind: "java", wrap: "class", t: "Zähle Kilometer nur für belegte Plätze. Ausgabe: „3 Plätze, 2 Autos, 15000 km“.",
+    pre: "class Auto {\n    private int km;\n    public Auto(int km) { this.km = km; }\n    public int getKilometerstand() { return km; }\n}\n",
+    code: "class Vermietung {\n    static String statistik(Auto[] autos) {\n        int anzahl = 0;\n        int gesamt = 0;\n        for (Auto a : autos) {\n            if (a [[0]] null) {\n                anzahl[[1]];\n                gesamt [[2]] a.getKilometerstand();\n            }\n        }\n        return autos.length + \" Plätze, \" + anzahl + \" Autos, \" + gesamt + \" km\";\n    }\n}\n",
+    run: "Auto[] autos = new [[3]][3];\nautos[0] = new Auto(12000);\nautos[2] = new Auto(3000);\nSystem.out.println(Vermietung.statistik(autos));",
+    gaps: [["!="], ["++", "+= 1"], ["+="], ["Auto"]] }
+};
+READ["ARR-4"] = {
+  read: [
+    "Array-Elemente können beliebige Referenztypen sein – also auch **wieder Arrays**. Dann spricht man von einem **zweidimensionalen** (mehrdimensionalen) Array. Am besten stellst du es dir als **Tabelle** vor. Der Kurs zeigt die Quartalsgewinne dreier Abteilungen:",
+    { code: "            Q I    Q II   Q III  Q IV\nAbt. 1      17.2   16.9   14.3   15.8\nAbt. 2      10.1   10.1   10.1   10.1\nAbt. 3      28.7   29.2   28.9   29.0" },
+    { code: "double[][] gewinn = new double[3][4];   // 3 Zeilen, 4 Spalten\n\ndouble[][] g2 = {\n    {17.2, 16.9, 14.3, 15.8},\n    {10.1, 10.1, 10.1, 10.1},\n    {28.7, 29.2, 28.9, 29.0}\n};" },
+    "Der **erste Index** wählt die Zeile (eines der inneren Arrays), der **zweite** das Element darin, also die Spalte: `gewinn[1][3]` ist Zeile 1, Spalte 3 → 10.1 (Abteilung 2, Quartal IV – Index beginnt bei 0!). Die linke obere Ecke ist `[0][0]`.",
+    "`gewinn.length` ist die Anzahl der **Zeilen** (3). `gewinn[0].length` ist die Anzahl der **Spalten** in Zeile 0 (4).",
+    "Durchlaufen mit **verschachtelten Schleifen**: außen die Zeilen, innen die Spalten.",
+    { code: "for (int z = 0; z < gewinn.length; z++) {\n    double summe = 0;\n    for (int s = 0; s < gewinn[z].length; s++) {\n        summe += gewinn[z][s];\n    }\n    System.out.println(\"Abteilung \" + (z + 1) + \": \" + summe);\n}" },
+    "Weil jede Zeile ein eigenes Array ist, dürfen die Zeilen sogar **unterschiedlich lang** sein. Darum in der inneren Schleife immer `gewinn[z].length` statt einer festen Zahl."
+  ],
+  pit: ["`new char[3][2]` = 3 Zeilen, 2 Spalten – nicht umgekehrt.", "`a.length` sind die Zeilen, `a[0].length` die Spalten.", "Innere und äußere Zählvariable verwechselt → falsche Elemente oder Exception."],
+  fill: { kind: "java", wrap: "main", t: "Summiere jede Zeile. Ausgabe: „Zeile 0: 6“ und „Zeile 1: 15“.",
+    code: "int[][] t = { {1, 2, 3}, {4, 5, 6} };\nfor (int z = 0; z < t.[[0]]; z++) {\n    int summe = 0;\n    for (int s = 0; s < t[[[1]]].length; s++) {\n        summe += t[[[2]]][[[3]]];\n    }\n    System.out.println(\"Zeile \" + z + \": \" + summe);\n}",
+    gaps: [["length"], ["z", "0"], ["z"], ["s"]] }
+};
+
+// ====================== ZKT – Zeichenketten ======================
+READ["ZKT-0"] = {
+  read: [
+    "Eine **Zeichenkette** (*string*) ist eine Folge von **Unicode-Zeichen**. Das erinnert an ein char-Array – und intern wird sie tatsächlich so gespeichert, nur gut in Klassen verpackt. Wie bei Arrays haben die Zeichen einen **Index ab 0**.",
+    "Java bietet mehrere Klassen für Zeichenketten. Die wichtigsten für dich: **String** (unveränderlich) und **StringBuilder** (veränderbar). `StringBuffer` ist praktisch gleich wie StringBuilder, aber für Programme mit mehreren Threads gedacht – im Kurs nimmst du StringBuilder.",
+    "Strings sind **Referenztypen**: Die Variable speichert eine Referenz auf ein String-Objekt. Weil Strings so häufig sind, gibt es eine Abkürzung: Ein **Literal** in Anführungszeichen erzeugt das Objekt, ohne `new`.",
+    { code: "String wort;                       // Deklaration\nwort = \"Firewall\";                 // Literal erzeugt das Objekt\nString leer = \"\";                  // leerer String (Länge 0) – nicht null!\nString auchMoeglich = new String(\"Firewall\");   // geht, ist aber unüblich" },
+    "`String` liegt in `java.lang` – kein Import nötig. Die Klasse ist außerdem `final`, kann also nicht beerbt werden.",
+    "**Unveränderlich (immutable):** Ein String-Objekt ändert sich nach dem Erzeugen **nie** wieder. Methoden wie `toUpperCase()` liefern einen **neuen** String; das Original bleibt gleich. Das Ergebnis musst du also auffangen:",
+    { code: "String s = \"alert\";\ns.toUpperCase();          // Ergebnis verpufft, s ist weiter \"alert\"\ns = s.toUpperCase();      // jetzt zeigt s auf den neuen String \"ALERT\"" },
+    "Zwei Grundmethoden:\n- `length()` – Anzahl der Zeichen (**mit** Klammern, anders als beim Array!)\n- `charAt(i)` – das Zeichen an Index i als `char`; gültig sind 0 bis `length() - 1`, sonst `StringIndexOutOfBoundsException`",
+    "Mit einer for-Schleife und `charAt` gehst du Zeichen für Zeichen durch einen String – das Grundmuster für Zählen, Prüfen und Umbauen."
+  ],
+  pit: ["`s.toUpperCase();` ohne Zuweisung ändert nichts.", "String: `length()`, Array: `length` – in der Klausur gern vertauscht.", "`charAt` liefert char ('a'), nicht String (\"a\")."],
+  fill: { kind: "java", wrap: "main", t: "Zähle die Ziffern in einem Log-Eintrag. Ausgabe: „ALERT 10.0.0.1 → 5 Ziffern“.",
+    code: "String log = \"alert 10.0.0.1\";\nlog = log.[[0]]();\nint ziffern = 0;\nfor (int i = 0; i < log.[[1]]; i++) {\n    char c = log.[[2]](i);\n    if (c >= '0' && c <= '9') {\n        ziffern++;\n    }\n}\nSystem.out.println(log + \" → \" + ziffern + \" Ziffern\");",
+    gaps: [["toUpperCase"], ["length()"], ["charAt"]] }
+};
+READ["ZKT-1"] = {
+  read: [
+    "Die Klasse String hat sehr viele Methoden – die vollständige Liste steht in der Java-API-Dokumentation. Der Kurs erklärt sie an einem Beispiel: Prüfen, ob eine Zeichenkette als deutsches **Autokennzeichen** taugt (Ort, Buchstaben, Zahl). Die wichtigsten Gruppen:",
+    "**Suchen:**\n- `indexOf(\"x\")` – Index des ersten Vorkommens, **−1**, wenn nicht enthalten; `lastIndexOf` sucht von hinten\n- `contains(\"x\")`, `startsWith(\"x\")`, `endsWith(\"x\")` – liefern boolean",
+    "**Herausschneiden:**\n- `substring(von)` – ab Index von bis zum Ende\n- `substring(von, bis)` – von **einschließlich** bis **ausschließlich**. Die Länge des Ergebnisses ist bis − von.",
+    { code: "String ip = \"192.168.10.5\";\nint p = ip.indexOf(\".\");             // 3\nString erstes = ip.substring(0, p);   // \"192\"\nString rest = ip.substring(p + 1);    // \"168.10.5\"" },
+    "**Umwandeln und Aufräumen:**\n- `toUpperCase()`, `toLowerCase()`\n- `trim()` – entfernt Leerzeichen (und Steuerzeichen) am Anfang und Ende; `strip()` ist die Unicode-bewusste Variante\n- `replace(\"alt\", \"neu\")` – ersetzt alle Vorkommen\n- `isEmpty()` – Länge 0?",
+    "**Zerlegen:** `split(trenner)` liefert ein **String-Array** der Teile. Achtung: Der Trenner ist ein **regulärer Ausdruck**, in dem der Punkt „beliebiges Zeichen“ bedeutet. Für einen echten Punkt also `split(\"\\\\.\")` – im Java-Code stehen zwei Backslashes.",
+    { code: "String[] teile = \"192.168.10.5\".split(\"\\\\.\");   // {\"192\", \"168\", \"10\", \"5\"}\nString[] woerter = \"ssh login failed\".split(\" \");  // {\"ssh\", \"login\", \"failed\"}" },
+    "**Umwandeln in Zahlen** und zurück: `Integer.parseInt(\"443\")`, `Double.parseDouble(\"2.5\")` – bei ungültigem Text `NumberFormatException`. In die andere Richtung `String.valueOf(443)` oder einfach `\"\" + 443`.",
+    "Denk dran: Keine dieser Methoden ändert den Original-String – alle liefern neue Werte."
+  ],
+  pit: ["`substring(2, 5)` liefert 3 Zeichen (Index 2, 3, 4).", "`split(\".\")` liefert ein leeres Array – der Punkt ist ein Regex-Joker.", "indexOf liefert −1 statt Exception, wenn nichts gefunden wird."],
+  fill: { kind: "java", wrap: "main", t: "Zerlege die IP-Adresse. Ausgabe: „4 Teile, erster: 192, Netz: 192.168“.",
+    code: "String ip = \"192.168.10.5\";\nString[] teile = ip.[[0]](\"\\\\.\");\nint p = ip.[[1]](\".\", 4);          // zweiter Punkt ab Index 4\nString netz = ip.[[2]](0, p);\nSystem.out.println(teile.length + \" Teile, erster: \" + teile[0] + \", Netz: \" + netz);",
+    gaps: [["split"], ["indexOf"], ["substring"]] }
+};
+READ["ZKT-2"] = {
+  read: [
+    "Ein Klassiker aus dem Kurs: die Passwortprüfung mit `if (passwort == \"123456\")`. Sie liefert oft **falsch**, obwohl du 123456 eingegeben hast. Warum?",
+    "Weil `==` bei Referenztypen nur die **Referenzen** vergleicht – also ob beide Variablen auf **dasselbe Objekt** zeigen. Ein eingelesener String ist ein **neues** Objekt, auch wenn er dieselben Zeichen enthält. (Zwei gleiche Literale im Code teilen sich dagegen manchmal ein Objekt – deshalb scheint `==` gelegentlich zu klappen. Verlass dich nie darauf.)",
+    "Für den **Inhalt**:\n- `a.equals(b)` – gleiche Zeichen, Groß/Klein zählt\n- `a.equalsIgnoreCase(b)` – Groß/Klein egal\n- `a.compareTo(b)` – lexikografische Reihenfolge (Unicode): **negativ**, wenn a vor b kommt, **0** bei Gleichheit, **positiv**, wenn a nach b kommt. Großbuchstaben kommen vor Kleinbuchstaben.",
+    { code: "String eingabe = new String(\"admin\");   // wie eine Eingabe: neues Objekt\nSystem.out.println(eingabe == \"admin\");           // false\nSystem.out.println(eingabe.equals(\"admin\"));      // true\nSystem.out.println(\"Admin\".equalsIgnoreCase(\"admin\"));  // true\nSystem.out.println(\"apfel\".compareTo(\"birne\") < 0);    // true" },
+    "Tipp: Ist eine Variable vielleicht `null`, schreib das Literal nach vorne: `\"admin\".equals(eingabe)` – das wirft keine NullPointerException.",
+    "**Konkatenation** (Verknüpfung) mit `+`: Die Zeichenketten werden aneinandergehängt, es entsteht ein **neuer** String. Ist **ein** Operand ein String, wird der andere automatisch in einen String umgewandelt (bei Objekten über `toString()`).",
+    "Ausgewertet wird **von links nach rechts** – das führt zu typischen Klausurfallen:",
+    { code: "System.out.println(\"Port \" + 4 + 4);     // Port 44   (String + 4 → String, + 4 → String)\nSystem.out.println(4 + 4 + \" Ports\");     // 8 Ports   (erst 4 + 4 = 8, dann String)\nSystem.out.println(\"Port \" + (4 + 4));   // Port 8    (Klammern zuerst)\nSystem.out.println('a' + 1);             // 98        (char + int = int!)\nSystem.out.println(\"\" + 'a' + 1);        // a1" },
+    "`+=` funktioniert auch: `s += \"!\";` hängt an – erzeugt dabei aber jedes Mal ein **neues** String-Objekt. In Schleifen ist das ineffizient; dafür gibt es StringBuilder."
+  ],
+  pit: ["Strings nie mit == vergleichen.", "`\"Port \" + 4 + 4` → \"Port 44\".", "`'a' + 1` ist eine Zahl (98), kein Text."],
+  fill: { kind: "java", wrap: "main", t: "Vergleiche richtig und achte auf die Auswertungsreihenfolge. Ausgabe: „true true“ und „Port 8 / 44 Ports“.",
+    code: "String eingabe = new String(\"Admin\");\nboolean genau = eingabe.[[0]](\"Admin\");\nboolean egal = eingabe.[[1]](\"ADMIN\");\nSystem.out.println(genau + \" \" + egal);\nSystem.out.println(\"Port \" + [[2]] + \" / \" + 4 + 4 + \" Ports\");",
+    gaps: [["equals"], ["equalsIgnoreCase"], ["(4 + 4)", "(4+4)", "8"]] }
+};
+READ["ZKT-3"] = {
+  read: [
+    "Mit **StringBuilder** stellt Java eine Klasse bereit, deren Objekte ihre **Länge und ihren Inhalt zur Laufzeit ändern** können. Sie hat Methoden zum Anhängen, Einfügen, Löschen und Ersetzen von Zeichen.",
+    { code: "StringBuilder leer = new StringBuilder();           // leer\nStringBuilder sb = new StringBuilder(\"am Anfang\");  // mit Startinhalt" },
+    "Für StringBuilder gibt es **keine Literal-Kurzform** – das Objekt wird immer mit `new` erzeugt.",
+    "**Der entscheidende Unterschied:** Die StringBuilder-Methoden verändern **das Original-Objekt selbst**. Du musst das Ergebnis nicht auffangen (sie geben das Objekt aber zusätzlich zurück, deshalb kann man Aufrufe verketten).",
+    "- `append(x)` – hängt x hinten an (jeder Typ)\n- `insert(pos, x)` – fügt x an Index pos ein\n- `delete(von, bis)` – löscht von einschließlich bis ausschließlich; `deleteCharAt(i)` löscht ein Zeichen\n- `replace(von, bis, text)` – ersetzt einen Bereich\n- `setCharAt(i, c)` – ändert ein Zeichen\n- `reverse()` – kehrt die Reihenfolge um\n- `length()`, `charAt(i)`, `indexOf(…)` – wie bei String\n- `toString()` – liefert den Inhalt als neuen String",
+    { code: "StringBuilder sb = new StringBuilder(\"Port\");\nsb.append(\" \").append(443);     // \"Port 443\"\nsb.insert(0, \"TCP-\");           // \"TCP-Port 443\"\nsb.delete(0, 4);                // \"Port 443\"\nsb.reverse();                   // \"344 troP\"\nString fertig = sb.toString();" },
+    "**Wann was?** String für Werte, die sich nicht ändern, und für Vergleiche. StringBuilder, wenn ein Text **schrittweise zusammengebaut** wird, vor allem in Schleifen – das spart das ständige Erzeugen neuer String-Objekte.",
+    "Achtung beim Vergleichen: `StringBuilder` hat **kein** inhaltliches `equals`. Erst mit `toString()` in einen String umwandeln und dann `equals` benutzen – etwa beim Palindrom-Test."
+  ],
+  pit: ["`StringBuilder sb = \"abc\";` → Compilerfehler, nur mit new.", "sb1.equals(sb2) vergleicht Referenzen – vorher toString().", "Die Methoden ändern das Original – anders als bei String."],
+  fill: { kind: "java", wrap: "main", t: "Baue den Text zusammen und prüfe auf Palindrom. Ausgabe: „1-2-3“ und „true“.",
+    code: "StringBuilder sb = [[0]] StringBuilder();\nfor (int i = 1; i <= 3; i++) {\n    sb.[[1]](i);\n    if (i < 3) {\n        sb.append(\"-\");\n    }\n}\nSystem.out.println(sb);\nString wort = \"rentner\";\nString rueckwaerts = new StringBuilder(wort).[[2]]().[[3]]();\nSystem.out.println(wort.equals(rueckwaerts));",
+    gaps: [["new"], ["append"], ["reverse"], ["toString"]] }
+};
+READ["ZKT-4"] = {
+  read: [
+    "Intern sind 5, 5.0, 5,00 und 05 für den Rechner gleichwertig – der Mensch erwartet aber je nach Zusammenhang ein bestimmtes Format: Geldbeträge mit zwei Nachkommastellen, große Zahlen mit Tausendertrennzeichen.",
+    "**String.format und printf:** Sollen mehrere Werte in einem Text ausgegeben werden, bieten sich `String.format(…)` (liefert einen String) und `System.out.printf(…)` (gibt direkt aus) an. Im Formatstring stehen **Platzhalter**, die der Reihe nach durch die folgenden Werte ersetzt werden:",
+    "- `%d` – ganze Zahl\n- `%f` – Kommazahl, `%.2f` mit 2 Nachkommastellen (gerundet)\n- `%s` – String (oder beliebiges Objekt über toString)\n- `%n` – Zeilenumbruch\n- Eine Zahl davor gibt die **Mindestbreite** an: `%5d` rechtsbündig in 5 Stellen, `%-10s` linksbündig in 10",
+    { code: "System.out.printf(\"%-6s|%5d%n\", \"SSH\", 22);   // \"SSH   |   22\"\nString s = String.format(\"%d Treffer\", 3);       // \"3 Treffer\"" },
+    "**Länderspezifisch:** Deutschland schreibt 123.456.789,00, England 123,456,789.00. Welches Format benutzt wird, bestimmt ein **Locale**-Objekt (Sprache/Land). `printf` mit `%.2f` richtet sich nach der Systemeinstellung – auf einem deutschen Rechner erscheint also ein **Komma**.",
+    "**NumberFormat** (`java.text`): Ein Formatierungsobjekt holst du mit einer statischen Methode, dann formatierst du mit `format(zahl)`:",
+    { code: "NumberFormat nf = NumberFormat.getInstance(Locale.GERMANY);\nnf.setMaximumFractionDigits(1);\nSystem.out.println(nf.format(12345.25));        // 12.345,2 (gerundet)\n\nNumberFormat geld = NumberFormat.getCurrencyInstance(Locale.GERMANY);\nNumberFormat proz = NumberFormat.getPercentInstance(Locale.GERMANY);" },
+    "`getInstance()` ohne Parameter nimmt das Locale des Systems. Weitere Einstellungen: `setMinimumFractionDigits`, `setMinimumIntegerDigits` (führende Nullen), `setGroupingUsed(false)` (ohne Tausenderpunkte). Währung und Prozent setzen das Symbol automatisch an die landesübliche Stelle.",
+    "**Datum:** Genauso aufgebaut – ein Objekt für das Datum (`LocalDate` aus `java.time`) und ein Formatierungsobjekt (`DateTimeFormatter` aus `java.time.format`):",
+    { code: "LocalDate klausur = LocalDate.of(2027, 1, 28);\nDateTimeFormatter f = DateTimeFormatter.ofPattern(\"dd.MM.yyyy\");\nSystem.out.println(klausur.format(f));          // 28.01.2027" },
+    "Im Muster: `dd` Tag, `MM` Monat (großes M – kleines `mm` sind Minuten!), `yyyy` Jahr."
+  ],
+  pit: ["Anzahl und Typ der Werte müssen zu den Platzhaltern passen: `%d` mit 2.5 → Exception zur Laufzeit.", "`mm` im Datumsmuster sind Minuten, `MM` Monate.", "printf hängt keinen Zeilenumbruch an – `%n` nicht vergessen."],
+  fill: { kind: "java", wrap: "main", imports: ["java.text.NumberFormat", "java.util.Locale", "java.time.LocalDate", "java.time.format.DateTimeFormatter"], t: "Formatiere Zahl, Tabelle und Datum. Ausgabe: „12.345,3“, „SSH   |   22“, „28.01.2027“.",
+    code: "NumberFormat nf = NumberFormat.getInstance(Locale.GERMANY);\nnf.setMaximumFractionDigits(1);\nSystem.out.println(nf.[[0]](12345.26));\nSystem.out.printf(\"%-6s|%5[[1]]%n\", \"SSH\", 22);\nDateTimeFormatter f = DateTimeFormatter.ofPattern(\"dd.[[2]].yyyy\");\nSystem.out.println(LocalDate.of(2027, 1, 28).format(f));",
+    gaps: [["format"], ["d"], ["MM"]] }
+};
+// automatisch erzeugt von verify_fill.js – erwartete Ausgaben der Lückencodes (mit javac/java ermittelt)
+var FILLOUT = {"EJP-0":"Hallo SOC!\n","EJP-3":"49\n","VAR-0":"Gesamt: 7.5\n","VAR-1":"3000000000 1.25 J true\n","VAR-2":"1h 2m 5s\n","VAR-3":"78.33333333333333 78\n","VAR-4":"true\n","VAR-5":"Brutto: 297.5\n","STA-0":"1.4142135623730951 1024.0\n","STA-1":"----------\n5.0\n----------\n","STA-2":"9 11 2.5\n","STA-3":"60.0\ntrue\n","STA-4":"true\ntrue\nfalse\nfalse\n","OBJ-0":"123456789012345678901234567891\n","OBJ-1":"8 42 FIREWALL\n","OBJ-2":"log-1 log\n","OBJ-3":"false\ntrue\ntrue\n","KLA-0":"0.0 null\n","KLA-2":"unbekannt: 50.0 Euro\nOtto\n","KLA-3":"1001 Hans 50.5\n1002 Otto 0.0\n","KLA-4":"1001 1002 1002\n","KLA-5":"DOBRA 1 40.8\n2\n","VER-0":"Die Blumen kosten 32.5 Euro\n","VER-1":"0.0 0.02 0.03 0.05\n","VER-2":"SSH Web unbekannt\nAB B D\n","ITR-0":"20\n","ITR-1":"gelesen: -5\ngelesen: 0\ngelesen: 42\ngültig: 42\n","ITR-2":"***\n***\n***\n","ITR-3":"1 2 4 5 7 ","VRB-0":"150.0 / 500.0\n","VRB-1":"Alex 500.0 -200.0\n","VRB-2":"Allgemeines Konto\nGirokonto\n","VRB-3":"Dispo 500.0\nkein Girokonto\n","VRB-4":"Sparbuch: 100.0\n","EXC-0":"21\nKeine Zahl: abc\nfertig\n","EXC-1":"8.0\nFehler: Exponent negativ\n","EXC-2":"speziell: x ist 0\nEnde\n","EXC-3":"0 hoch 0 ist nicht definiert\n","ARR-0":"7 0.0\n3 443\n","ARR-1":"max 31 summe 52\n","ARR-2":"[1, 3, 5, 9]\nfalse true\n[1, 3, 5, 9, 0]\n","ARR-3":"3 Plätze, 2 Autos, 15000 km\n","ARR-4":"Zeile 0: 6\nZeile 1: 15\n","ZKT-0":"ALERT 10.0.0.1 → 5 Ziffern\n","ZKT-1":"4 Teile, erster: 192, Netz: 192.168\n","ZKT-2":"true true\nPort 8 / 44 Ports\n","ZKT-3":"1-2-3\ntrue\n","ZKT-4":"12.345,3\nSSH   |   22\n28.01.2027\n"};
+
 // ======================================================================
 //  nibble – App-Logik: Lernpfad entlang des Lehrplans
 // ======================================================================
@@ -2603,7 +3628,7 @@ var S = { minutes: 20, done: {}, wrong: {}, days: [], answered: 0, correct: 0, m
 try { var raw = localStorage.getItem(KEY); if (raw) Object.assign(S, JSON.parse(raw)); } catch (e) {}
 Object.keys(S.wrong || {}).forEach(function(k){ if (!S.box[k]) S.box[k] = { b: 0, due: 0 }; }); S.wrong = {};
 if (S.mode === "learn") S.mode = "path";
-["prog", "checks", "seen", "box", "stats"].forEach(function(k){ if (!S[k] || typeof S[k] !== "object") S[k] = {}; });
+["prog", "checks", "seen", "box", "stats", "read"].forEach(function(k){ if (!S[k] || typeof S[k] !== "object") S[k] = {}; });
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 // ---------- Hilfen ----------
@@ -2631,7 +3656,86 @@ function hl(code) {
     return out + (cm ? '<span class="cm">' + esc(cm) + '</span>' : "");
   }).join("\n");
 }
-function est(n) { return 3 + n.quiz.length + (n.task ? 5 : 0); }
+function est(n) { var r = readOf(n); return 3 + n.quiz.length + (n.task ? 5 : 0) + (r ? Math.ceil(readWords(r) / 160) + (r.fill ? 2 : 0) : 0); }
+
+// ---------- Lesetexte und Lückencode ----------
+function readOf(n) { return (typeof READ !== "undefined" && n && READ[n.key]) || null; }
+function readWords(r) { return r.read.map(function(p){ return typeof p === "string" ? p : p.code; }).join(" ").split(/\s+/).length; }
+function readHtml(r) { return '<div class="read">' + r.read.map(function(p){ return typeof p === "string" ? mdBlock(p) : '<pre><code>' + hl(p.code) + '</code></pre>'; }).join("") + '</div>'; }
+function pitHtml(r) { return r && r.pit && r.pit.length ? '<div class="pit"><b>Stolperfallen</b><ul class="tlist">' + r.pit.map(function(x){ return "<li>" + md(x) + "</li>"; }).join("") + '</ul></div>' : ''; }
+function lessonHtml(n) { // Lesetext + Merksätze + Beispiel + Stolperfallen
+  var r = readOf(n);
+  return (r ? readHtml(r) + '<span class="label">Kurz gemerkt</span>' : '') + '<ul class="learn">' + n.learn.map(function(l){ return '<li>' + md(l) + '</li>'; }).join("") + '</ul>' +
+    (n.code ? '<pre><code>' + hl(n.code) + '</code></pre>' : '') + pitHtml(r);
+}
+var GAPM = "\u0001";
+function gapAns(f, i) { return f.gaps[i][0]; }
+function gapInput(f, i) {
+  var w = Math.max(4, gapAns(f, i).length + 2);
+  return '<input class="gap" data-gi="' + i + '" style="width:' + w + 'ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Lücke ' + (i + 1) + '">';
+}
+function gapCode(src, f, sol) {
+  var t = src.replace(/\[\[(\d+)\]\]/g, function(_, i){ return GAPM + i + GAPM; });
+  return hl(t).replace(new RegExp(GAPM + "(\\d+)" + GAPM, "g"), function(_, i){ return sol ? '<mark class="sol">' + esc(gapAns(f, +i)) + '</mark>' : gapInput(f, +i); });
+}
+function gapText(src, f, sol) {
+  var t = src.replace(/\[\[(\d+)\]\]/g, function(_, i){ return GAPM + i + GAPM; });
+  return mdBlock(t).replace(new RegExp(GAPM + "(\\d+)" + GAPM, "g"), function(_, i){ return sol ? '<mark class="sol">' + esc(gapAns(f, +i)) + '</mark>' : gapInput(f, +i); });
+}
+function fillBody(f, sol) {
+  if (f.kind === "text") return '<div class="filltext">' + gapText(f.text, f, sol) + '</div>';
+  var imp = (f.imports || []).map(function(i){ return "import " + i + ";"; }).join("\n");
+  function blk(lbl, src) { return (lbl ? '<span class="label">' + lbl + '</span>' : '') + '<pre class="fillcode"><code>' + gapCode(src, f, sol) + '</code></pre>'; }
+  var h = imp ? '<pre class="fillcode"><code>' + hl(imp) + '</code></pre>' : '';
+  if (f.wrap === "program") return h + blk("", f.code);
+  if (f.wrap === "main") return h + (f.pre ? blk("In der Klasse", f.pre.replace(/\n$/, "")) + blk("In main", f.code) : blk("In main", f.code));
+  return h + blk("Klassen", (f.pre || "") + f.code.replace(/\n$/, "")) + blk("In main", f.run);
+}
+function normJ(s) { // Leerzeichen sind egal – außer in String-Literalen und dort, wo sie Token trennen (z. B. "+ =" ≠ "+=")
+  return String(s).trim().split(/("(?:\\.|[^"\\])*")/).map(function(part, i){
+    if (i % 2) return part;
+    part = part.replace(/\s+/g, " ");
+    return part.replace(/(.) (?=(.))/g, function(m, a, b){ return (/\w/.test(a) && /\w/.test(b)) || (/[-+*\/=<>!&|%^]/.test(a) && /[-+*\/=<>!&|%^]/.test(b)) ? a + " " : a; }).replace(/^ | $/g, "");
+  }).join("");
+}
+function normT(s) { return String(s).trim().replace(/\s+/g, " ").toLowerCase(); }
+function gapOk(f, i, v) { var nm = f.kind === "java" ? normJ : normT; return f.gaps[i].some(function(a){ return nm(a) === nm(v); }); }
+function fillCard(s) {
+  var f = readOf(s.n).fill;
+  return '<article class="card"><span class="label">' + s.n.chap.id + ' · ' + esc(s.n.chap.title) + ' · ' + (f.kind === "java" ? "Lückencode" : "Lückentext") + '</span>' + tagLine(s) +
+    '<h2>' + esc(s.n.t) + '</h2><p class="q">' + md(f.t) + '</p>' + fillBody(f, false) +
+    '<p class="hint">' + (f.kind === "java" ? "Leerzeichen sind egal, Groß-/Kleinschreibung zählt – wie in Java." : "Groß-/Kleinschreibung ist egal.") + ' Mit Enter zur nächsten Lücke.</p>' +
+    '<button class="btn" id="fcheck">Prüfen</button><div id="fb" class="reveal"></div></article>';
+}
+function bindFill(s) {
+  var f = readOf(s.n).fill, ins = [].slice.call(app.querySelectorAll("input.gap")), tries = 0, fb = document.getElementById("fb"), btn = document.getElementById("fcheck");
+  ins.forEach(function(x, i){
+    x.addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); if (ins[i + 1]) ins[i + 1].focus(); else btn.click(); } });
+    x.addEventListener("input", function(){ x.classList.remove("right", "wrong"); });
+  });
+  function solution(ok) {
+    btn.hidden = true; ins.forEach(function(x){ x.disabled = true; });
+    var out = typeof FILLOUT !== "undefined" ? FILLOUT[s.n.key] : null;
+    fb.innerHTML = (ok ? '<p class="verdict ok">Alle Lücken richtig.</p>' : '<span class="label">Lösung</span>' + fillBody(f, true)) +
+      (out != null ? '<span class="label">Ausgabe des fertigen Programms <span style="text-transform:none;letter-spacing:0">(· = Leerzeichen)</span></span><pre><code>' + showWs(out.replace(/\n$/, "")) + '</code></pre>' : '') +
+      (f.gaps.some(function(g){ return g.length > 1; }) ? '<p class="hint">Gleichwertige Schreibweisen werden ebenfalls akzeptiert.</p>' : '') + nextBtn();
+    var nx = document.getElementById("next"); nx.onclick = advance; nx.focus({ preventScroll: true });
+    fb.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  btn.onclick = function(){
+    var right = 0, vals = [];
+    ins.forEach(function(x){ var i = +x.dataset.gi, ok = gapOk(f, i, x.value); vals.push(x.value.trim() || "–"); x.classList.toggle("right", ok); x.classList.toggle("wrong", !ok); if (ok) right++; });
+    var all = right === ins.length;
+    if (tries === 0) { S.answered++; if (all) S.correct++; record("f:" + s.n.key, s.n.key, all, { q: "Lücken: " + f.t, pick: vals.join(" · "), right: f.gaps.map(function(g){ return g[0]; }).join(" · "), why: "Lies den Abschnitt „" + s.n.t + "“ im Skript nach." }); }
+    tries++; S.read[s.n.key] = true; save();
+    if (all) return solution(true);
+    fb.innerHTML = '<p class="verdict no">' + right + ' von ' + ins.length + ' Lücken richtig. Die roten Felder kannst du korrigieren.</p><div class="row"><button class="btn ghost" id="fsol">Lösung zeigen</button><button class="btn" id="fagain">Nochmal prüfen</button></div>';
+    document.getElementById("fsol").onclick = function(){ solution(false); };
+    document.getElementById("fagain").onclick = function(){ btn.click(); };
+    btn.hidden = true;
+    var w = app.querySelector("input.gap.wrong"); if (w) w.focus();
+  };
+}
 function today() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
 function streak() {
   var set = {}; S.days.forEach(function(d){ set[d] = 1; });
@@ -2687,15 +3791,17 @@ function unitItems(u) { // alles, was zu einer Einheit abgefragt werden kann
   UNIT[u].chap.nibbles.forEach(function(n){ n.quiz.forEach(function(_, i){ it.push({ type: "q", key: n.key + "|" + i, n: n, qi: i }); }); });
   EXAM.forEach(function(e){ if (e.rel.split("-")[0] === u && (e.type === "tf" || e.type === "trace")) it.push({ type: "exam", key: "ex:" + e.id, e: e }); });
   UNIT[u].gens.forEach(function(g){ if (GENS[g] && GENS[g].cat === "trace") it.push({ type: "gen", key: "g:" + g, gen: g }); });
+  UNIT[u].chap.nibbles.forEach(function(n){ var r = readOf(n); if (r && r.fill) it.push({ type: "fill", key: "f:" + n.key, n: n }); });
   return it;
 }
-var COSTQ = { q: 1, exam: 1, gen: 4 };
+var COSTQ = { q: 1, exam: 1, gen: 4, fill: 2 };
 
 // ---------- Sessions planen ----------
 // 1) Fällige Wiederholungen  2) Rückblick auf abgeschlossene Einheiten  3) Arbeit an der gewählten Einheit
 function itemFromKey(k) {
   if (k.indexOf("ex:") === 0) { var e = EXAM.filter(function(x){ return "ex:" + x.id === k; })[0]; return e ? { type: "exam", key: k, e: e } : null; }
   if (k.indexOf("g:") === 0) { var g = k.slice(2); return GENS[g] ? { type: "gen", key: k, gen: g } : null; }
+  if (k.indexOf("f:") === 0) { var fn = byKey(k.slice(2)); return fn && readOf(fn) && readOf(fn).fill ? { type: "fill", key: k, n: fn } : null; }
   var p = k.split("|"), n = byKey(p[0]); return n && n.quiz[+p[1]] ? { type: "q", key: k, n: n, qi: +p[1] } : null;
 }
 function planUnit(u, minutes) {
@@ -2720,7 +3826,7 @@ function planUnit(u, minutes) {
   var st = unitStage(u).id;
   if (st === "learn") {
     var ns = UNIT[u].chap.nibbles.filter(function(n){ return !S.done[n.key]; });
-    for (var j = 0; j < ns.length; j++) { var m = est(ns[j]); if (used + m > minutes && items.some(function(x){ return x.type === "nibble"; })) break; items.push({ type: "nibble", n: ns[j], key: ns[j].key }); used += m; if (used >= minutes) break; }
+    for (var j = 0; j < ns.length; j++) { var m = est(ns[j]); if (used + m > minutes * 1.15 && items.some(function(x){ return x.type === "nibble"; })) break; items.push({ type: "nibble", n: ns[j], key: ns[j].key }); used += m; if (used >= minutes) break; }
   }
   if (st === "prog" || st === "done" || (st === "learn" && used < minutes - 6 && UNIT[u].gens.length && learnStat(u).done > 0)) {
     var gens = shuffle(UNIT[u].gens);
@@ -2815,7 +3921,7 @@ function home() {
   bindIO();
   var rs = document.getElementById("reset");
   rs.onclick = function(){
-    if (rs.dataset.armed) { var keep = { minutes: S.minutes, medium: S.medium, examDate: S.examDate }; S = Object.assign({ done: {}, wrong: {}, days: [], answered: 0, correct: 0, mode: "path", exam: {}, efocus: null, box: {}, stats: {}, log: [], unit: null, prog: {}, checks: {}, seen: {} }, keep); save(); home(); }
+    if (rs.dataset.armed) { var keep = { minutes: S.minutes, medium: S.medium, examDate: S.examDate }; S = Object.assign({ done: {}, wrong: {}, days: [], answered: 0, correct: 0, mode: "path", exam: {}, efocus: null, box: {}, stats: {}, log: [], unit: null, prog: {}, checks: {}, seen: {}, read: {} }, keep); save(); home(); }
     else { rs.dataset.armed = 1; rs.textContent = "Wirklich alles zurücksetzen? Nochmal tippen"; }
   };
 }
@@ -2827,6 +3933,7 @@ function pathHome() {
     '<button class="unitlink" id="openUnit"><span class="code big">' + u + '</span><span><b>' + esc(U.chap.title) + '</b><br><span class="hint">' + st.text + '</span></span><span aria-hidden="true">›</span></button>' +
     timePicker() + '<div class="plan" id="plan">' + planUnitHtml(p) + '</div>' +
     '<button class="btn" id="go">Session starten</button>' +
+    '<button class="btn ghost" id="goRead">Skript lesen: ' + u + '</button>' +
     (U.gens.length ? '<button class="btn ghost" id="goCode">Nur Programmieren: Aufgabe aus ' + u + '</button>' : '') +
     (u !== sug ? '<button class="linkbtn" id="toSug" style="align-self:flex-start">Zurück zum Lehrplan: ' + sug + '</button>' : '') + '</section>';
   h += '<section class="panel stats" aria-label="Fortschritt"><div class="stat"><b>' + doneN + '/' + UNITS.length + '</b><small>Einheiten fertig</small></div>' +
@@ -2844,7 +3951,7 @@ function planUnitHtml(p) {
   if (rev) h += '<div><span class="tag rev">Wdh.</span><span>' + rev + ' fällige Wiederholung' + (rev > 1 ? "en" : "") + '</span></div>';
   if (back) h += '<div><span class="tag">Rückblick</span><span>' + back + ' Frage' + (back > 1 ? "n" : "") + ' aus abgeschlossenen Einheiten</span></div>';
   p.items.forEach(function(x){
-    if (x.type === "nibble") h += '<div><span class="tag">Lernen</span><span>' + esc(x.n.t) + '</span></div>';
+    if (x.type === "nibble") h += '<div><span class="tag">Lernen</span><span>' + esc(x.n.t) + (readOf(x.n) ? ' <span class="hint">· Lesen, ' + (readOf(x.n).fill ? 'Lücken, ' : '') + 'Quiz</span>' : '') + '</span></div>';
     if (x.type === "task") h += '<div><span class="tag">Code</span><span>' + esc(genTitle(x.gen)) + '</span></div>';
     if (x.type === "check") h += '<div><span class="tag">Check</span><span>Kapitel-Check ' + S.unit + ' (≥ 80 % zum Abschließen)</span></div>';
   });
@@ -2856,6 +3963,7 @@ function bindPathHome() {
   document.getElementById("openUnit").onclick = function(){ unitView(S.unit); };
   var te = document.getElementById("toExam"); if (te) te.onclick = function(){ S.mode = "exam"; save(); home(); };
   var gc = document.getElementById("goCode"); if (gc) gc.onclick = function(){ startTasks([shuffle(UNIT[S.unit].gens)[0]], S.unit); };
+  document.getElementById("goRead").onclick = function(){ var ns = UNIT[S.unit].chap.nibbles, i = 0; while (i < ns.length - 1 && S.read[ns[i].key]) i++; readerView(S.unit, i); };
   var ts = document.getElementById("toSug"); if (ts) ts.onclick = function(){ S.unit = nextUnit(); save(); home(); };
   app.querySelectorAll("[data-u]").forEach(function(b){ b.onclick = function(){ S.unit = b.dataset.u; save(); unitView(b.dataset.u); }; });
 }
@@ -2923,6 +4031,9 @@ function unitView(u) {
       '<div class="chips">' + U.gens.map(function(g){ return '<button class="chip" data-g="' + g + '">' + esc(genTitle(g)) + '</button>'; }).join("") + '</div>';
   }
   h += '<div class="stage"><span class="num">' + (p.total ? 3 : 2) + '</span><div><b>Kapitel-Check</b><p class="hint">' + (c.passed ? "Bestanden (" + Math.round(c.best * 100) + " %)" : c.best ? "Bestes Ergebnis " + Math.round(c.best * 100) + " % – 80 % nötig" : "Gemischter Test, 80 % zum Abschließen") + '</p></div><button class="btn small" id="sCheck">Check</button></div></section>';
+  var rd = U.chap.nibbles.filter(function(n){ return S.read[n.key]; }).length;
+  h += '<section class="panel"><h2 style="font-size:20px">Skript</h2><p class="hint">Die ganze Einheit zum Durchlesen – in eigenen Worten nach dem Kursmaterial, ohne Timer. ' + rd + ' von ' + U.chap.nibbles.length + ' Abschnitten gelesen.</p><div class="toc">' +
+    U.chap.nibbles.map(function(n, i){ return '<button class="tocitem" data-r="' + i + '"><span class="tick' + (S.read[n.key] ? " on" : "") + '" aria-hidden="true">' + (S.read[n.key] ? "✓" : i + 1) + '</span><span>' + esc(n.t) + '</span><span aria-hidden="true">›</span></button>'; }).join("") + '</div></section>';
   if (U.esa.length) {
     h += '<section class="panel"><h2 style="font-size:20px">Einsendeaufgaben vorbereiten</h2><p class="hint">Die Original-Aufgaben löst du selbst. Hier trainierst du genau die Bausteine, die sie verlangen – mit eigenen, ähnlichen Übungen.</p>';
     U.esa.forEach(function(e){
@@ -2937,6 +4048,24 @@ function unitView(u) {
   var sp = document.getElementById("sProg"); if (sp) sp.onclick = function(){ startTasks([shuffle(U.gens)[0]], u); };
   document.getElementById("sCheck").onclick = function(){ startCheck(u); };
   app.querySelectorAll("[data-g]").forEach(function(b){ b.onclick = function(){ startTasks([b.dataset.g], u); }; });
+  app.querySelectorAll("[data-r]").forEach(function(b){ b.onclick = function(){ readerView(u, +b.dataset.r); }; });
+}
+
+// ---------- Skript: Lesen ohne Timer ----------
+function readerView(u, i) {
+  clearInterval(timer); sess = null;
+  var ns = UNIT[u].chap.nibbles, n = ns[i], r = readOf(n);
+  S.read[n.key] = true; save();
+  var h = header() + '<button class="btn ghost back" id="back">← ' + u + '</button>' +
+    '<article class="card"><span class="label">' + u + ' · Skript · Abschnitt ' + (i + 1) + ' von ' + ns.length + '</span><h2>' + esc(n.t) + '</h2>' + lessonHtml(n) +
+    '<div class="row">' + (r && r.fill ? '<button class="btn ghost" id="rFill">' + (r.fill.kind === "java" ? "Lückencode" : "Lückentext") + ' üben</button>' : '') + '<button class="btn ghost" id="rQuiz">Quiz dazu</button></div>' +
+    '<div class="row"><button class="btn ghost" id="rPrev"' + (i ? '' : ' disabled') + '>← Zurück</button><button class="btn" id="rNext">' + (i < ns.length - 1 ? "Weiter →" : "Fertig") + '</button></div></article>';
+  render(h);
+  document.getElementById("back").onclick = function(){ unitView(u); };
+  document.getElementById("rPrev").onclick = function(){ if (i) readerView(u, i - 1); };
+  document.getElementById("rNext").onclick = function(){ if (i < ns.length - 1) readerView(u, i + 1); else unitView(u); };
+  var rf = document.getElementById("rFill"); if (rf) rf.onclick = function(){ newSess([{ k: "fill", n: n }], 5, { unit: u, reader: i }); };
+  document.getElementById("rQuiz").onclick = function(){ newSess(n.quiz.map(function(_, qi){ return { k: "q", n: n, qi: qi }; }), 5, { unit: u, reader: i }); };
 }
 
 // ---------- Sessions starten ----------
@@ -2946,13 +4075,14 @@ function newSess(steps, mins, extra) {
   save(); clearInterval(timer); timer = setInterval(tick, 1000); step();
 }
 function nibbleSteps(n) {
-  var st = [{ k: "learn", n: n }]; n.quiz.forEach(function(_, i){ st.push({ k: "q", n: n, qi: i }); });
+  var st = [{ k: "learn", n: n }], r = readOf(n); if (r && r.fill) st.push({ k: "fill", n: n }); n.quiz.forEach(function(_, i){ st.push({ k: "q", n: n, qi: i }); });
   if (n.task) st.push({ k: "task", n: n }); st.push({ k: "fin", n: n }); return st;
 }
 function genStep(g, u) { var cat = GENS[g].cat; return { k: "gen", t: GEN.make(cat, seed(), g), unit: u || genUnit(g) }; }
 function itemStep(it) {
   if (it.type === "q") return { k: "q", n: it.n, qi: it.qi, review: it.tag };
   if (it.type === "exam") return { k: "exam", e: it.e, review: it.tag };
+  if (it.type === "fill") return { k: "fill", n: it.n, review: it.tag };
   if (it.type === "gen") { var s = genStep(it.gen); s.review = it.tag; return s; }
   return null;
 }
@@ -2979,6 +4109,8 @@ function checkSteps(u) {
   shuffle(EXAM.filter(function(e){ return e.rel.split("-")[0] === u && e.type === "tf"; })).slice(0, 2).forEach(function(e){ steps.push({ k: "exam", e: e, check: true }); });
   var tr = UNIT[u].gens.filter(function(g){ return GENS[g].cat === "trace"; });
   if (tr.length) { var s = genStep(shuffle(tr)[0], u); s.check = true; steps.push(s); }
+  var fl = UNIT[u].chap.nibbles.filter(function(n){ var r = readOf(n); return r && r.fill; });
+  if (fl.length) steps.push({ k: "fill", n: shuffle(fl)[0], check: true });
   return steps;
 }
 function startCheck(u) { newSess(checkSteps(u), Math.max(S.minutes, 10), { unit: u, check: u }); }
@@ -3025,11 +4157,13 @@ function step() {
   var h = sbar(cur, bars.length);
   if (s.k === "exam") h += examCard(s.e, tagLine(s));
   else if (s.k === "gen") h += genCard(s);
+  else if (s.k === "fill") h += fillCard(s);
   else {
     var tag = '<span class="label">' + s.n.chap.id + ' · ' + esc(s.n.chap.title) + '</span>' + tagLine(s);
     if (s.k === "learn") {
-      h += '<article class="card">' + tag + '<h2>' + esc(s.n.t) + '</h2><ul class="learn">' + s.n.learn.map(function(l){ return '<li>' + md(l) + '</li>'; }).join("") + '</ul>' +
-        (s.n.code ? '<pre><code>' + hl(s.n.code) + '</code></pre>' : '') + '<button class="btn" id="next">Verstanden, zum Quiz</button></article>';
+      var rf = readOf(s.n);
+      h += '<article class="card">' + tag + '<h2>' + esc(s.n.t) + '</h2>' + lessonHtml(s.n) + '<button class="btn" id="next">' + (rf && rf.fill ? "Verstanden, zum Lückencode" : "Verstanden, zum Quiz") + '</button></article>';
+      S.read[s.n.key] = true; save();
     } else if (s.k === "q") {
       var q = s.n.quiz[s.qi];
       h += '<article class="card">' + tag + '<p class="q">' + md(q.q) + '</p><div class="answers">' +
@@ -3050,6 +4184,7 @@ function step() {
   if (s.k === "q") bindQuiz(s);
   if (s.k === "exam") bindExam(s.e);
   if (s.k === "gen") bindGen(s);
+  if (s.k === "fill") bindFill(s);
 }
 function advance() { sess.i++; step(); }
 function nextBtn() { return '<button class="btn" id="next" style="margin-top:14px;width:100%">Weiter</button>'; }
@@ -3140,6 +4275,35 @@ function testsTable(t) {
   return '<div class="tablewrap"><table class="tests"><thead><tr><th>Test</th><th>erwartet</th></tr></thead><tbody>' +
     t.tests.map(function(x){ return '<tr><td><code>' + esc(x.label) + '</code></td><td><code>' + esc(x.show) + '</code></td></tr>'; }).join("") + '</tbody></table></div>';
 }
+// Lückencode aus der Musterlösung: einige Kernzeilen ausblenden
+function lineGaps(s) {
+  if (s.lgaps) return s.lgaps;
+  var cand = [];
+  s.t.solFiles.forEach(function(f, fi){
+    f.content.split("\n").forEach(function(l, li){
+      var x = l.trim();
+      if (x.length < 6 || /^(\/\/|\/\*|\*|\}|\{|import |package |@)/.test(x)) return;
+      if (/\bclass\b|\binterface\b|\benum\b/.test(x)) return;
+      if (/^(public|private|protected|static)\b.*\)\s*(throws [\w., ]+)?\s*\{$/.test(x)) return; // Methodenköpfe bleiben stehen
+      if (/^(private|protected|public)?\s*(static\s+)?(final\s+)?[\w<>\[\]]+\s+\w+;$/.test(x)) return; // reine Attributdeklarationen
+      cand.push(fi + ":" + li);
+    });
+  });
+  var k = Math.min(cand.length, Math.max(2, Math.min(5, Math.round(cand.length / 4))));
+  s.lgaps = shuffle(cand).slice(0, k);
+  return s.lgaps;
+}
+function lineGapHtml(s) {
+  var gaps = lineGaps(s), h = '', n = 0;
+  s.t.solFiles.forEach(function(f, fi){
+    h += '<p class="mono hint">' + esc(f.name) + '</p><pre class="fillcode"><code>' + f.content.replace(/\n$/, "").split("\n").map(function(l, li){
+      if (gaps.indexOf(fi + ":" + li) < 0) return hl(l);
+      var ind = l.match(/^\s*/)[0], w = Math.max(18, l.trim().length + 4);
+      return esc(ind) + '<input class="gap line" data-lk="' + fi + ":" + li + '" style="width:' + w + 'ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Fehlende Zeile ' + (++n) + '">';
+    }).join("\n") + '</code></pre>';
+  });
+  return h;
+}
 function genCard(s) {
   var t = s.t, U = s.unit ? UNIT[s.unit] : null;
   var head = '<article class="card"><span class="label">' + (U ? s.unit + ' · ' : '') + esc(GEN.CATS.filter(function(c){ return c.id === t.cat; })[0].name) + (t.ref ? ' · angelehnt an ' + esc(t.ref) : '') + '</span>' + tagLine(s) + '<h2>' + esc(t.title) + '</h2>';
@@ -3147,9 +4311,14 @@ function genCard(s) {
     return head + '<p class="q">Geben Sie exakt die produzierte Konsolenausgabe an.</p><pre><code>' + hl(t.code) + '</code></pre>' +
       '<label class="hint" for="ans-x">Deine Ausgabe</label><textarea id="ans-x" spellcheck="false" autocapitalize="off" placeholder="Zeile für Zeile, wie auf der Konsole"></textarea><button class="btn" id="reveal">Lösung zeigen</button><div id="fb" class="reveal"></div></article>';
   }
-  var pap = S.medium !== "rechner";
-  var h = head + '<div class="seg small" role="group" aria-label="Bearbeitung"><button id="mPap" aria-pressed="' + pap + '">Auf Papier</button><button id="mPc" aria-pressed="' + !pap + '">Am Rechner</button></div>' +
+  var lu = S.medium === "luecke", pap = !lu && S.medium !== "rechner";
+  var h = head + '<div class="seg small three" role="group" aria-label="Bearbeitung"><button id="mPap" aria-pressed="' + pap + '">Auf Papier</button><button id="mPc" aria-pressed="' + (!pap && !lu) + '">Am Rechner</button><button id="mLu" aria-pressed="' + lu + '">Lückencode</button></div>' +
     '<div class="q">' + mdBlock(t.task) + '</div>';
+  if (lu) {
+    (t.givenFiles || []).forEach(function(f, i){ h += fileBlock(f, "gv" + i, "gegeben"); });
+    return h + '<div class="task"><p><b>Lückencode</b> – die Musterlösung mit fehlenden Zeilen. Schreib die Zeilen selbst. Ein guter Einstieg, bevor du die ganze Aufgabe frei löst – zählt aber nicht als Pflichtaufgabe der Einheit.</p></div>' +
+      lineGapHtml(s) + '<button class="btn" id="lcheck">Zeilen prüfen</button><div id="fb" class="reveal"></div><p id="copyMsg" class="hint" role="status"></p></article>';
+  }
   (t.givenFiles || []).forEach(function(f, i){ h += fileBlock(f, "gv" + i, "gegeben"); });
   if (t.kind === "program") h += '<span class="label">Erwartete Ausgabe</span><pre><code>' + esc(t.out) + '</code></pre>';
   else h += '<span class="label">Daran wird geprüft</span>' + testsTable(t);
@@ -3174,18 +4343,34 @@ function solutionHtml(t) {
 }
 function genDone(s, ok) {
   var t = s.t;
-  record("g:" + t.gen, t.rel, ok, { q: t.title + (t.kind === "trace" ? "" : " (" + (S.medium === "rechner" ? "Rechner" : "Papier") + ")"), self: t.kind !== "trace", why: t.why || "" });
-  if (ok && s.unit && UNIT[s.unit].gens.indexOf(t.gen) >= 0) { S.prog[s.unit] = (S.prog[s.unit] || 0) + 1; sess.tasksOk++; save(); }
+  record("g:" + t.gen, t.rel, ok, { q: t.title + (t.kind === "trace" ? "" : " (" + (S.medium === "rechner" ? "Rechner" : S.medium === "luecke" ? "Lückencode" : "Papier") + ")"), self: t.kind !== "trace", why: t.why || "" });
+  if (ok && s.unit && UNIT[s.unit].gens.indexOf(t.gen) >= 0 && (t.kind === "trace" || S.medium !== "luecke")) { S.prog[s.unit] = (S.prog[s.unit] || 0) + 1; sess.tasksOk++; save(); }
 }
 function bindGen(s) {
   var t = s.t, fb = document.getElementById("fb");
   app.querySelectorAll("[data-copy]").forEach(function(b){ b.onclick = function(){ copyFrom(b.dataset.copy); }; });
   var mp = document.getElementById("mPap"), mc = document.getElementById("mPc");
-  if (mp) { mp.onclick = function(){ S.medium = "papier"; save(); step(); }; mc.onclick = function(){ S.medium = "rechner"; save(); step(); }; }
+  if (mp) { mp.onclick = function(){ S.medium = "papier"; save(); step(); }; mc.onclick = function(){ S.medium = "rechner"; save(); step(); }; document.getElementById("mLu").onclick = function(){ S.medium = "luecke"; save(); step(); }; }
   function finish(pre, extraHtml) {
     fb.innerHTML = (extraHtml || '') + (t.kind === "trace" ? '' : solutionHtml(t)) + rateButtons(pre);
     bindRate(function(v){ genDone(s, v); });
     fb.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  var lc = document.getElementById("lcheck");
+  if (lc) {
+    var ins = [].slice.call(app.querySelectorAll("input.gap.line"));
+    ins.forEach(function(x, i){ x.addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); if (ins[i + 1]) ins[i + 1].focus(); else lc.click(); } }); });
+    lc.onclick = function(){
+      lc.hidden = true; var right = 0, exp = '';
+      ins.forEach(function(x){
+        var p = x.dataset.lk.split(":"), want = t.solFiles[+p[0]].content.split("\n")[+p[1]].trim(), ok = normJ(x.value) === normJ(want);
+        x.classList.add(ok ? "right" : "wrong"); x.disabled = true; if (ok) right++;
+        else exp += '<li><code>' + esc(x.value.trim() || "(leer)") + '</code><br>erwartet: <code>' + esc(want) + '</code></li>';
+      });
+      var all = right === ins.length;
+      finish(all ? 1 : null, '<p class="verdict ' + (all ? "ok" : "no") + '">' + right + ' von ' + ins.length + ' Zeilen wie in der Musterlösung.</p>' +
+        (all ? '' : '<ul class="tlist">' + exp + '</ul><p class="hint">Es gibt oft mehrere richtige Lösungen. Ist deine Zeile gleichwertig, bewerte unten mit „Sitzt“ – im Zweifel am Rechner testen.</p>'));
+    };
   }
   var rv = document.getElementById("reveal");
   if (rv) rv.onclick = function(){
@@ -3233,9 +4418,12 @@ function summary() {
     '<p class="muted">Was nicht saß, kommt in der nächsten Session wieder. Was saß, wird nach 1, 3, 7, 14 und 30 Tagen erneut geprüft.</p>' + sessionWeak(sess.concepts) +
     (sess.practice ? '<button class="btn ghost" id="more">Noch eine Aufgabe</button>' : '') + '<button class="btn" id="home">Zur Übersicht</button></article>';
   var wasPractice = sess.practice ? { u: sess.unit, g: sess.steps[0] && sess.steps[0].t && sess.steps[0].t.gen } : null;
+  var wasReader = sess.reader != null ? { u: sess.unit, i: sess.reader } : null;
+  if (wasReader) h = h.replace('<button class="btn" id="home">Zur Übersicht</button>', '<button class="btn ghost" id="toReader">Zurück zum Skript</button><button class="btn" id="home">Zur Übersicht</button>');
   sess = null; save(); render(h); bindWeak();
   document.getElementById("home").onclick = home;
   var mo = document.getElementById("more"); if (mo) mo.onclick = function(){ startTasks([wasPractice.g], wasPractice.u); };
+  var tr = document.getElementById("toReader"); if (tr) tr.onclick = function(){ readerView(wasReader.u, wasReader.i); };
 }
 
 // ---------- Programmieren: Startseite ----------
@@ -3246,12 +4434,12 @@ function reachedGens() { // Übungstypen aller Einheiten bis zur aktuellen
   return g;
 }
 function codeHome() {
-  var pap = S.medium !== "rechner", reached = reachedGens(), solved = 0;
+  var lu = S.medium === "luecke", pap = !lu && S.medium !== "rechner", reached = reachedGens(), solved = 0;
   Object.keys(S.prog).forEach(function(k){ solved += S.prog[k]; });
   var h = '<section class="panel"><span class="label">Programmieren üben</span>' +
     '<p class="hint">Jede Aufgabe wird neu erzeugt – andere Zahlen, Namen, Varianten. So trainierst du Können statt Auswendiglernen.</p>' +
-    '<div class="seg small" role="group" aria-label="Bearbeitung"><button id="cPap" aria-pressed="' + pap + '">Auf Papier</button><button id="cPc" aria-pressed="' + !pap + '">Am Rechner</button></div>' +
-    '<p class="hint">' + (pap ? "Wie in der Klausur: von Hand schreiben, dann mit Musterlösung und Checkliste vergleichen." : "Vorlage und Test.java kopieren, in der IDE programmieren, Tests laufen lassen.") + '</p>' +
+    '<div class="seg small three" role="group" aria-label="Bearbeitung"><button id="cPap" aria-pressed="' + pap + '">Auf Papier</button><button id="cPc" aria-pressed="' + (!pap && !lu) + '">Am Rechner</button><button id="cLu" aria-pressed="' + lu + '">Lückencode</button></div>' +
+    '<p class="hint">' + (lu ? "Einstieg: Die Musterlösung mit fehlenden Kernzeilen – du ergänzt sie. Zählt nicht für die 3 Pflichtaufgaben je Einheit." : pap ? "Wie in der Klausur: von Hand schreiben, dann mit Musterlösung und Checkliste vergleichen." : "Vorlage und Test.java kopieren, in der IDE programmieren, Tests laufen lassen.") + '</p>' +
     '<button class="btn" id="cMix"' + (reached.length ? '' : ' disabled') + '>Gemischte Aufgabe' + (reached.length ? ' (bis ' + reached[reached.length - 1].u + ')' : '') + '</button>' +
     (reached.length ? '' : '<p class="hint">Programmieraufgaben beginnen ab EJP – wähle unten eine Einheit.</p>') +
     '<div class="stats" style="margin-top:4px"><div class="stat"><b>' + solved + '</b><small>Aufgaben gelöst</small></div><div class="stat"><b>' + Object.keys(GENS).length + '</b><small>Aufgabentypen</small></div><div class="stat"><b>∞</b><small>Varianten</small></div></div></section>';
@@ -3265,6 +4453,7 @@ function codeHome() {
 function bindCodeHome() {
   document.getElementById("cPap").onclick = function(){ S.medium = "papier"; save(); home(); };
   document.getElementById("cPc").onclick = function(){ S.medium = "rechner"; save(); home(); };
+  document.getElementById("cLu").onclick = function(){ S.medium = "luecke"; save(); home(); };
   var mx = document.getElementById("cMix");
   if (mx) mx.onclick = function(){ var r = reachedGens(); if (!r.length) return; var pick = shuffle(r)[0]; startTasks([pick.g], pick.u); };
   app.querySelectorAll("[data-cg]").forEach(function(b){ b.onclick = function(){ startTasks([b.dataset.cg], b.dataset.cu); }; });
@@ -3359,7 +4548,7 @@ function startFocus(k) {
 home();
 
 // ---------- Webapp: Offline-Betrieb und automatische Updates ----------
-var BUILD = "20261110-105957";
+var BUILD = "20261114-100355";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|anthropic/.test(location.hostname)) {
   var reloading = false;
   navigator.serviceWorker.addEventListener("controllerchange", function(){ if (!reloading && !sess) { reloading = true; location.reload(); } });

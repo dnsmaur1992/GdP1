@@ -4,7 +4,8 @@
     python3 build.py
 
 Inhalte ändern: src/content*.js (Lern-Häppchen), src/exam.js (Klausurtraining),
-src/gen.js (Aufgabengeneratoren), src/units.js (Lehrplan), src/app.js (Logik).
+src/gen.js (Aufgabengeneratoren), src/units.js (Lehrplan), src/app.js (Logik),
+src/read*.js (Lesetexte und Lückencode; danach node tools/verify_fill.js → src/fillout.js).
 Danach build.py ausführen und index.html committen.
 """
 from pathlib import Path
@@ -15,6 +16,7 @@ src = root / "src"
 t = (src / "template.html").read_text(encoding="utf-8")
 content = "".join((src / f"content{i}.js").read_text(encoding="utf-8") for i in (1, 2, 3))
 t = t.replace("/*CONTENT*/", content).replace("/*EXAM*/", (src / "exam.js").read_text(encoding="utf-8"))
+t = t.replace("/*READ*/", "".join((src / f).read_text(encoding="utf-8") for f in ("read1.js", "read2.js", "read3.js", "fillout.js")))
 for name in ("gen", "units", "app"):
     t = t.replace("/*" + name.upper() + "*/", (src / (name + ".js")).read_text(encoding="utf-8"))
 t = t.replace("<!--PWA-->", "")
